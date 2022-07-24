@@ -30,7 +30,7 @@ const usersControllers = {
     
             fs.writeFile(fileData, JSON.stringify(listData), (err) => {
                 if (err) throw err;
-                res.status(200).send('New User Added!');
+                res.status(200).send(listData[newId]);
             });
         });
     },
@@ -44,7 +44,7 @@ const usersControllers = {
     
             fs.writeFile(fileData, JSON.stringify(listData), (err) => {
                 if (err) throw err;
-                res.status(200).send('Updated User Successfully!');
+                res.status(200).send(listData[userId]);
             });
         });
     },
