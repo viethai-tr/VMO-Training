@@ -5,4 +5,4 @@
 - **DELETE**: DELETE ```/users/:id```
 
 ## **TO DO:**
-[ ] Update routes
+- [ ] Update routes
