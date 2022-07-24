@@ -3,3 +3,6 @@
 - **READ**: GET ```/users```, GET ```/users/:id```
 - **UPDATE**: PUT ```/users/:id```
 - **DELETE**: DELETE ```/users/:id```
+
+## **TO DO:**
+- [ ] Update routes
