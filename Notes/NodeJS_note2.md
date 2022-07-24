@@ -1,0 +1,25 @@
+- try catch JS, xử lý session.
+- heap, stack.
+    - stack: cấu trúc (struct), lưu trữ static (câu lệnh, biến tĩnh), lưu địa chỉ object.
+    - heap: cấp phát bộ nhớ, lưu value object.
+- event loop:
+    - call stack
+    - uv, process.nextTick
+    - web API, event table.
+    - event queue.
+    - debug (cách async chạy)
+    - promise > callback
+    - function trong callback sẽ bị xóa sau khi thực thi (anonymous function).
+
+# **Express, Nest**
+- Tạo sv RESTful API, sử dụng Express.
+- Module core Node.js:
+    - fs (sync, async): đọc file, **stream file** (pipe).
+    - http module.
+    - assert (validate).
+    - ajv, joi.
+    - path (url, file).
+    - process: process child (multi-threaded), worker // optional => OS.
+    - query string, url.
+    - **event**: emitter (chat app), 
+    - upload file.

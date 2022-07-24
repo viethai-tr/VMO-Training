@@ -1,0 +1,9 @@
+*.mov
+*.pdf
+src_bk
+node_modules
+boilerplate-npm
+Week2/files
+Notes/nodew2.md
+Study_Test
+*.mp4
