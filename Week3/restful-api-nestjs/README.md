@@ -1,10 +1,9 @@
-# **Learning RESTful API w/ NestJS for Beginner :**
+# **Learning RESTful API w/ NestJS for Beginner:**
 > **Course:** [NestJs Course for Beginners - Create a REST API (freeCodeCamp)](https://www.youtube.com/watch?v=GHTA143_b-s)
 >
-> **Timestamp:** [1:04:30 / 3:42:08](https://youtu.be/GHTA143_b-s?t=3870)
+> **Timestamp:** Sign up logic [(1:04:30 / 3:42:08)](https://youtu.be/GHTA143_b-s?t=3870)
 
 - NestJS.
-- Prisma.
-- Docker (for database).
+- Prisma + Docker (for database).
 - Class-validator + Class-transformer.
 - Argon2 for hashing password.
