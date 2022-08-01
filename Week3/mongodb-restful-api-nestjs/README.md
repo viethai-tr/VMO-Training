@@ -17,7 +17,7 @@
 ## **Need to learn:**
 - [ ] Custom decorators.
 - [ ] Inceptors.
-- [ ] Dependency injection.
+- [x] Dependency injection.
 
 ## **Need to learn again:**
 - [ ] PassportJS.
