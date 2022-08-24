@@ -1,0 +1,2 @@
+- Handle error.
+- Http code delete 

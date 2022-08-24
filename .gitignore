@@ -9,3 +9,5 @@ Study_Test
 *.mp4
 .env
 *.m4a
+clean_architecture
+database
