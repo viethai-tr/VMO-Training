@@ -33,7 +33,8 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
                         .populate('employees', 'name')
                         .populate('projects', 'name');
                     return {
-                        page: page + ' / ' + totalPages,
+                        curPage: page,
+                        totalPages,
                         listResult,
                     };
                 } else if (page > totalPages) {
@@ -49,7 +50,8 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
                         .populate('employees', 'name')
                         .populate('projects', 'name');
                     return {
-                        page: page + ' / ' + totalPages,
+                        curPage: page,
+                        totalPages,
                         listResult,
                     };
                 }

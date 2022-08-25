@@ -47,7 +47,8 @@ export class Repository<T extends Document> implements IRepository<T> {
                         .limit(limit);
 
                     return {
-                        page: page + ' / ' + totalPages,
+                        curPage: page,
+                        totalPages: totalPages,
                         listResult,
                     };
                 } else if (page > totalPages) {

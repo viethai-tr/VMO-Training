@@ -39,7 +39,8 @@ export class ProjectRepository extends Repository<ProjectDocument> {
                         .populate('employees', 'name')
                         .populate('customer', 'name');
                     return {
-                        page: page + ' / ' + totalPages,
+                        curPage: page,
+                        totalPages,
                         listResult,
                     };
                 } else if (page > totalPages) {
@@ -98,23 +99,31 @@ export class ProjectRepository extends Repository<ProjectDocument> {
 
     async getEmployeesProject(id: string) {
         return await this.projectModel
-            .findOne({ _id: id }, { employees: 1, name: 1})
+            .findOne({ _id: id }, { employees: 1, name: 1 })
             .populate('employees', 'name');
     }
 
-    async countProjects(type?: string, status?: string, customer?: string, technology?: string, startingDate?: string) {
+    async countProjects(
+        type?: string,
+        status?: string,
+        customer?: string,
+        technology?: string,
+        startingDate?: string,
+    ) {
         let oriQuery = {
             type: type,
             status: status,
             customer: customer,
             technologies: technology,
-            starting_date: startingDate
+            starting_date: startingDate,
         };
 
-        const query = Object.fromEntries(Object.entries(oriQuery).filter(([_, v]) => v != null));
+        const query = Object.fromEntries(
+            Object.entries(oriQuery).filter(([_, v]) => v != null),
+        );
 
         console.log(query);
-        
+
         try {
             const count = await this.projectModel.countDocuments(query);
 

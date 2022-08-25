@@ -1,5 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Put,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { EmployeeDto, PaginationDto } from '../core/dtos';
 import { EmployeeDocument } from '../core/schemas/employee.schema';
@@ -16,15 +26,15 @@ export class EmployeeController {
         name: 'project',
         required: false,
         description: 'Project ID',
-        type: 'string'
+        type: 'string',
     })
     @ApiQuery({
         name: 'technology',
         required: false,
         description: 'Technology ID',
-        type: 'string'
+        type: 'string',
     })
-    async countEmployees(@Query() {technology, project}) {
+    async countEmployees(@Query() { technology, project }) {
         return await this.employeeService.countEmployees(technology, project);
     }
 
@@ -38,20 +48,32 @@ export class EmployeeController {
         name: 'limit',
         required: false,
         description: 'Number of employees per page',
-        type: 'integer'
+        type: 'integer',
     })
     @ApiQuery({
         name: 'page',
         required: false,
         description: 'Current page',
-        type: 'integer'
+        type: 'integer',
     })
-    async getAllEmployees(@Query() {limit, page}: PaginationDto): Promise<EmployeeDocument[]> {
-        return await this.employeeService.getAllEmployees(limit, page);
+    @ApiQuery({
+        name: 'sort',
+        required: false,
+        description: 'Type of sort',
+        enum: ['asc', 'desc'],
+    })
+    async getAllEmployees(
+        @Query() { limit, page }: PaginationDto,
+        @Query() { sort },
+    ): Promise<EmployeeDocument[]> {
+        return await this.employeeService.getAllEmployees(limit, page, sort);
     }
 
     @Patch(':id')
-    async updateEmployee(@Param('id') id: string, @Body() employee: EmployeeDto) {
+    async updateEmployee(
+        @Param('id') id: string,
+        @Body() employee: EmployeeDto,
+    ) {
         return await this.employeeService.updateEmployee(id, employee);
     }
 
@@ -59,7 +81,7 @@ export class EmployeeController {
     async createEmployee(@Body() employee: EmployeeDto) {
         return await this.employeeService.createEmployee(employee);
     }
-    
+
     @Delete(':id')
     async deleteEmployee(@Param('id') id: string) {
         return await this.employeeService.deleteEmployee(id);
