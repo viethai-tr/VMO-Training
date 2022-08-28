@@ -19,7 +19,7 @@ export class AuthService {
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
         private jwt: JwtService,
         private config: ConfigService,
-    ) {}
+    ) { }
 
     async signin(authDto: AuthDto) {
         const admin = await this.adminModel.findOne({
@@ -36,7 +36,15 @@ export class AuthService {
             );
 
         const id = admin._id.toString();
-        return this.signToken(authDto.username, id);
+        const tokens = await this.signToken(authDto.username, id);
+        await this.updateRtHash(id, tokens.refresh_token);
+
+        return tokens;
+    }
+
+    async logout(id: string): Promise<boolean> {
+        await this.adminModel.findOneAndUpdate({ _id: id, rt: { $ne: null } }, { rt: null });
+        return true;
     }
 
     async signToken(
@@ -48,12 +56,44 @@ export class AuthService {
             username,
         };
 
-        const token = await this.jwt.signAsync(payload, {
-            expiresIn: '15m',
-            secret: this.config.get('SECRET_KEY'),
-        });
-        
-        // Fix here
-        return 
+        const [at, rt] = await Promise.all([
+            this.jwt.signAsync(payload, {
+                expiresIn: '15p',
+                secret: this.config.get('AT_SECRET_KEY'),
+            }),
+
+            this.jwt.signAsync(payload, {
+                expiresIn: '7d',
+                secret: this.config.get('RT_SECRET_KEY'),
+            }),
+        ]);
+
+        // const token = await this.jwt.signAsync(payload, {
+        //     expiresIn: '15p',
+        //     secret: this.config.get('SECRET_KEY'),
+        // });
+
+        return {
+            access_token: at,
+            refresh_token: rt
+        }
+    }
+
+    async updateRtHash(id: string, rt: string) {
+        const newRt = await argon.hash(rt);
+
+        await this.adminModel.findOneAndUpdate({ _id: id }, { rt: newRt });
+    }
+
+    async refreshToken(id: string, rt: string): Promise<Tokens> {
+        const user = await this.adminModel.findOne({ _id: id });
+        if (!user || !user.rt) throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
+
+        const rtMatched = await argon.verify(user.rt, rt);
+        if (!rtMatched) throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
+
+        const tokens = await this.signToken(id, rt);
+
+        return tokens;
     }
 }
