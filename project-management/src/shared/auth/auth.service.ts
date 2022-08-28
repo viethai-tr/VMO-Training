@@ -11,6 +11,7 @@ import { Model } from 'mongoose';
 import { Admin, AdminDocument } from '../../core/schemas/admin.schema';
 import { AuthDto } from '../../core/dtos/auth.dto';
 import * as argon from 'argon2';
+import { Tokens } from './types/tokens.type';
 
 @Injectable()
 export class AuthService {
@@ -41,7 +42,7 @@ export class AuthService {
     async signToken(
         username: string,
         id: string,
-    ): Promise<{ access_token: string }> {
+    ): Promise<Tokens> {
         const payload = {
             sub: id,
             username,
@@ -51,9 +52,8 @@ export class AuthService {
             expiresIn: '15m',
             secret: this.config.get('SECRET_KEY'),
         });
-
-        return {
-            access_token: token,
-        };
+        
+        // Fix here
+        return 
     }
 }

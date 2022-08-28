@@ -8,6 +8,8 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { Employee, EmployeeSchema } from '../../core/schemas/employee.schema';
 import { EmployeeModule } from 'src/employee/employee.module';
 import { CustomerModule } from 'src/customer/customer.module';
+import { AtStrategy } from './strategy/at.strategy';
+import { RtStrategy } from './strategy/rt.strategy';
 
 @Module({
   imports: [
@@ -17,7 +19,7 @@ import { CustomerModule } from 'src/customer/customer.module';
     EmployeeModule,
     CustomerModule
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, AtStrategy, RtStrategy],
   controllers: [AuthController]
 })
 export class AuthModule {}

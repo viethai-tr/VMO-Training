@@ -21,17 +21,34 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         super(employeeModel);
     }
 
-    async getAllEmployeesAsync(limit?: number, page?: number, sort?: string) {
+    async getAllEmployeesAsync(
+        limit?: number,
+        page?: number,
+        sort?: string,
+        sortBy?: string,
+    ) {
         try {
             let listResult;
             page = Math.floor(page);
             const totalDocs = await this.employeeModel.countDocuments();
             const totalPages = Math.ceil(totalDocs / limit);
 
-            let sortType;
-            sort = sort.toLowerCase();
-            if (sort == 'desc') sortType = 'desc';
-            else sortType = 'asc';
+            let sortKind;
+            if (sort != undefined) {
+                sort = sort.toLowerCase();
+                if (sort == 'desc') sortKind = 'desc';
+                else sortKind = 'asc';
+            } else sortKind = 'asc';
+
+            const employeeProperties = ['name', 'dob', 'experience'];
+            if (sortBy != undefined) {
+                sortBy = sortBy.toLowerCase();
+                if (!employeeProperties.includes(sortBy))
+                    sortBy = 'name';
+            } else sortBy = 'name';
+            const objSort = {
+                sortBy: sortKind,
+            };
 
             if (limit) {
                 if (page <= totalPages) {
@@ -39,7 +56,7 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
 
                     listResult = await this.employeeModel
                         .find({})
-                        .sort({name: sortType})
+                        .sort(objSort)
                         .skip(skip)
                         .limit(limit)
                         .populate('technologies', 'name');
@@ -56,7 +73,7 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
                 } else {
                     listResult = await this.employeeModel
                         .find()
-                        .sort({name: sortType})
+                        .sort(objSort)
                         .limit(limit)
                         .populate('technologies', 'name');
                     return {
@@ -67,7 +84,7 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
             } else {
                 listResult = await this.employeeModel
                     .find()
-                    .sort({name: sortType})
+                    .sort(objSort)
                     .populate('technologies', 'name');
             }
             return Promise.resolve(listResult);

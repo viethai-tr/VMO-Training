@@ -62,11 +62,22 @@ export class EmployeeController {
         description: 'Type of sort',
         enum: ['asc', 'desc'],
     })
+    @ApiQuery({
+        name: 'sortBy',
+        required: false,
+        description: 'Sort by',
+        enum: ['name', 'dob', 'experience'],
+    })
     async getAllEmployees(
         @Query() { limit, page }: PaginationDto,
-        @Query() { sort },
+        @Query() { sort, sortBy },
     ): Promise<EmployeeDocument[]> {
-        return await this.employeeService.getAllEmployees(limit, page, sort);
+        return await this.employeeService.getAllEmployees(
+            limit,
+            page,
+            sort,
+            sortBy,
+        );
     }
 
     @Patch(':id')
