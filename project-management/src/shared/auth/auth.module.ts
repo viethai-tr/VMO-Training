@@ -4,10 +4,12 @@ import { AuthController } from './auth.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Admin, AdminSchema } from '../../core/schemas/admin.schema';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './strategy/jwt.strategy';
 import { Employee, EmployeeSchema } from '../../core/schemas/employee.schema';
 import { EmployeeModule } from 'src/employee/employee.module';
 import { CustomerModule } from 'src/customer/customer.module';
+import { RtStrategy } from './strategy/rt.strategy';
+import { AtStrategy } from './strategy/at.strategy';
+// import { RtStrategy } from './strategy/rt.strategy';
 
 @Module({
   imports: [
@@ -17,7 +19,7 @@ import { CustomerModule } from 'src/customer/customer.module';
     EmployeeModule,
     CustomerModule
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, AtStrategy, RtStrategy],
   controllers: [AuthController]
 })
 export class AuthModule {}

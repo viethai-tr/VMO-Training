@@ -56,7 +56,7 @@ export class AuthService {
         const [at, rt] = await Promise.all([
             this.jwt.signAsync(payload, {
                 expiresIn: '15m',
-                secret: this.config.get('secretKey'),
+                secret: this.config.get('atSecretKey'),
             }),
 
             this.jwt.signAsync(payload, {
@@ -79,8 +79,7 @@ export class AuthService {
 
     async refreshToken(id: string, rt: string): Promise<Tokens> {
         const user = await this.adminModel.findOne({ _id: id });
-
-        if (!user || !user.rt) throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
+        if (!user || !user.rt) throw new HttpException('Not logged in', HttpStatus.FORBIDDEN);
 
         const rtMatched = await argon.verify(user.rt, rt);
         if (!rtMatched) throw new HttpException('Access denied', HttpStatus.FORBIDDEN);

@@ -5,7 +5,6 @@ import { Mongoose } from 'mongoose';
 import { Department, DepartmentSchema } from 'src/core/schemas/department.schema';
 import { Project, ProjectSchema } from 'src/core/schemas/project.schema';
 import { Technology, TechnologySchema } from 'src/core/schemas/technology.schema';
-import { JwtStrategy } from 'src/shared/auth/strategy/jwt.strategy';
 import { Employee, EmployeeSchema } from '../core/schemas/employee.schema';
 import { EmployeeController } from './employee.controller';
 import { EmployeeRepository } from './employee.repository';
@@ -13,7 +12,7 @@ import { EmployeeService } from './employee.service';
 
 @Module({
   controllers: [EmployeeController],
-  providers: [EmployeeService, JwtStrategy, EmployeeRepository],
+  providers: [EmployeeService, EmployeeRepository],
   imports: [
     MongooseModule.forFeature([
       { name: Employee.name, schema: EmployeeSchema },

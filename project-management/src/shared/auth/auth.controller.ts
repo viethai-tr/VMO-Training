@@ -10,7 +10,7 @@ import { GetCurrentAdmin } from '../decorators/get-current-admin.decorator';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RtGuard } from './guards/rt.guard';
 
 @ApiBearerAuth()
 @Controller('auth')
@@ -30,8 +30,8 @@ export class AuthController {
 
     // @Public()
     // @Get('admin')
-    // async testAdmin() {
-    //     return this.config.get('AT_SECRET_KEY');
+    // async testAdmin(@GetCurrentAdmin() user) {
+    //     return user;
     // }
 
     @Post('logout')
@@ -40,8 +40,10 @@ export class AuthController {
     }
 
     @Post('refresh')
-    async refreshToken(@GetCurrentAdmin('sub') id: string, @GetCurrentAdmin('rt') rt: string) {
-        // continue here
+    @Public()
+    @UseGuards(RtGuard)
+    async refreshToken(@GetCurrentAdmin('sub') id: string, @GetCurrentAdmin('refreshToken') rt: string) {
+        return await this.authService.refreshToken(id, rt);
     }
 
     // @UseGuards(AuthGuard('jwt'))

@@ -13,6 +13,8 @@ import { ProjectStatusModule } from './project-status/project-status.module';
 import { DepartmentModule } from './department/department.module';
 import { AdminModule } from './admin/admin.module';
 import configuration from './config/configuration';
+import { APP_GUARD } from '@nestjs/core';
+import { AtGuard } from './shared/auth/guards/at.guard';
 
 @Module({
     imports: [
@@ -48,6 +50,6 @@ import configuration from './config/configuration';
         AdminModule,
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [AppService, { provide: APP_GUARD, useClass: AtGuard }],
 })
 export class AppModule {}
