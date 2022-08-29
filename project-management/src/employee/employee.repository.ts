@@ -46,9 +46,11 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
                 if (!employeeProperties.includes(sortBy))
                     sortBy = 'name';
             } else sortBy = 'name';
+
             const objSort = {
-                sortBy: sortKind,
+                [sortBy]: sortKind,
             };
+            console.log(objSort)
 
             if (limit) {
                 if (page <= totalPages) {

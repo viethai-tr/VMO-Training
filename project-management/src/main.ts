@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { JwtAuthGuard } from './shared/auth/strategy/jwt-auth.guard';
+import { JwtAuthGuard } from './shared/auth/guards/jwt-auth.guard';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);

@@ -57,7 +57,7 @@ export class AdminRepository extends Repository<AdminDocument> {
     }
 
     async getAdminInfo(id: string) {
-        const curAdmin = await this.adminModel.findOne({ _id: id }, {_id: 0, password: 0});
+        const curAdmin = await this.adminModel.findOne({ _id: id }, {_id: 0, password: 0, rt: 0});
         delete curAdmin.password;
 
         return curAdmin;

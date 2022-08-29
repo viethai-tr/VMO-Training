@@ -19,9 +19,9 @@ export class AuthService {
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
         private jwt: JwtService,
         private config: ConfigService,
-    ) { }
+    ) {}
 
-    async signin(authDto: AuthDto) {
+    async login(authDto: AuthDto) {
         const admin = await this.adminModel.findOne({
             username: authDto.username,
         });
@@ -43,40 +43,32 @@ export class AuthService {
     }
 
     async logout(id: string): Promise<boolean> {
-        await this.adminModel.findOneAndUpdate({ _id: id, rt: { $ne: null } }, { rt: null });
+        await this.adminModel.findOneAndUpdate({ _id: id }, { rt: null });
         return true;
     }
 
-    async signToken(
-        username: string,
-        id: string,
-    ): Promise<Tokens> {
+    async signToken(username: string, id: string): Promise<Tokens> {
         const payload = {
             sub: id,
-            username,
+            username
         };
 
         const [at, rt] = await Promise.all([
             this.jwt.signAsync(payload, {
-                expiresIn: '15p',
-                secret: this.config.get('AT_SECRET_KEY'),
+                expiresIn: '15m',
+                secret: this.config.get('secretKey'),
             }),
 
             this.jwt.signAsync(payload, {
                 expiresIn: '7d',
-                secret: this.config.get('RT_SECRET_KEY'),
+                secret: this.config.get('rtSecretKey'),
             }),
         ]);
-
-        // const token = await this.jwt.signAsync(payload, {
-        //     expiresIn: '15p',
-        //     secret: this.config.get('SECRET_KEY'),
-        // });
 
         return {
             access_token: at,
             refresh_token: rt
-        }
+        };
     }
 
     async updateRtHash(id: string, rt: string) {
@@ -87,12 +79,14 @@ export class AuthService {
 
     async refreshToken(id: string, rt: string): Promise<Tokens> {
         const user = await this.adminModel.findOne({ _id: id });
+
         if (!user || !user.rt) throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
 
         const rtMatched = await argon.verify(user.rt, rt);
         if (!rtMatched) throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
 
-        const tokens = await this.signToken(id, rt);
+        const tokens = await this.signToken(user.username, user.id);
+        await this.updateRtHash(user.id, tokens.refresh_token);
 
         return tokens;
     }

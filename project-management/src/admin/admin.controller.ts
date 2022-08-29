@@ -24,7 +24,7 @@ export class AdminController {
     }
     
     @Get('me')
-    async getAdminInfo(@GetCurrentAdmin('id') id: string) {
+    async getAdminInfo(@GetCurrentAdmin('sub') id: string) {
         return await this.adminService.getAdminInfo(id);
     }
 }
