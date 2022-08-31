@@ -22,4 +22,8 @@ export class ProjectStatusService {
     async updateProjectStatus(id: string, projectStatusDto: ProjectStatusDto) { 
         return await this.projectStatusRepository.update(id, <ProjectStatusDocument>(projectStatusDto));
     }
+
+    async deleteProjectStatus(id: string) {
+        return await this.projectStatusRepository.deleteProjectStatus(id);
+    }
 }

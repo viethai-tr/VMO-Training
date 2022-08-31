@@ -11,8 +11,8 @@ export class DepartmentService {
         private departmentRepository: DepartmentRepository
     ) { }
 
-    async getAllDepartments(limit?: number, page?: number): Promise<DepartmentDocument[]> {
-        return await this.departmentRepository.getAllDepartments(limit, page);
+    async getAllDepartments(limit?: number, page?: number, sort?: string, sortBy?: string): Promise<DepartmentDocument[]> {
+        return await this.departmentRepository.getAllDepartments(limit, page, sort, sortBy);
     }
 
     async getDepartmentById(id: string): Promise<DepartmentDocument> {

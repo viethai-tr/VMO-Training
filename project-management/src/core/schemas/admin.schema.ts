@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Exclude } from "class-transformer";
 
 export type AdminDocument = Admin & Document;
 
@@ -11,12 +12,17 @@ export class Admin {
     name: string;
 
     @Prop({ required: true })
+    @Exclude()
     password: string;
 
     @Prop()
     status: string;
 
+    @Prop({ required: true, default: 'User' })
+    role: string;
+
     @Prop()
+    @Exclude()
     rt: string;
 }
 

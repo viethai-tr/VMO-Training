@@ -1,15 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    UseFilters,
+} from '@nestjs/common';
+import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
 import { CustomerDto } from '../core/dtos';
 import { CustomerDocument } from '../core/schemas/customer.schema';
 import { CustomerRepository } from './customer.repository';
 
 @Injectable()
 export class CustomerService {
-    constructor(
-        private customerRepository: CustomerRepository,
-    ) {}
+    constructor(private customerRepository: CustomerRepository) {}
 
-    async getAllCustomers(limit?: number, page?: number): Promise<CustomerDocument[]>{
+    async getAllCustomers(
+        limit?: number,
+        page?: number,
+    ): Promise<CustomerDocument[]> {
         return await this.customerRepository.getAll(limit, page);
     }
 
@@ -18,14 +25,21 @@ export class CustomerService {
     }
 
     async updateCustomer(id: string, customerDto: CustomerDto) {
-        return this.customerRepository.update(id, <CustomerDocument>(customerDto));
+        return this.customerRepository.update(
+            id,
+            <CustomerDocument>customerDto,
+        );
     }
 
     async createCustomer(customerDto: CustomerDto) {
-        return this.customerRepository.create(<CustomerDocument>(customerDto));
+        return this.customerRepository.create(<CustomerDocument>customerDto);
     }
 
     async deleteCustomer(id: string) {
-        return this.customerRepository.deleteCustomer(id);
+        try {
+            return this.customerRepository.deleteCustomer(id);
+        } catch (e) {
+            throw new HttpException('Lmao', HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 }

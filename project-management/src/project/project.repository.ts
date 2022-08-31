@@ -19,18 +19,34 @@ export class ProjectRepository extends Repository<ProjectDocument> {
         super(projectModel);
     }
 
-    async getAllProjects(limit?: number, page?: number) {
+    async getAllProjects(limit?: number, page?: number, sort?: string, sortBy?: string) {
         try {
             let listResult;
             page = Math.floor(page);
             const totalDocs = await this.projectModel.countDocuments();
             const totalPages = Math.ceil(totalDocs / limit);
+
+            let sortKind;
+            if (sort != undefined) {
+                sort = sort.toLowerCase();
+                if (sort == 'desc') sortKind = 'desc';
+                else sortKind = 'asc';
+            } else sortKind = 'asc';
+
+            const projectProperties = ['name', 'starting_date'];
+            if (sortBy != undefined) {
+                sortBy = sortBy.toLowerCase();
+                if (!projectProperties.includes(sortBy))
+                    sortBy = 'name';
+            } else sortBy = 'name';
+
             if (limit) {
                 if (page <= totalPages) {
                     const skip = limit * (page - 1);
 
                     listResult = await this.projectModel
                         .find({})
+                        .sort({[sortBy]: sortKind})
                         .skip(skip)
                         .limit(limit)
                         .populate('type', 'name')
@@ -51,6 +67,7 @@ export class ProjectRepository extends Repository<ProjectDocument> {
                 } else {
                     listResult = await this.projectModel
                         .find()
+                        .sort({[sortBy]: sortKind})
                         .limit(limit)
                         .populate('type', 'name')
                         .populate('status', 'name')
@@ -65,6 +82,7 @@ export class ProjectRepository extends Repository<ProjectDocument> {
             } else {
                 listResult = await this.projectModel
                     .find()
+                    .sort({[sortBy]: sortKind})
                     .populate('type', 'name')
                     .populate('status', 'name')
                     .populate('technologies', 'name')

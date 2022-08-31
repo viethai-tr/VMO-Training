@@ -1,28 +1,72 @@
-import { Body, Controller, Get, Patch } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-import { ChangePasswordDto } from 'src/core/dtos/change-password.dto';
-import { GetCurrentAdmin } from 'src/shared/decorators/get-current-admin.decorator';
+import {
+    Body,
+    ClassSerializerInterceptor,
+    Controller,
+    Get,
+    HttpStatus,
+    Patch,
+    Query,
+    UseInterceptors,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ChangePasswordDto } from '../core/dtos/change-password.dto';
+import { GetCurrentAdmin } from '../shared/decorators/get-current-admin.decorator';
 import { AdminService } from './admin.service';
 import { AdminDto } from '../core/dtos/admin.dto';
+import { Roles } from '../shared/decorators/roles.decorator';
+import Role from '../core/enums/role.enum';
+import { PaginationDto } from '../core/dtos';
+import { AdminDocument } from '../core/schemas/admin.schema';
 
-@Controller('admin')
 @ApiBearerAuth()
 @ApiTags('Admin')
+@Roles(Role.Admin)
+@Controller('admin')
 export class AdminController {
     constructor(private readonly adminService: AdminService) {}
 
-    @Patch('me')
-    @ApiBody({type: AdminDto})
-    async updateAdmin(@GetCurrentAdmin('id') id: string, @Body() adminDto: AdminDto) {
-        return await this.adminService.updateAdmin(id, adminDto);
+    // @UseInterceptors(ClassSerializerInterceptor)
+    @ApiQuery({
+        name: 'limit',
+        required: false,
+        description: 'Number of employees per page',
+        type: 'integer',
+    })
+    @ApiQuery({
+        name: 'page',
+        required: false,
+        description: 'Current page',
+        type: 'integer',
+    })
+    @Get('user')
+    async getAllUsers(@Query() { limit, page }: PaginationDto): Promise<AdminDocument[]> {
+        return this.adminService.getAllUser(limit, page);
     }
 
-    @Patch('password')
-    @ApiBody({type: ChangePasswordDto})
-    async changePassword(@GetCurrentAdmin('id') id: string, @Body() passwordDto: ChangePasswordDto) {
-        return await this.adminService.changePassword(id, passwordDto);
+    @ApiBody({ type: AdminDto })
+    @Patch('me')
+    async updateAdmin(
+        @GetCurrentAdmin('id') id: string,
+        @Body() adminDto: AdminDto,
+        ) {
+            await this.adminService.updateAdmin(id, adminDto);
+        return {
+            HttpStatus: HttpStatus.OK,
+            msg: 'Infomation updated successfully!',
+        };
     }
     
+    @ApiBody({ type: ChangePasswordDto })
+    @Roles(Role.Admin, Role.User)
+    @Patch('password')
+    async changePassword(
+        @GetCurrentAdmin('id') id: string,
+        @Body() passwordDto: ChangePasswordDto,
+    ) {
+        return await this.adminService.changePassword(id, passwordDto);
+    }
+
+    @Roles(Role.Admin, Role.User)
     @Get('me')
     async getAdminInfo(@GetCurrentAdmin('sub') id: string) {
         return await this.adminService.getAdminInfo(id);

@@ -1,9 +1,4 @@
-import {
-    ForbiddenException,
-    HttpException,
-    HttpStatus,
-    Injectable,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -35,22 +30,35 @@ export class AuthService {
                 HttpStatus.BAD_REQUEST,
             );
 
+        await this.adminModel.findOneAndUpdate(
+            { username: authDto.username },
+            { status: 'ACTIVE' },
+        );
+
         const id = admin._id.toString();
-        const tokens = await this.signToken(authDto.username, id);
+        const tokens = await this.signToken(authDto.username, id, admin.role);
         await this.updateRtHash(id, tokens.refresh_token);
 
         return tokens;
     }
 
     async logout(id: string): Promise<boolean> {
-        await this.adminModel.findOneAndUpdate({ _id: id }, { rt: null });
+        await this.adminModel.findOneAndUpdate(
+            { _id: id },
+            { rt: null, status: 'INACTIVE' },
+        );
         return true;
     }
 
-    async signToken(username: string, id: string): Promise<Tokens> {
+    async signToken(
+        username: string,
+        id: string,
+        role: string
+    ): Promise<Tokens> {
         const payload = {
             sub: id,
-            username
+            username,
+            role
         };
 
         const [at, rt] = await Promise.all([
@@ -67,7 +75,7 @@ export class AuthService {
 
         return {
             access_token: at,
-            refresh_token: rt
+            refresh_token: rt,
         };
     }
 
@@ -79,12 +87,14 @@ export class AuthService {
 
     async refreshToken(id: string, rt: string): Promise<Tokens> {
         const user = await this.adminModel.findOne({ _id: id });
-        if (!user || !user.rt) throw new HttpException('Not logged in', HttpStatus.FORBIDDEN);
+        if (!user || !user.rt)
+            throw new HttpException('Not logged in', HttpStatus.FORBIDDEN);
 
         const rtMatched = await argon.verify(user.rt, rt);
-        if (!rtMatched) throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
+        if (!rtMatched)
+            throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
 
-        const tokens = await this.signToken(user.username, user.id);
+        const tokens = await this.signToken(user.username, user.id, user.role);
         await this.updateRtHash(user.id, tokens.refresh_token);
 
         return tokens;

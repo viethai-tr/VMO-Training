@@ -1,15 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { TechnologyDto } from 'src/core/dtos/technology.dto';
 import { TechnologyDocument } from 'src/core/schemas/technology.schema';
 import { TechnologyRepository } from './technology.repository';
 
 @Injectable()
 export class TechnologyService {
-    constructor(
-        private technologyRepository: TechnologyRepository
-    ) { }
+    constructor(private technologyRepository: TechnologyRepository) {}
 
-    async getAllTechnologies(limit?: number, page?: number): Promise<TechnologyDocument[]> {
+    async getAllTechnologies(
+        limit?: number,
+        page?: number,
+    ): Promise<TechnologyDocument[]> {
         return await this.technologyRepository.getAll(limit, page);
     }
 
@@ -18,14 +19,23 @@ export class TechnologyService {
     }
 
     async updateTechnology(id: string, technologyDto: TechnologyDto) {
-        return await this.technologyRepository.update(id, <TechnologyDocument>(technologyDto));
+        return await this.technologyRepository.update(
+            id,
+            <TechnologyDocument>technologyDto,
+        );
     }
 
     async createTechnology(technologyDto: TechnologyDto) {
-        return await this.technologyRepository.create(<TechnologyDocument>(technologyDto));
+        return await this.technologyRepository.create(
+            <TechnologyDocument>technologyDto,
+        );
     }
 
     async deleteTechnology(id: string) {
-        return await this.technologyRepository.deleteTechnology(id);
+        try {
+            return await this.technologyRepository.deleteTechnology(id);
+        } catch (e) {
+            throw new BadRequestException(e);
+        }
     }
 }

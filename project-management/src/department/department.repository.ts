@@ -4,8 +4,8 @@ import { Model } from 'mongoose';
 import {
     Department,
     DepartmentDocument,
-} from 'src/core/schemas/department.schema';
-import { Repository } from 'src/core/Repository';
+} from '../core/schemas/department.schema';
+import { Repository } from '../core/Repository';
 
 export class DepartmentRepository extends Repository<DepartmentDocument> {
     constructor(
@@ -15,18 +15,34 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
         super(departmentModel);
     }
 
-    async getAllDepartments(limit?: number, page?: number) {
+    async getAllDepartments(limit?: number, page?: number, sort?: string, sortBy?: string) {
         try {
             let listResult;
             page = Math.floor(page);
             const totalDocs = await this.departmentModel.countDocuments();
             const totalPages = Math.ceil(totalDocs / limit);
+
+            let sortKind;
+            if (sort != undefined) {
+                sort = sort.toLowerCase();
+                if (sort == 'desc') sortKind = 'desc';
+                else sortKind = 'asc';
+            } else sortKind = 'asc';
+
+            const departmentProperties = ['name', 'founding_date'];
+            if (sortBy != undefined) {
+                sortBy = sortBy.toLowerCase();
+                if (!departmentProperties.includes(sortBy))
+                    sortBy = 'name';
+            } else sortBy = 'name';
+
             if (limit) {
                 if (page <= totalPages) {
                     const skip = limit * (page - 1);
 
                     listResult = await this.departmentModel
                         .find({})
+                        .sort({[sortBy]: sortKind})
                         .skip(skip)
                         .limit(limit)
                         .populate('manager', 'name')
@@ -45,6 +61,7 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
                 } else {
                     listResult = await this.departmentModel
                         .find()
+                        .sort({[sortBy]: sortKind})
                         .limit(limit)
                         .populate('manager', 'name')
                         .populate('employees', 'name')
@@ -58,6 +75,7 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
             } else {
                 listResult = await this.departmentModel
                     .find()
+                    .sort({[sortBy]: sortKind})
                     .populate('manager', 'name')
                     .populate('employees', 'name')
                     .populate('projects', 'name');

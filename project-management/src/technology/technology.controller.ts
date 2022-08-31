@@ -12,17 +12,21 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import Role from '../core/enums/role.enum';
+import { Roles } from '../shared/decorators/roles.decorator';
 import { PaginationDto } from '../core/dtos';
 import { TechnologyDto } from '../core/dtos/technology.dto';
 import { TechnologyDocument } from '../core/schemas/technology.schema';
 import { TechnologyService } from './technology.service';
 
 @ApiBearerAuth()
-@Controller('technology')
 @ApiTags('Technology')
+@Roles(Role.Admin)
+@Controller('technology')
 export class TechnologyController {
     constructor(private technologyService: TechnologyService) {}
 
+    @Roles(Role.Admin, Role.User)
     @Get()
     @ApiQuery({
         name: 'limit',
@@ -42,6 +46,7 @@ export class TechnologyController {
         return await this.technologyService.getAllTechnologies(limit, page);
     }
 
+    @Roles(Role.Admin, Role.User)
     @Get(':id')
     async getTechnologyById(
         @Param('id') id: string,

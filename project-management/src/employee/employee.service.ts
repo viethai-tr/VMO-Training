@@ -16,7 +16,7 @@ export class EmployeeService {
         @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>
     ) { }
 
-    async getAllEmployees(limit?: number, page?: number, sort?: string, sortBy?: string): Promise<EmployeeDocument[]> {
+    async getAllEmployees(limit?: number, page?: number, sort?: string, sortBy?: string) {
         return await this.employeeRepository.getAllEmployeesAsync(limit, page, sort, sortBy);
     }
 
@@ -46,6 +46,7 @@ export class EmployeeService {
     }
 
     async deleteEmployee(id: string) {
+        
         return await this.employeeRepository.deleteEmployee(id);
     }
 }

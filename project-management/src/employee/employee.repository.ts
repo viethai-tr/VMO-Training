@@ -47,18 +47,13 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
                     sortBy = 'name';
             } else sortBy = 'name';
 
-            const objSort = {
-                [sortBy]: sortKind,
-            };
-            console.log(objSort)
-
             if (limit) {
                 if (page <= totalPages) {
                     const skip = limit * (page - 1);
 
                     listResult = await this.employeeModel
                         .find({})
-                        .sort(objSort)
+                        .sort({[sortBy]: sortKind})
                         .skip(skip)
                         .limit(limit)
                         .populate('technologies', 'name');
@@ -75,7 +70,7 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
                 } else {
                     listResult = await this.employeeModel
                         .find()
-                        .sort(objSort)
+                        .sort({[sortBy]: sortKind})
                         .limit(limit)
                         .populate('technologies', 'name');
                     return {
@@ -86,7 +81,7 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
             } else {
                 listResult = await this.employeeModel
                     .find()
-                    .sort(objSort)
+                    .sort({[sortBy]: sortKind})
                     .populate('technologies', 'name');
             }
             return Promise.resolve(listResult);

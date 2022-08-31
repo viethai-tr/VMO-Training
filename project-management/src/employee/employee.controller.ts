@@ -11,38 +11,20 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../shared/decorators/roles.decorator';
 import { EmployeeDto, PaginationDto } from '../core/dtos';
 import { EmployeeDocument } from '../core/schemas/employee.schema';
 import { EmployeeService } from './employee.service';
+import Role from '../core/enums/role.enum';
 
 @ApiBearerAuth()
-@Controller('employee')
 @ApiTags('Employee')
+@Roles(Role.Admin)
+@Controller('employee')
 export class EmployeeController {
     constructor(private readonly employeeService: EmployeeService) {}
 
-    @Get('/count')
-    @ApiQuery({
-        name: 'project',
-        required: false,
-        description: 'Project ID',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'technology',
-        required: false,
-        description: 'Technology ID',
-        type: 'string',
-    })
-    async countEmployees(@Query() { technology, project }) {
-        return await this.employeeService.countEmployees(technology, project);
-    }
-
-    @Get(':id')
-    async getEmployeeById(@Param('id') id: string): Promise<EmployeeDocument> {
-        return await this.employeeService.getEmployeeById(id);
-    }
-
+    @Roles(Role.Admin, Role.User)
     @Get()
     @ApiQuery({
         name: 'limit',
@@ -78,6 +60,30 @@ export class EmployeeController {
             sort,
             sortBy,
         );
+    }
+
+    @Roles(Role.Admin, Role.User)
+    @Get('/count')
+    @ApiQuery({
+        name: 'project',
+        required: false,
+        description: 'Project ID',
+        type: 'string',
+    })
+    @ApiQuery({
+        name: 'technology',
+        required: false,
+        description: 'Technology ID',
+        type: 'string',
+    })
+    async countEmployees(@Query() { technology, project }) {
+        return await this.employeeService.countEmployees(technology, project);
+    }
+
+    @Roles(Role.Admin, Role.User)
+    @Get(':id')
+    async getEmployeeById(@Param('id') id: string): Promise<EmployeeDocument> {
+        return await this.employeeService.getEmployeeById(id);
     }
 
     @Patch(':id')

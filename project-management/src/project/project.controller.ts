@@ -1,18 +1,22 @@
 import { Body, Controller, Delete, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { ProjectCountDto } from 'src/core/dtos/project-count.dto';
+import { ProjectCountDto } from '../core/dtos/project-count.dto';
+import { Roles } from '../shared/decorators/roles.decorator';
 import { PaginationDto, ProjectDto } from '../core/dtos';
 import { ProjectDocument } from '../core/schemas/project.schema';
 import { ProjectService } from './project.service';
+import Role from '../core/enums/role.enum';
 
 @ApiBearerAuth()
-@Controller('project')
 @ApiTags('Project')
+@Roles(Role.Admin)
+@Controller('project')
 export class ProjectController {
     constructor(private readonly projectService: ProjectService) {}
 
     @Get()
+    @Roles(Role.Admin, Role.User)
     @ApiQuery({
         name: 'limit',
         required: false,
@@ -25,10 +29,23 @@ export class ProjectController {
         description: 'Current page',
         type: 'integer'
     })
-    async getAllProjects(@Query() {limit, page}: PaginationDto): Promise<ProjectDocument[]> {
-        return await this.projectService.getAllProjects(limit, page);
+    @ApiQuery({
+        name: 'sort',
+        required: false,
+        description: 'Type of sort',
+        enum: ['asc', 'desc'],
+    })
+    @ApiQuery({
+        name: 'sortBy',
+        required: false,
+        description: 'Sort by',
+        enum: ['name', 'starting_date'],
+    })
+    async getAllProjects(@Query() {limit, page}: PaginationDto, @Query() {sort, sortBy}): Promise<ProjectDocument[]> {
+        return await this.projectService.getAllProjects(limit, page, sort, sortBy);
     }
 
+    @Roles(Role.Admin, Role.User)
     @Get('count')
     @ApiQuery({
         name: 'status',
@@ -64,11 +81,13 @@ export class ProjectController {
         return await this.projectService.countProjects(type, status, customer, technology, startingDate);
     }
 
+    @Roles(Role.Admin, Role.User)
     @Get(':id/employee')
     async getEmployeesProject(@Param('id') id: string) {
         return this.projectService.getEmployeesProject(id);
     }
 
+    @Roles(Role.Admin, Role.User)
     @Get(':id')
     async getProjectById(@Param('id') id: string): Promise<ProjectDocument> {
         return this.projectService.getProjectById(id);

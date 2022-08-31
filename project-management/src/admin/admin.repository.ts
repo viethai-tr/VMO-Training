@@ -15,6 +15,54 @@ export class AdminRepository extends Repository<AdminDocument> {
         super(adminModel);
     }
 
+    async getAllUsers(limit?: number, page?: number) {
+        try {
+            let listResult;
+            page = Math.floor(page);
+            const totalDocs = await this.adminModel.countDocuments({
+                role: 'User',
+            });
+            const totalPages = Math.ceil(totalDocs / limit);
+            if (limit) {
+                if (page <= totalPages) {
+                    const skip = limit * (page - 1);
+
+                    listResult = await this.adminModel
+                        .find({ password: 0, rt: 0 })
+                        .skip(skip)
+                        .limit(limit);
+
+                    return {
+                        curPage: page,
+                        totalPages: totalPages,
+                        listResult,
+                    };
+                } else if (page > totalPages) {
+                    throw new HttpException(
+                        `Page ${page} not exist!`,
+                        HttpStatus.FORBIDDEN,
+                    );
+                } else {
+                    listResult = await this.adminModel
+                        .find({ role: 'User' }, { password: 0, rt: 0 })
+                        .limit(limit);
+                    return {
+                        limit: limit,
+                        listResult,
+                    };
+                }
+            } else {
+                listResult = await this.adminModel.find(
+                    { role: 'User' },
+                    { password: 0, rt: 0 },
+                );
+            }
+            return Promise.resolve(listResult);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+    }
+
     async changePassword(id: string, passwordDto: ChangePasswordDto) {
         if (passwordDto.newPassword != passwordDto.repeatPassword) {
             throw new HttpException(
@@ -49,16 +97,11 @@ export class AdminRepository extends Repository<AdminDocument> {
     }
 
     async updateAdmin(id: string, adminDto: AdminDto) {
-        await this.adminModel.findOneAndUpdate({ _id: id }, adminDto);
-        return {
-            HttpStatus: HttpStatus.OK,
-            msg: 'Admin updated!',
-        };
+        return await this.adminModel.findOneAndUpdate({ _id: id }, adminDto);
     }
 
     async getAdminInfo(id: string) {
-        const curAdmin = await this.adminModel.findOne({ _id: id }, {_id: 0, password: 0, rt: 0});
-        delete curAdmin.password;
+        const curAdmin = await this.adminModel.findOne({ _id: id }, {password: 0, rt: 0});
 
         return curAdmin;
     }

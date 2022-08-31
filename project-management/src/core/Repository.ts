@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { IRepository } from '../shared/database/IRepository';
+import { IRepository } from './database/IRepository';
 
 export class Repository<T extends Document> implements IRepository<T> {
     constructor(private _model: Model<T>) {}
@@ -31,18 +31,35 @@ export class Repository<T extends Document> implements IRepository<T> {
         }
     }
 
-    async getAll(limit?: number, page?: number) {
+    async getAll(
+        limit?: number,
+        page?: number,
+        sort?: string,
+        sortBy?: string,
+    ) {
         try {
             let listResult;
             page = Math.floor(page);
             const totalDocs = await this._model.countDocuments();
             const totalPages = Math.ceil(totalDocs / limit);
+
+            let sortKind;
+            if (sort) {
+                sort = sort.toLowerCase();
+                if (!['asc', 'desc'].includes(sort)) {
+                    sortKind = 'asc';
+                }
+            } else {
+                sortKind = 'asc';
+            }
+
             if (limit) {
                 if (page <= totalPages) {
                     const skip = limit * (page - 1);
 
                     listResult = await this._model
                         .find()
+                        .sort({ [sortBy]: sortKind })
                         .skip(skip)
                         .limit(limit);
 
@@ -54,17 +71,22 @@ export class Repository<T extends Document> implements IRepository<T> {
                 } else if (page > totalPages) {
                     throw new HttpException(
                         `Page ${page} not exist!`,
-                        HttpStatus.FORBIDDEN
+                        HttpStatus.FORBIDDEN,
                     );
                 } else {
-                    listResult = await this._model.find().limit(limit);
+                    listResult = await this._model
+                        .find()
+                        .sort({ [sortBy]: sortKind })
+                        .limit(limit);
                     return {
                         limit: limit,
                         listResult,
                     };
                 }
             } else {
-                listResult = await this._model.find();
+                listResult = await this._model
+                    .find()
+                    .sort({ [sortBy]: sortKind });
             }
             return Promise.resolve(listResult);
         } catch (err) {

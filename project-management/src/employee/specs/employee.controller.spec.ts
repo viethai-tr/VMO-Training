@@ -7,6 +7,10 @@ import { employeeStub } from './stubs/employee.stub';
 
 jest.mock('../employee.service');
 
+const mockEmployee = {
+  
+}
+
 describe('EmployeeController', () => {
   let controller: EmployeeController;
   let service: EmployeeService;

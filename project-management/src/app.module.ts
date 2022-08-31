@@ -15,6 +15,7 @@ import { AdminModule } from './admin/admin.module';
 import configuration from './config/configuration';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './shared/auth/guards/at.guard';
+import { RolesGuard } from './shared/auth/guards/roles.guard';
 
 @Module({
     imports: [
@@ -50,6 +51,10 @@ import { AtGuard } from './shared/auth/guards/at.guard';
         AdminModule,
     ],
     controllers: [AppController],
-    providers: [AppService, { provide: APP_GUARD, useClass: AtGuard }],
+    providers: [
+        AppService,
+        { provide: APP_GUARD, useClass: AtGuard },
+        { provide: APP_GUARD, useClass: RolesGuard },
+    ],
 })
 export class AppModule {}
