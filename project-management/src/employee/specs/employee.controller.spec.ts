@@ -1,84 +1,68 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import mongoose from 'mongoose';
 import { EmployeeDto } from '../../core/dtos';
 import { Employee } from '../../core/schemas/employee.schema';
 import { EmployeeController } from '../employee.controller';
 import { EmployeeService } from '../employee.service';
-import { employeeStub } from './stubs/employee.stub';
 
 jest.mock('../employee.service');
 
-const mockEmployee = {
-  
-}
-
 describe('EmployeeController', () => {
-  let controller: EmployeeController;
-  let service: EmployeeService;
+    let controller: EmployeeController;
+    let serviceMock = {
+        getAllEmployees: jest.fn(),
+    };
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [EmployeeController],
-      providers: [EmployeeService],
-    }).compile();
+    let dataMock: Employee[] = [
+        {
+            name: 'Unit test',
+            dob: new Date(1999, 11, 5),
+            address: 'TKC',
+            id_card: '10001',
+            phone_number: '0961317991',
+            technologies: [
+                new mongoose.Types.ObjectId('62f32902db3f35d4abfe2d0a'),
+                new mongoose.Types.ObjectId('62f32942db3f35d4abfe2d0b'),
+            ],
+            experience: 3,
+            languages: ['English', 'Japanese'],
+            certs: ['Cert 1', 'Cert 2'],
+        },
+    ];
 
-    controller = module.get<EmployeeController>(EmployeeController);
-    service = module.get<EmployeeService>(EmployeeService);
-    jest.clearAllMocks();
-  });
+    const paginateMock = {
+        limit: 2,
+        page: 1,
+    };
+    const sortingMock = {
+        sort: 'asc',
+        sortBy: 'name',
+    };
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
+    // const createdMock: Employee;
 
-  describe('getAllEmployees', () => {
-    describe('when getAllEmployees is called', () => {
-      let employees: Employee[];
-
-      beforeEach(async () => {
-        employees = await controller.getAllEmployees();
-      });
-
-      test('then it should call employeeService', () => {
-        expect(service.getAllEmployees).toHaveBeenCalled();
-      });
-
-      test('then it should return all employees', () => {
-        expect(employees).toEqual([employeeStub()]);
-      });
-    });
-  });
-
-  describe('createEmployee', () => {
-    let employee: Employee;
-    let employeeDto: EmployeeDto;
-    let technologiesObjectId = employeeStub().technologies;
-    let technologies: string[];
-    for (let i = 0; i < technologiesObjectId.length; i++) {
-      technologies[i] = technologiesObjectId[i].toString();
-    }
+    let expectedValueGet = dataMock;
 
     beforeEach(async () => {
-      employeeDto = {
-        name: employeeStub().name,
-        dob: employeeStub().dob,
-        address: employeeStub().address,
-        id_card: employeeStub().id_card,
-        phone_number: employeeStub().phone_number,
-        technologies: technologies,
-        experience: employeeStub().experience,
-        languages: employeeStub().languages,
-        certs: employeeStub().certs
-      }
+        const module: TestingModule = await Test.createTestingModule({
+            controllers: [EmployeeController],
+            providers: [EmployeeService],
+        })
+            .overrideProvider(EmployeeService)
+            .useValue(serviceMock)
+            .compile();
 
-      employee = await controller.createEmployee(employeeDto);
+        controller = module.get<EmployeeController>(EmployeeController);
     });
 
-    test('then it should call employeeService', () => {
-      expect(service.createEmployee).toHaveBeenCalledWith(employeeDto);
+    it('EmployeeController should be defined', () => {
+        expect(controller).toBeDefined();
     });
 
-    test('then it should return an employee', () => {
-      expect(employee).toEqual(employeeStub());
+    it('Get all employees', async () => {
+        serviceMock.getAllEmployees.mockResolvedValue(expectedValueGet);
+        expect(
+            await controller.getAllEmployees(paginateMock, sortingMock),
+        ).toEqual(expectedValueGet);
     });
-  });
 });

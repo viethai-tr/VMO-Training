@@ -22,84 +22,53 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
     }
 
     async getAllEmployeesAsync(
-        limit?: number,
-        page?: number,
-        sort?: string,
-        sortBy?: string,
+        limit: number = 5,
+        page: number = 1,
+        search: string = '',
+        sort: string = 'asc',
+        sortBy: string = 'name',
     ) {
-        try {
-            let listResult;
-            page = Math.floor(page);
-            const totalDocs = await this.employeeModel.countDocuments();
-            const totalPages = Math.ceil(totalDocs / limit);
+        const totalDocs = await this.employeeModel.countDocuments();
 
-            let sortKind;
-            if (sort != undefined) {
-                sort = sort.toLowerCase();
-                if (sort == 'desc') sortKind = 'desc';
-                else sortKind = 'asc';
-            } else sortKind = 'asc';
+        if (limit < 0) limit = 0;
 
-            const employeeProperties = ['name', 'dob', 'experience'];
-            if (sortBy != undefined) {
-                sortBy = sortBy.toLowerCase();
-                if (!employeeProperties.includes(sortBy))
-                    sortBy = 'name';
-            } else sortBy = 'name';
+        let totalPages;
+        if (limit == 0) totalPages = 1;
+        else totalPages = Math.ceil(totalDocs / limit);
+        if (page > totalPages || page < 0) page = 1;
+        else page = Math.floor(page);
 
-            if (limit) {
-                if (page <= totalPages) {
-                    const skip = limit * (page - 1);
+        let sortKind;
+        if (sort != undefined) {
+            sort = sort.toLowerCase();
+            if (sort == 'desc') sortKind = 'desc';
+            else sortKind = 'asc';
+        } else sortKind = 'asc';
 
-                    listResult = await this.employeeModel
-                        .find({})
-                        .sort({[sortBy]: sortKind})
-                        .skip(skip)
-                        .limit(limit)
-                        .populate('technologies', 'name');
-                    return {
-                        curPage: page,
-                        totalPages,
-                        listResult,
-                    };
-                } else if (page > totalPages) {
-                    throw new HttpException(
-                        `Page ${page} not exist!`,
-                        HttpStatus.FORBIDDEN,
-                    );
-                } else {
-                    listResult = await this.employeeModel
-                        .find()
-                        .sort({[sortBy]: sortKind})
-                        .limit(limit)
-                        .populate('technologies', 'name');
-                    return {
-                        limit,
-                        listResult,
-                    };
-                }
-            } else {
-                listResult = await this.employeeModel
-                    .find()
-                    .sort({[sortBy]: sortKind})
-                    .populate('technologies', 'name');
-            }
-            return Promise.resolve(listResult);
-        } catch (err) {
-            return Promise.reject(err);
-        }
+        const employeeProperties = ['name', 'dob', 'experience'];
+        sortBy = sortBy.toLowerCase();
+        if (!employeeProperties.includes(sortBy)) sortBy = 'name';
+
+        let listResult = await this.employeeModel
+            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .sort({ [sortBy]: sortKind })
+            .limit(limit)
+            .populate('technologies', 'name');
+
+        return {
+            curPage: page,
+            totalPages,
+            search,
+            sortBy,
+            sort,
+            listResult,
+        };
     }
 
     async getEmployeeByIdAsync(id: string): Promise<EmployeeDocument> {
-        try {
-            let employeeResult = await this.employeeModel
-                .findOne({ _id: id })
-                .populate('technologies', 'name');
-
-            return Promise.resolve(employeeResult);
-        } catch (err) {
-            return Promise.reject(err);
-        }
+        return await this.employeeModel
+            .findOne({ _id: id })
+            .populate('technologies', 'name');
     }
 
     async deleteEmployee(id: string) {
@@ -107,13 +76,7 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         try {
             checkEmployee = await this.employeeModel.findOne({ _id: id });
         } catch (err) {
-            throw new HttpException(
-                {
-                    status: HttpStatus.NOT_ACCEPTABLE,
-                    error: 'Not a valid ID',
-                },
-                HttpStatus.NOT_ACCEPTABLE,
-            );
+            throw new HttpException('Not a valid ID', HttpStatus.BAD_REQUEST);
         }
 
         if (checkEmployee) {
@@ -143,57 +106,47 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
     }
 
     async countEmployees(technology?: string, project?: string) {
-        try {
-            let count;
+        let count;
 
-            if (!technology && !project) {
-                count = await this.employeeModel.countDocuments();
-                return {
-                    num_of_employees: count,
-                };
-            }
-
-            let listEmployeesTechnology;
-            let listEmployeesProject;
-
-            if (project) {
-                listEmployeesProject = await (
-                    await this.projectModel.findOne(
-                        { _id: project },
-                        { employees: true },
-                    )
-                ).employees;
-            }
-
-            if (technology) {
-                listEmployeesTechnology = await (
-                    await this.employeeModel.find({ technologies: technology })
-                ).map((item) => item._id);
-            }
-
-            if (project && technology) {
-                count = (
-                    await listEmployeesTechnology.filter((value) =>
-                        listEmployeesProject.includes(value),
-                    )
-                ).length;
-            } else if (technology) {
-                count = listEmployeesTechnology.length;
-            } else {
-                count = listEmployeesProject.length;
-            }
-
+        if (!technology && !project) {
+            count = await this.employeeModel.countDocuments();
             return {
                 num_of_employees: count,
             };
-        } catch (err) {
-            throw new HttpException(
-                {
-                    status: HttpStatus.NOT_ACCEPTABLE,
-                    error: 'Not a valid ID',
-                },
-                HttpStatus.NOT_ACCEPTABLE,
-            );
         }
+
+        let listEmployeesTechnology;
+        let listEmployeesProject;
+
+        if (project) {
+            listEmployeesProject = await (
+                await this.projectModel.findOne(
+                    { _id: project },
+                    { employees: true },
+                )
+            ).employees;
+        }
+
+        if (technology) {
+            listEmployeesTechnology = await (
+                await this.employeeModel.find({ technologies: technology })
+            ).map((item) => item._id);
+        }
+
+        if (project && technology) {
+            count = (
+                await listEmployeesTechnology.filter((value) =>
+                    listEmployeesProject.includes(value),
+                )
+            ).length;
+        } else if (technology) {
+            count = listEmployeesTechnology.length;
+        } else {
+            count = listEmployeesProject.length;
+        }
+
+        return {
+            num_of_employees: count,
+        };
     }
 }

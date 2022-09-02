@@ -14,8 +14,8 @@ export class ProjectService {
         private projectRepository: ProjectRepository
     ) { }
 
-    async getAllProjects(limit?: number, page?: number, sort?: string, sortBy?: string): Promise<ProjectDocument[]> {
-        return await this.projectRepository.getAllProjects(limit, page, sort, sortBy);
+    async getAllProjects(limit?: number, page?: number, search?: string, sort?: string, sortBy?: string) {
+        return await this.projectRepository.getAllProjects(limit, page, search, sort, sortBy);
     }
 
     async getProjectById(id: string): Promise<ProjectDocument> {

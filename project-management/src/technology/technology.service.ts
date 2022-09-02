@@ -10,8 +10,10 @@ export class TechnologyService {
     async getAllTechnologies(
         limit?: number,
         page?: number,
-    ): Promise<TechnologyDocument[]> {
-        return await this.technologyRepository.getAll(limit, page);
+        search?: string,
+        sort?: string
+    ) {
+        return await this.technologyRepository.getAll(limit, page, search, sort);
     }
 
     async getTechnologyById(id: string): Promise<TechnologyDocument> {

@@ -1,13 +1,16 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     Delete,
     Get,
+    HttpException,
     Param,
     Patch,
     Post,
     Put,
     Query,
+    UseFilters,
     UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -16,16 +19,24 @@ import { EmployeeDto, PaginationDto } from '../core/dtos';
 import { EmployeeDocument } from '../core/schemas/employee.schema';
 import { EmployeeService } from './employee.service';
 import Role from '../core/enums/role.enum';
+import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Employee')
 @Roles(Role.Admin)
+@UseFilters(new HttpExceptionFilter())
 @Controller('employee')
 export class EmployeeController {
     constructor(private readonly employeeService: EmployeeService) {}
 
     @Roles(Role.Admin, Role.User)
     @Get()
+    @ApiQuery({
+        name: 'search',
+        required: false,
+        description: 'Search by name',
+        type: 'string',
+    })
     @ApiQuery({
         name: 'limit',
         required: false,
@@ -52,11 +63,12 @@ export class EmployeeController {
     })
     async getAllEmployees(
         @Query() { limit, page }: PaginationDto,
-        @Query() { sort, sortBy },
-    ): Promise<EmployeeDocument[]> {
+        @Query() { sort, sortBy, search },
+    ) {
         return await this.employeeService.getAllEmployees(
             limit,
             page,
+            search,
             sort,
             sortBy,
         );
@@ -77,13 +89,24 @@ export class EmployeeController {
         type: 'string',
     })
     async countEmployees(@Query() { technology, project }) {
-        return await this.employeeService.countEmployees(technology, project);
+        try {
+            return await this.employeeService.countEmployees(
+                technology,
+                project,
+            );
+        } catch (err) {
+            throw new BadRequestException('Invalid ID');
+        }
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
     async getEmployeeById(@Param('id') id: string): Promise<EmployeeDocument> {
-        return await this.employeeService.getEmployeeById(id);
+        try {
+            return await this.employeeService.getEmployeeById(id);
+        } catch (err) {
+            throw new BadRequestException('Invalid ID');
+        }
     }
 
     @Patch(':id')
@@ -101,6 +124,10 @@ export class EmployeeController {
 
     @Delete(':id')
     async deleteEmployee(@Param('id') id: string) {
-        return await this.employeeService.deleteEmployee(id);
+        try {
+            return await this.employeeService.deleteEmployee(id);
+        } catch (err) {
+            throw new BadRequestException(err);
+        }
     }
 }

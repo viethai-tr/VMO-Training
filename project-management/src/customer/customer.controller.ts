@@ -32,9 +32,15 @@ export class CustomerController {
     @Roles(Role.Admin, Role.User)
     @Get()
     @ApiQuery({
+        name: 'search',
+        required: false,
+        description: 'Search',
+        type: 'string',
+    })
+    @ApiQuery({
         name: 'limit',
         required: false,
-        description: 'Number of employees per page',
+        description: 'Number of records per page',
         type: 'integer',
     })
     @ApiQuery({
@@ -43,10 +49,17 @@ export class CustomerController {
         description: 'Current page',
         type: 'integer',
     })
+    @ApiQuery({
+        name: 'sort',
+        required: false,
+        description: 'Type of sort',
+        enum: ['asc', 'desc'],
+    })
     async getAllCustomers(
         @Query() { limit, page }: PaginationDto,
-    ): Promise<CustomerDocument[]> {
-        return await this.customerService.getAllCustomers(limit, page);
+        @Query() {sort, search}
+    ) {
+        return await this.customerService.getAllCustomers(limit, page, search, sort);
     }
 
     @Roles(Role.Admin, Role.User)

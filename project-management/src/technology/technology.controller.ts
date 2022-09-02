@@ -29,6 +29,12 @@ export class TechnologyController {
     @Roles(Role.Admin, Role.User)
     @Get()
     @ApiQuery({
+        name: 'search',
+        required: false,
+        description: 'Search',
+        type: 'string',
+    })
+    @ApiQuery({
         name: 'limit',
         required: false,
         description: 'Number of employees per page',
@@ -40,10 +46,22 @@ export class TechnologyController {
         description: 'Current page',
         type: 'integer',
     })
+    @ApiQuery({
+        name: 'sort',
+        required: false,
+        description: 'Type of sort',
+        enum: ['asc', 'desc'],
+    })
     async getAllTechnologies(
         @Query() { limit, page }: PaginationDto,
-    ): Promise<TechnologyDocument[]> {
-        return await this.technologyService.getAllTechnologies(limit, page);
+        @Query() { sort, search },
+    ) {
+        return await this.technologyService.getAllTechnologies(
+            limit,
+            page,
+            search,
+            sort,
+        );
     }
 
     @Roles(Role.Admin, Role.User)
@@ -57,7 +75,7 @@ export class TechnologyController {
     @Post()
     async createTechnology(@Body() technologyDto: TechnologyDto) {
         return await this.technologyService.createTechnology(
-            <TechnologyDocument>technologyDto,
+            <TechnologyDocument>(technologyDto),
         );
     }
 
@@ -68,7 +86,7 @@ export class TechnologyController {
     ) {
         return await this.technologyService.updateTechnology(
             id,
-            <TechnologyDocument>technologyDto,
+            <TechnologyDocument>(technologyDto),
         );
     }
 

@@ -7,8 +7,8 @@ import { ProjectStatusRepository } from './project-status.repository';
 export class ProjectStatusService {
     constructor(private projectStatusRepository: ProjectStatusRepository) {}
 
-    async getAllProjectStatuses(limit?: number, page?: number): Promise<ProjectStatusDocument[]> {
-        return await this.projectStatusRepository.getAll(limit, page);
+    async getAllProjectStatuses(limit?: number, page?: number, search?: string, sort?: string) {
+        return await this.projectStatusRepository.getAll(limit, page, search, sort);
     }
 
     async getProjectStatusById(id: string): Promise<ProjectStatusDocument> {

@@ -15,75 +15,44 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
         super(departmentModel);
     }
 
-    async getAllDepartments(limit?: number, page?: number, sort?: string, sortBy?: string) {
-        try {
-            let listResult;
-            page = Math.floor(page);
+    async getAllDepartments(limit: number = 5, page: number = 1, search: string = '', sort: string = 'asc', sortBy: string = 'name') {
             const totalDocs = await this.departmentModel.countDocuments();
-            const totalPages = Math.ceil(totalDocs / limit);
 
-            let sortKind;
-            if (sort != undefined) {
-                sort = sort.toLowerCase();
-                if (sort == 'desc') sortKind = 'desc';
-                else sortKind = 'asc';
-            } else sortKind = 'asc';
+        if (limit < 0) limit = 0;
 
-            const departmentProperties = ['name', 'founding_date'];
-            if (sortBy != undefined) {
-                sortBy = sortBy.toLowerCase();
-                if (!departmentProperties.includes(sortBy))
-                    sortBy = 'name';
-            } else sortBy = 'name';
+        let totalPages;
+        if (limit == 0) totalPages = 1;
+        else totalPages = Math.ceil(totalDocs / limit);
+        if (page > totalPages || page < 0) page = 1;
+        else page = Math.floor(page);
 
-            if (limit) {
-                if (page <= totalPages) {
-                    const skip = limit * (page - 1);
+        let sortKind;
+        if (sort != undefined) {
+            sort = sort.toLowerCase();
+            if (sort == 'desc') sortKind = 'desc';
+            else sortKind = 'asc';
+        } else sortKind = 'asc';
 
-                    listResult = await this.departmentModel
-                        .find({})
-                        .sort({[sortBy]: sortKind})
-                        .skip(skip)
-                        .limit(limit)
-                        .populate('manager', 'name')
-                        .populate('employees', 'name')
-                        .populate('projects', 'name');
-                    return {
-                        curPage: page,
-                        totalPages,
-                        listResult,
-                    };
-                } else if (page > totalPages) {
-                    throw new HttpException(
-                        `Page ${page} not exist!`,
-                        HttpStatus.FORBIDDEN,
-                    );
-                } else {
-                    listResult = await this.departmentModel
-                        .find()
-                        .sort({[sortBy]: sortKind})
-                        .limit(limit)
-                        .populate('manager', 'name')
-                        .populate('employees', 'name')
-                        .populate('projects', 'name');
-                    return {
-                        curPage: page,
-                        totalPages,
-                        listResult,
-                    };
-                }
-            } else {
-                listResult = await this.departmentModel
-                    .find()
-                    .sort({[sortBy]: sortKind})
-                    .populate('manager', 'name')
+        const departmentProperties = ['name', 'founding_date'];
+        sortBy = sortBy.toLowerCase();
+        if (!departmentProperties.includes(sortBy)) sortBy = 'name';
+
+        let listResult = await this.departmentModel
+            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .sort({ [sortBy]: sortKind })
+            .limit(limit)
+            .populate('manager', 'name')
                     .populate('employees', 'name')
                     .populate('projects', 'name');
-            }
-            return Promise.resolve(listResult);
-        } catch (err) {
-            return Promise.reject(err);
-        }
+
+        return {
+            curPage: page,
+            totalPages,
+            search,
+            sortBy,
+            sort,
+            listResult,
+        };
     }
 
     async getDepartmentById(id: string): Promise<DepartmentDocument> {

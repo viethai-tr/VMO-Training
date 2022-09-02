@@ -19,19 +19,32 @@ export class ProjectTypeController {
     @Roles(Role.Admin, Role.User)
     @Get()
     @ApiQuery({
+        name: 'search',
+        required: false,
+        description: 'Search',
+        type: 'string',
+    })
+    @ApiQuery({
         name: 'limit',
         required: false,
         description: 'Number of employees per page',
-        type: 'integer'
+        type: 'integer',
     })
     @ApiQuery({
         name: 'page',
         required: false,
         description: 'Current page',
-        type: 'integer'
+        type: 'integer',
     })
-    async getAllProjectTypes(@Query() {limit, page}: PaginationDto): Promise<ProjectType[]> {
-        return await this.projectTypeService.getAllProjectTypes(limit, page);
+    @ApiQuery({
+        name: 'sort',
+        required: false,
+        description: 'Type of sort',
+        enum: ['asc', 'desc'],
+    })
+    async getAllProjectTypes(@Query() {limit, page}: PaginationDto,
+    @Query() {sort, search}) {
+        return await this.projectTypeService.getAllProjectTypes(limit, page, search, sort);
     }
 
     @Roles(Role.Admin, Role.User)

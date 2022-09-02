@@ -16,8 +16,8 @@ export class EmployeeService {
         @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>
     ) { }
 
-    async getAllEmployees(limit?: number, page?: number, sort?: string, sortBy?: string) {
-        return await this.employeeRepository.getAllEmployeesAsync(limit, page, sort, sortBy);
+    async getAllEmployees(limit: number = 0, page: number = 1, search: string = '', sort: string = 'asc', sortBy: string = 'name') {
+        return await this.employeeRepository.getAllEmployeesAsync(limit, page, search, sort, sortBy);
     }
 
     async getEmployeeById(id: string) {

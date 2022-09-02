@@ -16,8 +16,10 @@ export class CustomerService {
     async getAllCustomers(
         limit?: number,
         page?: number,
-    ): Promise<CustomerDocument[]> {
-        return await this.customerRepository.getAll(limit, page);
+        sort?: string,
+        search?: string
+    ) {
+        return await this.customerRepository.getAll(limit, page, sort, search);
     }
 
     async getCustomerById(id: string) {

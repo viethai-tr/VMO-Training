@@ -18,19 +18,32 @@ export class ProjectStatusController {
     @Roles(Role.Admin, Role.User)
     @Get()
     @ApiQuery({
+        name: 'search',
+        required: false,
+        description: 'Search',
+        type: 'string',
+    })
+    @ApiQuery({
         name: 'limit',
         required: false,
-        description: 'Number of employees per page',
-        type: 'integer'
+        description: 'Number of records per page',
+        type: 'integer',
     })
     @ApiQuery({
         name: 'page',
         required: false,
         description: 'Current page',
-        type: 'integer'
+        type: 'integer',
     })
-    async getAllProjectStatuses(@Query() {limit, page}: PaginationDto): Promise<ProjectStatusDocument[]> {
-        return await this.projectStatusService.getAllProjectStatuses(limit, page);
+    @ApiQuery({
+        name: 'sort',
+        required: false,
+        description: 'Type of sort',
+        enum: ['asc', 'desc'],
+    })
+    async getAllProjectStatuses(@Query() {limit, page}: PaginationDto,
+    @Query() {search, sort}) {
+        return await this.projectStatusService.getAllProjectStatuses(limit, page, search, sort);
     }
 
     @Roles(Role.Admin, Role.User)

@@ -10,7 +10,6 @@ import {
     Query,
     UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import Role from '../core/enums/role.enum';
 import { Roles } from '../shared/decorators/roles.decorator';
@@ -27,6 +26,12 @@ export class DepartmentController {
 
     @Roles(Role.Admin, Role.User)
     @Get()
+    @ApiQuery({
+        name: 'search',
+        required: false,
+        description: 'Search',
+        type: 'string',
+    })
     @ApiQuery({
         name: 'limit',
         required: false,
@@ -53,13 +58,14 @@ export class DepartmentController {
     })
     async getAllDepartments(
         @Query() { limit, page }: PaginationDto,
-        @Query() { sort, sortBy },
-    ): Promise<DepartmentDocument[]> {
+        @Query() { search, sort, sortBy },
+    ) {
         return await this.departmentService.getAllDepartments(
             limit,
             page,
+            search,
             sort,
-            sortBy,
+            sortBy
         );
     }
 

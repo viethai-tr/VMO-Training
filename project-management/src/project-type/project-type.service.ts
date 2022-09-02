@@ -9,8 +9,8 @@ export class ProjectTypeService {
         private projectTypeRepository: ProjectTypeRepository
     ) {}
 
-    async getAllProjectTypes(limit?: number, page?: number): Promise<ProjectType[]> {
-        return await this.projectTypeRepository.getAll(limit, page);
+    async getAllProjectTypes(limit?: number, page?: number, search?: string, sort?: string) {
+        return await this.projectTypeRepository.getAll(limit, page, search, sort);
     }
 
     async getProjectTypeById(id: string): Promise<ProjectType> {

@@ -32,66 +32,40 @@ export class Repository<T extends Document> implements IRepository<T> {
     }
 
     async getAll(
-        limit?: number,
-        page?: number,
-        sort?: string,
-        sortBy?: string,
+        limit: number = 5,
+        page: number = 1,
+        search: string = '',
+        sort: string = 'asc',
+        sortBy: string = 'name',
     ) {
-        try {
-            let listResult;
-            page = Math.floor(page);
-            const totalDocs = await this._model.countDocuments();
-            const totalPages = Math.ceil(totalDocs / limit);
+        let sortKind;
+        if (sort != undefined) {
+            sort = sort.toLowerCase();
+            if (sort == 'desc') sortKind = 'desc';
+            else sortKind = 'asc';
+        } else sortKind = 'asc';
 
-            let sortKind;
-            if (sort) {
-                sort = sort.toLowerCase();
-                if (!['asc', 'desc'].includes(sort)) {
-                    sortKind = 'asc';
-                }
-            } else {
-                sortKind = 'asc';
-            }
+        if (limit < 0) limit = 0;
 
-            if (limit) {
-                if (page <= totalPages) {
-                    const skip = limit * (page - 1);
+        let listResult = await this._model
+            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .sort({ [sortBy]: sortKind })
+            .limit(limit);
 
-                    listResult = await this._model
-                        .find()
-                        .sort({ [sortBy]: sortKind })
-                        .skip(skip)
-                        .limit(limit);
+        let totalPages;
+        if (limit == 0) totalPages = 1;
+        else totalPages = Math.ceil(listResult.length / limit);
 
-                    return {
-                        curPage: page,
-                        totalPages: totalPages,
-                        listResult,
-                    };
-                } else if (page > totalPages) {
-                    throw new HttpException(
-                        `Page ${page} not exist!`,
-                        HttpStatus.FORBIDDEN,
-                    );
-                } else {
-                    listResult = await this._model
-                        .find()
-                        .sort({ [sortBy]: sortKind })
-                        .limit(limit);
-                    return {
-                        limit: limit,
-                        listResult,
-                    };
-                }
-            } else {
-                listResult = await this._model
-                    .find()
-                    .sort({ [sortBy]: sortKind });
-            }
-            return Promise.resolve(listResult);
-        } catch (err) {
-            return Promise.reject(err);
-        }
+        if (page > totalPages || page < 0) page = 1;
+
+        return {
+            curPage: page,
+            totalPages,
+            search,
+            sortBy,
+            sort,
+            listResult,
+        };
     }
 
     async getById(id: string): Promise<T> {

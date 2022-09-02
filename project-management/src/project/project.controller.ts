@@ -1,6 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ProjectCountDto } from '../core/dtos/project-count.dto';
 import { Roles } from '../shared/decorators/roles.decorator';
 import { PaginationDto, ProjectDto } from '../core/dtos';
@@ -18,16 +28,22 @@ export class ProjectController {
     @Get()
     @Roles(Role.Admin, Role.User)
     @ApiQuery({
+        name: 'search',
+        required: false,
+        description: 'Search by name',
+        type: 'string',
+    })
+    @ApiQuery({
         name: 'limit',
         required: false,
         description: 'Number of employees per page',
-        type: 'integer'
+        type: 'integer',
     })
     @ApiQuery({
         name: 'page',
         required: false,
         description: 'Current page',
-        type: 'integer'
+        type: 'integer',
     })
     @ApiQuery({
         name: 'sort',
@@ -41,8 +57,17 @@ export class ProjectController {
         description: 'Sort by',
         enum: ['name', 'starting_date'],
     })
-    async getAllProjects(@Query() {limit, page}: PaginationDto, @Query() {sort, sortBy}): Promise<ProjectDocument[]> {
-        return await this.projectService.getAllProjects(limit, page, sort, sortBy);
+    async getAllProjects(
+        @Query() { limit, page }: PaginationDto,
+        @Query() { sort, sortBy, search },
+    ) {
+        return await this.projectService.getAllProjects(
+            limit,
+            page,
+            search,
+            sort,
+            sortBy
+        );
     }
 
     @Roles(Role.Admin, Role.User)
@@ -51,34 +76,43 @@ export class ProjectController {
         name: 'status',
         required: false,
         description: 'Project status',
-        type: 'string'
+        type: 'string',
     })
     @ApiQuery({
         name: 'type',
         required: false,
         description: 'Project type',
-        type: 'string'
+        type: 'string',
     })
     @ApiQuery({
         name: 'customer',
         required: false,
         description: 'Customer',
-        type: 'string'
+        type: 'string',
     })
     @ApiQuery({
         name: 'technology',
         required: false,
         description: 'Technology',
-        type: 'string'
+        type: 'string',
     })
     @ApiQuery({
         name: 'startingDate',
         required: false,
         description: 'Starting date of project',
-        type: 'string'
+        type: 'string',
     })
-    async countProjects(@Query() {type, status, customer, technology, startingDate}: ProjectCountDto) {
-        return await this.projectService.countProjects(type, status, customer, technology, startingDate);
+    async countProjects(
+        @Query()
+        { type, status, customer, technology, startingDate }: ProjectCountDto,
+    ) {
+        return await this.projectService.countProjects(
+            type,
+            status,
+            customer,
+            technology,
+            startingDate,
+        );
     }
 
     @Roles(Role.Admin, Role.User)
@@ -93,8 +127,17 @@ export class ProjectController {
         return this.projectService.getProjectById(id);
     }
 
+    @Post()
+    @ApiBody({ type: ProjectDto})
+    async createProject(@Body() projectDto: ProjectDto) {
+        return await this.projectService.createProject(projectDto);
+    }
+
     @Patch(':id')
-    async updateProject(@Param('id') id: string, @Body() projectDto: ProjectDto) {
+    async updateProject(
+        @Param('id') id: string,
+        @Body() projectDto: ProjectDto,
+    ) {
         return await this.projectService.updateProject(id, projectDto);
     }
 
