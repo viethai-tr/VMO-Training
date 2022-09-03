@@ -24,10 +24,10 @@ import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter';
 @ApiBearerAuth()
 @ApiTags('Employee')
 @Roles(Role.Admin)
-@UseFilters(new HttpExceptionFilter())
+@UseFilters(HttpExceptionFilter)
 @Controller('employee')
 export class EmployeeController {
-    constructor(private readonly employeeService: EmployeeService) {}
+    constructor(private readonly employeeService: EmployeeService) { }
 
     @Roles(Role.Admin, Role.User)
     @Get()
@@ -89,24 +89,16 @@ export class EmployeeController {
         type: 'string',
     })
     async countEmployees(@Query() { technology, project }) {
-        try {
-            return await this.employeeService.countEmployees(
-                technology,
-                project,
-            );
-        } catch (err) {
-            throw new BadRequestException('Invalid ID');
-        }
+        return await this.employeeService.countEmployees(
+            technology,
+            project,
+        );
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
-    async getEmployeeById(@Param('id') id: string): Promise<EmployeeDocument> {
-        try {
-            return await this.employeeService.getEmployeeById(id);
-        } catch (err) {
-            throw new BadRequestException('Invalid ID');
-        }
+    async getEmployeeById(@Param('id') id: string) {
+        return await this.employeeService.getEmployeeById(id);
     }
 
     @Patch(':id')
@@ -124,10 +116,6 @@ export class EmployeeController {
 
     @Delete(':id')
     async deleteEmployee(@Param('id') id: string) {
-        try {
-            return await this.employeeService.deleteEmployee(id);
-        } catch (err) {
-            throw new BadRequestException(err);
-        }
+        return await this.employeeService.deleteEmployee(id);
     }
 }

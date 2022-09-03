@@ -24,7 +24,7 @@ import Role from 'src/core/enums/role.enum';
 @ApiBearerAuth()
 @ApiTags('Customer')
 @Roles(Role.Admin)
-@UseFilters(new HttpExceptionFilter())
+@UseFilters(HttpExceptionFilter)
 @Controller('customer')
 export class CustomerController {
     constructor(private customerService: CustomerService) {}

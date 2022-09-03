@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseFilters, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import Role from '../core/enums/role.enum';
@@ -6,15 +6,17 @@ import { Roles } from '../shared/decorators/roles.decorator';
 import { PaginationDto, ProjectTypeDto } from '../core/dtos';
 import { ProjectType, ProjectTypeDocument } from '../core/schemas/project-type.schema';
 import { ProjectTypeService } from './project-type.service';
+import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Project Type')
 @Roles(Role.Admin)
+@UseFilters(HttpExceptionFilter)
 @Controller('project-type')
 export class ProjectTypeController {
     constructor(
         private projectTypeService: ProjectTypeService
-    ) {}
+    ) { }
 
     @Roles(Role.Admin, Role.User)
     @Get()
@@ -42,8 +44,8 @@ export class ProjectTypeController {
         description: 'Type of sort',
         enum: ['asc', 'desc'],
     })
-    async getAllProjectTypes(@Query() {limit, page}: PaginationDto,
-    @Query() {sort, search}) {
+    async getAllProjectTypes(@Query() { limit, page }: PaginationDto,
+        @Query() { sort, search }) {
         return await this.projectTypeService.getAllProjectTypes(limit, page, search, sort);
     }
 

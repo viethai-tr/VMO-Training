@@ -13,9 +13,10 @@ import { ProjectStatusModule } from './project-status/project-status.module';
 import { DepartmentModule } from './department/department.module';
 import { AdminModule } from './admin/admin.module';
 import configuration from './config/configuration';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './shared/auth/guards/at.guard';
 import { RolesGuard } from './shared/auth/guards/roles.guard';
+import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 
 @Module({
     imports: [
@@ -55,6 +56,10 @@ import { RolesGuard } from './shared/auth/guards/roles.guard';
         AppService,
         { provide: APP_GUARD, useClass: AtGuard },
         { provide: APP_GUARD, useClass: RolesGuard },
+        {
+            provide: APP_FILTER,
+            useClass: HttpExceptionFilter,
+        },
     ],
 })
-export class AppModule {}
+export class AppModule { }

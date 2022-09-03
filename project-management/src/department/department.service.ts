@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import mongoose from 'mongoose';
+import { check } from 'prettier';
 import { DepartmentDto } from 'src/core/dtos';
 import { DepartmentDocument } from 'src/core/schemas/department.schema';
+import { checkObjectId } from 'src/shared/checkObjectId';
 import { convertObjectId } from 'src/shared/convertObjectId';
 import { DepartmentRepository } from './department.repository';
 
@@ -16,7 +18,8 @@ export class DepartmentService {
     }
 
     async getDepartmentById(id: string): Promise<DepartmentDocument> {
-        return await this.departmentRepository.getDepartmentById(id);
+        if (checkObjectId(id))
+            return await this.departmentRepository.getDepartmentById(id);
     }
 
     async createDepartment(departmentDto: DepartmentDto) {
@@ -38,15 +41,18 @@ export class DepartmentService {
     }
 
     async deleteDepartment(id: string) {
-        return await this.departmentRepository.delete(id);
+        if (checkObjectId(id))
+            return await this.departmentRepository.delete(id);
     }
 
     async getEmployeesDepartment(id: string) {
-        return await this.departmentRepository.getEmployeesDepartment(id);
+        if (checkObjectId(id))
+            return await this.departmentRepository.getEmployeesDepartment(id);
     }
 
     async getProjectsDepartment(id: string) {
-        return await this.departmentRepository.getProjectsDepartment(id);
+        if (checkObjectId(id))
+            return await this.departmentRepository.getProjectsDepartment(id);
     }
 
 }

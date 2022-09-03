@@ -7,6 +7,7 @@ import {
     Patch,
     Post,
     Query,
+    UseFilters,
     UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -17,10 +18,12 @@ import { PaginationDto, ProjectDto } from '../core/dtos';
 import { ProjectDocument } from '../core/schemas/project.schema';
 import { ProjectService } from './project.service';
 import Role from '../core/enums/role.enum';
+import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Project')
 @Roles(Role.Admin)
+@UseFilters(HttpExceptionFilter)
 @Controller('project')
 export class ProjectController {
     constructor(private readonly projectService: ProjectService) {}

@@ -72,37 +72,7 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
     }
 
     async deleteEmployee(id: string) {
-        let checkEmployee;
-        try {
-            checkEmployee = await this.employeeModel.findOne({ _id: id });
-        } catch (err) {
-            throw new HttpException('Not a valid ID', HttpStatus.BAD_REQUEST);
-        }
-
-        if (checkEmployee) {
-            const projects = this.projectModel.find({ employees: id });
-            const departments = this.departmentModel.find({ employees: id });
-            const manager = this.departmentModel.find({ manager: id });
-
-            if (
-                (!projects || (await projects).length == 0) &&
-                (!departments || (await departments).length == 0) &&
-                (!manager || (await manager).length == 0)
-            ) {
-                await this.employeeModel.findOneAndDelete({ _id: id });
-                return {
-                    HttpStatus: HttpStatus.OK,
-                    msg: 'Delete successfully!',
-                };
-            } else {
-                throw new HttpException(
-                    'Cannot be deleted',
-                    HttpStatus.FORBIDDEN,
-                );
-            }
-        } else {
-            throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-        }
+        return await this.employeeModel.findOneAndDelete({ _id: id });
     }
 
     async countEmployees(technology?: string, project?: string) {

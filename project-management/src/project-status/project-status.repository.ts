@@ -11,19 +11,4 @@ export class ProjectStatusRepository extends Repository<ProjectStatusDocument> {
     ) {
         super(projectStatusModel);
     }
-
-    async deleteProjectStatus(id: string) {
-        const checkProjectType = this.projectStatusModel.find({_id: id});
-        if (checkProjectType) {
-            const projects = await this.projectStatusModel.find({type: id});
-            if (!projects || projects.length == 0) {
-                await this.projectStatusModel.findOneAndDelete({_id: id});
-                return "Delete successfully!";
-            } else {
-                throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-            }
-        } else {
-            throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-        }
-    }
 }

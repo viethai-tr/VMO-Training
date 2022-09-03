@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseFilters, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import Role from '../core/enums/role.enum';
@@ -7,10 +7,12 @@ import { PaginationDto } from '../core/dtos';
 import { ProjectStatusDto } from '../core/dtos/project-status.dto';
 import { ProjectStatusDocument } from '../core/schemas/project-status.schema';
 import { ProjectStatusService } from './project-status.service';
+import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Project Status')
 @Roles(Role.Admin)
+@UseFilters(HttpExceptionFilter)
 @Controller('project-status')
 export class ProjectStatusController {
     constructor(private readonly projectStatusService: ProjectStatusService) {}

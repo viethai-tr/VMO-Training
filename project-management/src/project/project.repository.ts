@@ -65,7 +65,6 @@ export class ProjectRepository extends Repository<ProjectDocument> {
     }
 
     async getProjectById(id: string) {
-        try {
             return await this.projectModel
                 .findOne({ _id: id })
                 .populate('type', 'name')
@@ -73,15 +72,6 @@ export class ProjectRepository extends Repository<ProjectDocument> {
                 .populate('technologies', 'name')
                 .populate('employees', 'name')
                 .populate('customer', 'name');
-        } catch (err) {
-            throw new HttpException(
-                {
-                    status: HttpStatus.NOT_ACCEPTABLE,
-                    error: 'Invalid ID',
-                },
-                HttpStatus.NOT_ACCEPTABLE,
-            );
-        }
     }
 
     async getEmployeesProject(id: string) {
@@ -91,26 +81,8 @@ export class ProjectRepository extends Repository<ProjectDocument> {
     }
 
     async countProjects(
-        type?: string,
-        status?: string,
-        customer?: string,
-        technology?: string,
-        startingDate?: string,
+        query
     ) {
-        let oriQuery = {
-            type: type,
-            status: status,
-            customer: customer,
-            technologies: technology,
-            starting_date: startingDate,
-        };
-
-        const query = Object.fromEntries(
-            Object.entries(oriQuery).filter(([_, v]) => v != null),
-        );
-
-        console.log(query);
-
         try {
             const count = await this.projectModel.countDocuments(query);
 
@@ -130,36 +102,6 @@ export class ProjectRepository extends Repository<ProjectDocument> {
     }
 
     async deleteProject(id: string) {
-        let checkProject;
-
-        try {
-            checkProject = await this.projectModel.findOne({ _id: id });
-        } catch (err) {
-            throw new HttpException(
-                {
-                    status: HttpStatus.NOT_ACCEPTABLE,
-                    error: 'Invalid ID',
-                },
-                HttpStatus.NOT_ACCEPTABLE,
-            );
-        }
-
-        if (checkProject) {
-            const checkDepartment = this.departmentModel.find({ projects: id });
-            if (!checkDepartment || (await checkDepartment).length == 0) {
-                await this.projectModel.findOneAndDelete({ _id: id });
-                return {
-                    HttpStatus: HttpStatus.OK,
-                    msg: 'Delete successfully!',
-                };
-            } else {
-                throw new HttpException(
-                    'Cannot be deleted',
-                    HttpStatus.FORBIDDEN,
-                );
-            }
-        } else {
-            throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-        }
+       return await this.projectModel.findOneAndDelete({_id: id});
     }
 }
