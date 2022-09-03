@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     Delete,
@@ -17,14 +18,13 @@ import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
 import { CustomerDto, PaginationDto } from '../core/dtos';
 import { Customer, CustomerDocument } from '../core/schemas/customer.schema';
 import { CustomerService } from './customer.service';
-import { AllExceptionsFilter } from '../shared/filters/all-exceptions.filter';
-import { HttpAdapterHost } from '@nestjs/core';
 import { Roles } from 'src/shared/decorators/roles.decorator';
 import Role from 'src/core/enums/role.enum';
 
 @ApiBearerAuth()
 @ApiTags('Customer')
 @Roles(Role.Admin)
+@UseFilters(new HttpExceptionFilter())
 @Controller('customer')
 export class CustomerController {
     constructor(private customerService: CustomerService) {}
@@ -57,9 +57,14 @@ export class CustomerController {
     })
     async getAllCustomers(
         @Query() { limit, page }: PaginationDto,
-        @Query() {sort, search}
+        @Query() { sort, search },
     ) {
-        return await this.customerService.getAllCustomers(limit, page, search, sort);
+        return await this.customerService.getAllCustomers(
+            limit,
+            page,
+            search,
+            sort,
+        );
     }
 
     @Roles(Role.Admin, Role.User)
@@ -70,22 +75,12 @@ export class CustomerController {
 
     @Delete(':id')
     async deleteCustomer(@Param('id') id: string) {
-        try {
             return await this.customerService.deleteCustomer(id);
-        } catch (err) {
-            throw new HttpException(
-                {
-                    status: HttpStatus.BAD_REQUEST,
-                    error: err.message,
-                },
-                HttpStatus.BAD_REQUEST,
-            );
-        }
     }
 
     @Post()
     async createCustomer(@Body() customerDto: CustomerDto) {
-        return await this.customerService.createCustomer(customerDto);
+        return await this.customerService.createCustomer(customerDto);  
     }
 
     @Patch(':id')

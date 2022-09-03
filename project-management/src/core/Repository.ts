@@ -5,30 +5,16 @@ import { IRepository } from './database/IRepository';
 export class Repository<T extends Document> implements IRepository<T> {
     constructor(private _model: Model<T>) {}
 
-    async create(item: T): Promise<T> {
-        try {
-            await this._model.create(item);
-            return Promise.resolve(item);
-        } catch (err) {
-            return Promise.reject(err);
-        }
+    async create(item: T) {
+        return this._model.create(item);
     }
 
     async update(id: string, item: T): Promise<T> {
-        try {
-            await this._model.findOneAndUpdate({ _id: id }, item);
-            return Promise.resolve(item);
-        } catch (err) {
-            return Promise.reject(err);
-        }
+        return this._model.findOneAndUpdate({ _id: id }, item);
     }
 
     async delete(id: string): Promise<T> {
-        try {
-            await this._model.findOneAndDelete({ _id: id });
-        } catch (err) {
-            return Promise.reject(err);
-        }
+        return this._model.findOneAndDelete({ _id: id });
     }
 
     async getAll(
@@ -47,14 +33,17 @@ export class Repository<T extends Document> implements IRepository<T> {
 
         if (limit < 0) limit = 0;
 
-        let listResult = await this._model
+        const listResult = await this._model
             .find({ name: new RegExp('.*' + search + '.*', 'i') })
             .sort({ [sortBy]: sortKind })
             .limit(limit);
 
+        const totalDocs = await this._model
+        .find({ name: new RegExp('.*' + search + '.*', 'i') }).countDocuments();
+
         let totalPages;
         if (limit == 0) totalPages = 1;
-        else totalPages = Math.ceil(listResult.length / limit);
+        else totalPages = Math.ceil(totalDocs / limit);
 
         if (page > totalPages || page < 0) page = 1;
 
@@ -69,10 +58,6 @@ export class Repository<T extends Document> implements IRepository<T> {
     }
 
     async getById(id: string): Promise<T> {
-        try {
-            return this._model.findOne({ _id: id });
-        } catch (err) {
-            return Promise.reject(err);
-        }
+        return await this._model.findOne({ _id: id });
     }
 }

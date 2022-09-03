@@ -15,16 +15,13 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
         super(departmentModel);
     }
 
-    async getAllDepartments(limit: number = 5, page: number = 1, search: string = '', sort: string = 'asc', sortBy: string = 'name') {
-            const totalDocs = await this.departmentModel.countDocuments();
-
-        if (limit < 0) limit = 0;
-
-        let totalPages;
-        if (limit == 0) totalPages = 1;
-        else totalPages = Math.ceil(totalDocs / limit);
-        if (page > totalPages || page < 0) page = 1;
-        else page = Math.floor(page);
+    async getAllDepartments(
+        limit: number = 5,
+        page: number = 1,
+        search: string = '',
+        sort: string = 'asc',
+        sortBy: string = 'name',
+    ) {
 
         let sortKind;
         if (sort != undefined) {
@@ -33,6 +30,8 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
             else sortKind = 'asc';
         } else sortKind = 'asc';
 
+        if (limit < 0) limit = 0;
+        
         const departmentProperties = ['name', 'founding_date'];
         sortBy = sortBy.toLowerCase();
         if (!departmentProperties.includes(sortBy)) sortBy = 'name';
@@ -42,8 +41,18 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
             .sort({ [sortBy]: sortKind })
             .limit(limit)
             .populate('manager', 'name')
-                    .populate('employees', 'name')
-                    .populate('projects', 'name');
+            .populate('employees', 'name')
+            .populate('projects', 'name');
+
+        const totalDocs = await this.departmentModel
+            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .countDocuments();
+
+        let totalPages;
+        if (limit == 0) totalPages = 1;
+        else totalPages = Math.ceil(totalDocs / limit);
+
+        if (page > totalPages || page < 0) page = 1;
 
         return {
             curPage: page,

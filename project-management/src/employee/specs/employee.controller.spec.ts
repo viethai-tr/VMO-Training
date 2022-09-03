@@ -37,6 +37,7 @@ describe('EmployeeController', () => {
     const sortingMock = {
         sort: 'asc',
         sortBy: 'name',
+        search: ''
     };
 
     // const createdMock: Employee;
