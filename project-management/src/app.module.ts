@@ -17,6 +17,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './shared/auth/guards/at.guard';
 import { RolesGuard } from './shared/auth/guards/roles.guard';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
+import { MongoExceptionFilter } from './shared/filters/mongo-exception.filter';
 
 @Module({
     imports: [
@@ -59,6 +60,10 @@ import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
         {
             provide: APP_FILTER,
             useClass: HttpExceptionFilter,
+        },
+        {
+            provide: APP_FILTER,
+            useClass: MongoExceptionFilter,
         },
     ],
 })

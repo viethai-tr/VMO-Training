@@ -8,11 +8,13 @@ import { ProjectStatusDto } from '../core/dtos/project-status.dto';
 import { ProjectStatusDocument } from '../core/schemas/project-status.schema';
 import { ProjectStatusService } from './project-status.service';
 import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter';
+import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Project Status')
 @Roles(Role.Admin)
 @UseFilters(HttpExceptionFilter)
+@UseFilters(MongoExceptionFilter)
 @Controller('project-status')
 export class ProjectStatusController {
     constructor(private readonly projectStatusService: ProjectStatusService) {}

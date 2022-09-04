@@ -84,7 +84,7 @@ export class ProjectService {
                 await this.projectModel.findOneAndDelete({ _id: id });
                 return {
                     HttpStatus: HttpStatus.OK,
-                    msg: 'Delete successfully!',
+                    message: 'Delete successfully!',
                 };
             } else {
                 throw new HttpException(

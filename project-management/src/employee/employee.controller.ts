@@ -16,18 +16,19 @@ import {
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../shared/decorators/roles.decorator';
 import { EmployeeDto, PaginationDto } from '../core/dtos';
-import { EmployeeDocument } from '../core/schemas/employee.schema';
 import { EmployeeService } from './employee.service';
 import Role from '../core/enums/role.enum';
-import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter';
+import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
+import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Employee')
 @Roles(Role.Admin)
 @UseFilters(HttpExceptionFilter)
+@UseFilters(MongoExceptionFilter)
 @Controller('employee')
 export class EmployeeController {
-    constructor(private readonly employeeService: EmployeeService) { }
+    constructor(private readonly employeeService: EmployeeService) {}
 
     @Roles(Role.Admin, Role.User)
     @Get()
@@ -89,10 +90,7 @@ export class EmployeeController {
         type: 'string',
     })
     async countEmployees(@Query() { technology, project }) {
-        return await this.employeeService.countEmployees(
-            technology,
-            project,
-        );
+        return await this.employeeService.countEmployees(technology, project);
     }
 
     @Roles(Role.Admin, Role.User)
@@ -102,6 +100,7 @@ export class EmployeeController {
     }
 
     @Patch(':id')
+    @ApiBody({ type: EmployeeDto })
     async updateEmployee(
         @Param('id') id: string,
         @Body() employee: EmployeeDto,
@@ -110,6 +109,7 @@ export class EmployeeController {
     }
 
     @Post()
+    @ApiBody({ type: EmployeeDto })
     async createEmployee(@Body() employee: EmployeeDto) {
         return await this.employeeService.createEmployee(employee);
     }

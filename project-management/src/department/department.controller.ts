@@ -18,11 +18,13 @@ import { DepartmentDto, PaginationDto } from '../core/dtos';
 import { DepartmentDocument } from '../core/schemas/department.schema';
 import { DepartmentService } from './department.service';
 import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
+import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Department')
 @Roles(Role.Admin)
 @UseFilters(HttpExceptionFilter)
+@UseFilters(MongoExceptionFilter)
 @Controller('department')
 export class DepartmentController {
     constructor(private departmentService: DepartmentService) {}

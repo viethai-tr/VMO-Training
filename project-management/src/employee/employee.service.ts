@@ -46,7 +46,8 @@ export class EmployeeService {
     async createEmployee(employeeDto: EmployeeDto) {
         const { name, dob, address, id_card, phone_number, technologies, experience, languages, certs } = employeeDto;
         const idTechnologies = convertObjectId(technologies);
-        return await this.employeeRepository.create(<EmployeeDocument>{ name, dob, address, id_card, phone_number, technologies: idTechnologies, experience, languages, certs });
+        await this.employeeRepository.create(<EmployeeDocument>{ name, dob, address, id_card, phone_number, technologies: idTechnologies, experience, languages, certs });
+        return employeeDto;
     }
 
     async deleteEmployee(id: string) {

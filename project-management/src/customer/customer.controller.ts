@@ -20,11 +20,13 @@ import { Customer, CustomerDocument } from '../core/schemas/customer.schema';
 import { CustomerService } from './customer.service';
 import { Roles } from 'src/shared/decorators/roles.decorator';
 import Role from 'src/core/enums/role.enum';
+import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Customer')
 @Roles(Role.Admin)
 @UseFilters(HttpExceptionFilter)
+@UseFilters(MongoExceptionFilter)
 @Controller('customer')
 export class CustomerController {
     constructor(private customerService: CustomerService) {}

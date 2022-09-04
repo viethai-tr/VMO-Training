@@ -6,6 +6,7 @@ import {
     HttpStatus,
     Patch,
     Query,
+    UseFilters,
     UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -17,10 +18,14 @@ import { Roles } from '../shared/decorators/roles.decorator';
 import Role from '../core/enums/role.enum';
 import { PaginationDto } from '../core/dtos';
 import { AdminDocument } from '../core/schemas/admin.schema';
+import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter';
+import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Admin')
 @Roles(Role.Admin)
+@UseFilters(MongoExceptionFilter)
+@UseFilters(HttpExceptionFilter)
 @Controller('admin')
 export class AdminController {
     constructor(private readonly adminService: AdminService) {}

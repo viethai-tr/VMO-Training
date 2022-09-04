@@ -7,11 +7,13 @@ import { PaginationDto, ProjectTypeDto } from '../core/dtos';
 import { ProjectType, ProjectTypeDocument } from '../core/schemas/project-type.schema';
 import { ProjectTypeService } from './project-type.service';
 import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter';
+import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Project Type')
 @Roles(Role.Admin)
 @UseFilters(HttpExceptionFilter)
+@UseFilters(MongoExceptionFilter)
 @Controller('project-type')
 export class ProjectTypeController {
     constructor(

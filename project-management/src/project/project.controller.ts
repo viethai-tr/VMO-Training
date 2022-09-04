@@ -19,11 +19,13 @@ import { ProjectDocument } from '../core/schemas/project.schema';
 import { ProjectService } from './project.service';
 import Role from '../core/enums/role.enum';
 import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
+import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Project')
 @Roles(Role.Admin)
 @UseFilters(HttpExceptionFilter)
+@UseFilters(MongoExceptionFilter)
 @Controller('project')
 export class ProjectController {
     constructor(private readonly projectService: ProjectService) {}
