@@ -10,15 +10,15 @@ export class AdminService {
     constructor(private adminRepository: AdminRepository) {}
 
     async getAllUser(limit?: number, page?: number, search?: string, sort?: string) {
-        return await this.adminRepository.getAllUsers(limit, page, search, sort);
+        return this.adminRepository.getAllUsers(limit, page, search, sort);
     }
 
     async changePassword(id: string, passwordDto: ChangePasswordDto) {
-        return await this.adminRepository.changePassword(id, passwordDto);
+        return this.adminRepository.changePassword(id, passwordDto);
     }
 
     async updateAdmin(id: string, adminDto: AdminDto) {
-        return await this.adminRepository.updateAdmin(id, adminDto);
+        return this.adminRepository.updateAdmin(id, adminDto);
     }
 
     async getAdminInfo(id: string) {

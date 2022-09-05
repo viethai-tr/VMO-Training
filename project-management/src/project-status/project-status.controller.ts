@@ -46,27 +46,27 @@ export class ProjectStatusController {
     })
     async getAllProjectStatuses(@Query() {limit, page}: PaginationDto,
     @Query() {search, sort}) {
-        return await this.projectStatusService.getAllProjectStatuses(limit, page, search, sort);
+        return this.projectStatusService.getAllProjectStatuses(limit, page, search, sort);
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
     async getProjectStatusById(@Param('id') id: string): Promise<ProjectStatusDocument> {
-        return await this.projectStatusService.getProjectStatusById(id);
+        return this.projectStatusService.getProjectStatusById(id);
     }
 
     @Post()
     async createProjectStatus(@Body() projectStatusDto: ProjectStatusDto) {
-        return await this.projectStatusService.createProjectStatus(projectStatusDto);
+        return this.projectStatusService.createProjectStatus(projectStatusDto);
     }
 
     @Patch(':id')
     async updateProjectStatus(@Param('id') id: string, @Body() projectStatusDto: ProjectStatusDto) {
-        return await this.projectStatusService.updateProjectStatus(id, projectStatusDto);
+        return this.projectStatusService.updateProjectStatus(id, projectStatusDto);
     }
 
     @Delete(':id')
     async deleteProjectStatus(@Param('id') id: string) {
-        return await this.projectStatusService.deleteProjectStatus(id);
+        return this.projectStatusService.deleteProjectStatus(id);
     }
 }

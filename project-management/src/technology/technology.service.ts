@@ -14,7 +14,7 @@ export class TechnologyService {
         search?: string,
         sort?: string,
     ) {
-        return await this.technologyRepository.getAll(
+        return this.technologyRepository.getAll(
             limit,
             page,
             search,
@@ -24,25 +24,25 @@ export class TechnologyService {
 
     async getTechnologyById(id: string): Promise<TechnologyDocument> {
         checkObjectId(id);
-        return await this.technologyRepository.getById(id);
+        return this.technologyRepository.getById(id);
     }
 
     async updateTechnology(id: string, technologyDto: TechnologyDto) {
         checkObjectId(id);
-        return await this.technologyRepository.update(
+        return this.technologyRepository.update(
             id,
             <TechnologyDocument>technologyDto,
         );
     }
 
     async createTechnology(technologyDto: TechnologyDto) {
-        return await this.technologyRepository.create(
+        return this.technologyRepository.create(
             <TechnologyDocument>technologyDto,
         );
     }
 
     async deleteTechnology(id: string) {
         checkObjectId(id);
-        return await this.technologyRepository.deleteTechnology(id);
+        return this.technologyRepository.deleteTechnology(id);
     }
 }

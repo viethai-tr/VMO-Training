@@ -25,29 +25,24 @@ export class ProjectTypeService {
         search?: string,
         sort?: string,
     ) {
-        return await this.projectTypeRepository.getAll(
-            limit,
-            page,
-            search,
-            sort,
-        );
+        return this.projectTypeRepository.getAll(limit, page, search, sort);
     }
 
     async getProjectTypeById(id: string): Promise<ProjectType> {
         checkObjectId(id);
-        return await this.projectTypeRepository.getById(id);
+        return this.projectTypeRepository.getById(id);
     }
 
     async updateProjectType(id: string, projectTypeDto: ProjectTypeDto) {
         checkObjectId(id);
-        return await this.projectTypeRepository.update(
+        return this.projectTypeRepository.update(
             id,
             <ProjectTypeDocument>projectTypeDto,
         );
     }
 
     async createProjectType(projectTypeDto: ProjectTypeDto) {
-        return await this.projectTypeRepository.create(
+        return this.projectTypeRepository.create(
             <ProjectTypeDocument>projectTypeDto,
         );
     }

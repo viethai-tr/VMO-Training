@@ -83,12 +83,12 @@ export class AdminController {
         @GetCurrentAdmin('sub') id: string,
         @Body() passwordDto: ChangePasswordDto,
     ) {
-        return await this.adminService.changePassword(id, passwordDto);
+        return this.adminService.changePassword(id, passwordDto);
     }
 
     @Roles(Role.Admin, Role.User)
     @Get('me')
     async getAdminInfo(@GetCurrentAdmin('sub') id: string) {
-        return await this.adminService.getAdminInfo(id);
+        return this.adminService.getAdminInfo(id);
     }
 }

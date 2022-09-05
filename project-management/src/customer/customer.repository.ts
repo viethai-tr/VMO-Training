@@ -28,6 +28,6 @@ export class CustomerRepository extends Repository<CustomerDocument> {
         //     );
         // }
 
-        return await this.customerModel.findOneAndDelete({ _id: id });
+        return this.customerModel.findOneAndDelete({ _id: id });
     }
 }

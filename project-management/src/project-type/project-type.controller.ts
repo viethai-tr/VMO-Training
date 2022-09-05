@@ -47,27 +47,27 @@ export class ProjectTypeController {
     })
     async getAllProjectTypes(@Query() { limit, page }: PaginationDto,
         @Query() { sort, search }) {
-        return await this.projectTypeService.getAllProjectTypes(limit, page, search, sort);
+        return this.projectTypeService.getAllProjectTypes(limit, page, search, sort);
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
     async getProjectTypeById(@Param('id') id: string): Promise<ProjectType> {
-        return await this.projectTypeService.getProjectTypeById(id);
+        return this.projectTypeService.getProjectTypeById(id);
     }
 
     @Patch(':id')
     async updateProjectType(@Param('id') id: string, @Body() projectTypeDto: ProjectTypeDto) {
-        return await this.projectTypeService.updateProjectType(id, <ProjectTypeDocument>(projectTypeDto));
+        return this.projectTypeService.updateProjectType(id, <ProjectTypeDocument>(projectTypeDto));
     }
 
     @Post()
     async createProjectType(@Body() projectTypeDto: ProjectTypeDto) {
-        return await this.projectTypeService.createProjectType(projectTypeDto);
+        return this.projectTypeService.createProjectType(projectTypeDto);
     }
 
     @Delete(':id')
     async deleteProjectType(@Param('id') id: string) {
-        return await this.projectTypeService.deleteProjectType(id);
+        return this.projectTypeService.deleteProjectType(id);
     }
 }

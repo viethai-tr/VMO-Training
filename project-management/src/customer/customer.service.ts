@@ -48,8 +48,7 @@ export class CustomerService {
     }
 
     async deleteCustomer(id: string) {
-        if (!id.match(/^[0-9a-fA-F]{24}$/))
-            throw new BadRequestException('Invalid ID');
+        checkObjectId(id);
 
         let checkCustomer;
         checkCustomer = await this.customerModel.findOne({ _id: id });

@@ -65,7 +65,7 @@ export class ProjectRepository extends Repository<ProjectDocument> {
     }
 
     async getProjectById(id: string) {
-        return await this.projectModel
+        return this.projectModel
             .findOne({ _id: id })
             .populate('type', 'name')
             .populate('status', 'name')
@@ -75,7 +75,7 @@ export class ProjectRepository extends Repository<ProjectDocument> {
     }
 
     async getEmployeesProject(id: string) {
-        return await this.projectModel
+        return this.projectModel
             .findOne({ _id: id }, { projects: 1, name: 1 })
             .populate('employees', 'name');
     }
@@ -90,6 +90,6 @@ export class ProjectRepository extends Repository<ProjectDocument> {
     }
 
     async deleteProject(id: string) {
-        return await this.projectModel.findOneAndDelete({ _id: id });
+        return this.projectModel.findOneAndDelete({ _id: id });
     }
 }

@@ -60,7 +60,7 @@ export class TechnologyController {
         @Query() { limit, page }: PaginationDto,
         @Query() { sort, search },
     ) {
-        return await this.technologyService.getAllTechnologies(
+        return this.technologyService.getAllTechnologies(
             limit,
             page,
             search,
@@ -73,12 +73,12 @@ export class TechnologyController {
     async getTechnologyById(
         @Param('id') id: string,
     ): Promise<TechnologyDocument> {
-        return await this.technologyService.getTechnologyById(id);
+        return this.technologyService.getTechnologyById(id);
     }
 
     @Post()
     async createTechnology(@Body() technologyDto: TechnologyDto) {
-        return await this.technologyService.createTechnology(
+        return this.technologyService.createTechnology(
             <TechnologyDocument>(technologyDto),
         );
     }
@@ -88,7 +88,7 @@ export class TechnologyController {
         @Param('id') id: string,
         @Body() technologyDto: TechnologyDto,
     ) {
-        return await this.technologyService.updateTechnology(
+        return this.technologyService.updateTechnology(
             id,
             <TechnologyDocument>(technologyDto),
         );
@@ -96,6 +96,6 @@ export class TechnologyController {
 
     @Delete(':id')
     async deleteTechnology(@Param('id') id: string) {
-        return await this.technologyService.deleteTechnology(id);
+        return this.technologyService.deleteTechnology(id);
     }
 }

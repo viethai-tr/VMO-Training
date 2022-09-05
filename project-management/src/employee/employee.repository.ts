@@ -65,13 +65,13 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
     }
 
     async getEmployeeByIdAsync(id: string): Promise<EmployeeDocument> {
-        return await this.employeeModel
+        return this.employeeModel
             .findOne({ _id: id })
             .populate('technologies', 'name');
     }
 
     async deleteEmployee(id: string) {
-        return await this.employeeModel.findOneAndDelete({ _id: id });
+        return this.employeeModel.findOneAndDelete({ _id: id });
     }
 
     async countEmployees(technology?: string, project?: string) {
@@ -88,33 +88,32 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         let listEmployeesProject;
 
         if (project) {
-            if (checkObjectId(project)) {
-                listEmployeesProject = await (
-                    await this.projectModel.findOne(
-                        { _id: project },
-                        { employees: true },
-                    )
-                ).employees;
-                count = listEmployeesProject.length;
-            }
+            checkObjectId(project);
+            listEmployeesProject = await (
+                await this.projectModel.findOne(
+                    { _id: project },
+                    { employees: true },
+                )
+            ).employees;
+            count = listEmployeesProject.length;
         }
 
         if (technology) {
-            if (checkObjectId(technology)) {
-                listEmployeesTechnology = await (
-                    await this.employeeModel.find({ technologies: technology })
-                ).map((item) => item._id);
-                count = listEmployeesTechnology.length;
-            }
+            checkObjectId(technology);
+            listEmployeesTechnology = await (
+                await this.employeeModel.find({ technologies: technology })
+            ).map((item) => item._id);
+            count = listEmployeesTechnology.length;
         }
 
         if (project && technology) {
-            if (checkObjectId(project) && checkObjectId(technology))
-                count = (
-                    await listEmployeesTechnology.filter((value) =>
-                        listEmployeesProject.includes(value),
-                    )
-                ).length;
+            checkObjectId(project);
+            checkObjectId(technology);
+            count = (
+                await listEmployeesTechnology.filter((value) =>
+                    listEmployeesProject.includes(value),
+                )
+            ).length;
         }
 
         return {

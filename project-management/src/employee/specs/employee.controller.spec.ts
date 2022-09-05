@@ -118,12 +118,12 @@ describe('EmployeeController', () => {
         );
     });
 
-    // test('Creating new employee failed', async () => {
-    //     serviceMock.createEmployee.mockRejectedValue(new BadRequestException());
-    //     expect(
-    //         await controller.createEmployee(dataCreatedMock),
-    //     ).rejects.toThrow(new BadRequestException());
-    // });
+    test('Creating new employee failed', async () => {
+        serviceMock.createEmployee.mockRejectedValue(new BadRequestException());
+        expect(
+            await controller.createEmployee(dataCreatedMock),
+        ).rejects.toThrow(BadRequestException);
+    });
 
     test('Removing employee successfully', async () => {
         serviceMock.deleteEmployee.mockResolvedValue(expectedValueDeleted);

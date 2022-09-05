@@ -65,7 +65,7 @@ export class ProjectController {
         @Query() { limit, page }: PaginationDto,
         @Query() { sort, sortBy, search },
     ) {
-        return await this.projectService.getAllProjects(
+        return this.projectService.getAllProjects(
             limit,
             page,
             search,
@@ -110,7 +110,7 @@ export class ProjectController {
         @Query()
         { type, status, customer, technology, startingDate }: ProjectCountDto,
     ) {
-        return await this.projectService.countProjects(
+        return this.projectService.countProjects(
             type,
             status,
             customer,
@@ -134,7 +134,7 @@ export class ProjectController {
     @Post()
     @ApiBody({ type: ProjectDto})
     async createProject(@Body() projectDto: ProjectDto) {
-        return await this.projectService.createProject(projectDto);
+        return this.projectService.createProject(projectDto);
     }
 
     @Patch(':id')
@@ -142,11 +142,11 @@ export class ProjectController {
         @Param('id') id: string,
         @Body() projectDto: ProjectDto,
     ) {
-        return await this.projectService.updateProject(id, projectDto);
+        return this.projectService.updateProject(id, projectDto);
     }
 
     @Delete(':id')
     async deleteProject(@Param('id') id: string) {
-        return await this.projectService.deleteProject(id);
+        return this.projectService.deleteProject(id);
     }
 }

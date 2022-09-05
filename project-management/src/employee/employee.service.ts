@@ -35,7 +35,7 @@ export class EmployeeService {
         sort?: string,
         sortBy?: string,
     ) {
-        return await this.employeeRepository.getAllEmployeesAsync(
+        return this.employeeRepository.getAllEmployeesAsync(
             limit,
             page,
             search,
@@ -44,44 +44,40 @@ export class EmployeeService {
         );
     }
 
-    async getEmployeeById(id: string) { 
-        if (checkObjectId(id))
-            return await this.employeeRepository.getEmployeeByIdAsync(id);
+    async getEmployeeById(id: string) {
+        checkObjectId(id);
+        return this.employeeRepository.getEmployeeByIdAsync(id);
     }
 
     async countEmployees(technology?: string, project?: string) {
-        return await this.employeeRepository.countEmployees(
-            technology,
-            project,
-        );
+        return this.employeeRepository.countEmployees(technology, project);
     }
 
     async updateEmployee(id: string, employeeDto: EmployeeDto) {
-        if (checkObjectId(id)) {
-            const {
-                name,
-                dob,
-                address,
-                id_card,
-                phone_number,
-                technologies,
-                experience,
-                languages,
-                certs,
-            } = employeeDto;
-            const idTechnologies = convertObjectId(technologies);
-            return await this.employeeRepository.update(id, <EmployeeDocument>{
-                name,
-                dob,
-                address,
-                id_card,
-                phone_number,
-                technologies: idTechnologies,
-                experience,
-                languages,
-                certs,
-            });
-        }
+        checkObjectId(id);
+        const {
+            name,
+            dob,
+            address,
+            id_card,
+            phone_number,
+            technologies,
+            experience,
+            languages,
+            certs,
+        } = employeeDto;
+        const idTechnologies = convertObjectId(technologies);
+        return this.employeeRepository.update(id, <EmployeeDocument>{
+            name,
+            dob,
+            address,
+            id_card,
+            phone_number,
+            technologies: idTechnologies,
+            experience,
+            languages,
+            certs,
+        });
     }
 
     async createEmployee(employeeDto: EmployeeDto) {
@@ -111,32 +107,28 @@ export class EmployeeService {
     }
 
     async deleteEmployee(id: string) {
-        if (checkObjectId(id)) {
-            let checkEmployee = await this.employeeModel.findOne({ _id: id });
+        checkObjectId(id);
+        let checkEmployee = await this.employeeModel.findOne({ _id: id });
 
-            if (!checkEmployee)
-                throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+        if (!checkEmployee)
+            throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
-            const projects = this.projectModel.find({ employees: id });
-            const departments = this.departmentModel.find({ employees: id });
-            const manager = this.departmentModel.find({ manager: id });
+        const projects = this.projectModel.find({ employees: id });
+        const departments = this.departmentModel.find({ employees: id });
+        const manager = this.departmentModel.find({ manager: id });
 
-            if (
-                (!projects || (await projects).length == 0) &&
-                (!departments || (await departments).length == 0) &&
-                (!manager || (await manager).length == 0)
-            ) {
-                await this.employeeRepository.deleteEmployee(id);
-                return {
-                    HttpStatus: HttpStatus.OK,
-                    msg: 'Delete successfully!',
-                };
-            } else {
-                throw new HttpException(
-                    'Cannot be deleted',
-                    HttpStatus.FORBIDDEN,
-                );
-            }
+        if (
+            (!projects || (await projects).length == 0) &&
+            (!departments || (await departments).length == 0) &&
+            (!manager || (await manager).length == 0)
+        ) {
+            await this.employeeRepository.deleteEmployee(id);
+            return {
+                HttpStatus: HttpStatus.OK,
+                msg: 'Delete successfully!',
+            };
+        } else {
+            throw new HttpException('Cannot be deleted', HttpStatus.FORBIDDEN);
         }
     }
 }

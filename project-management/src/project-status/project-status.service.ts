@@ -26,7 +26,7 @@ export class ProjectStatusService {
         search?: string,
         sort?: string,
     ) {
-        return await this.projectStatusRepository.getAll(
+        return this.projectStatusRepository.getAll(
             limit,
             page,
             search,
@@ -36,18 +36,18 @@ export class ProjectStatusService {
 
     async getProjectStatusById(id: string) {
         checkObjectId(id);
-        return await this.projectStatusRepository.getById(id);
+        return this.projectStatusRepository.getById(id);
     }
 
     async createProjectStatus(projectStatusDto: ProjectStatusDto) {
-        return await this.projectStatusRepository.create(
+        return this.projectStatusRepository.create(
             <ProjectStatusDocument>projectStatusDto,
         );
     }
 
     async updateProjectStatus(id: string, projectStatusDto: ProjectStatusDto) {
         checkObjectId(id);
-        return await this.projectStatusRepository.update(
+        return this.projectStatusRepository.update(
             id,
             <ProjectStatusDocument>projectStatusDto,
         );

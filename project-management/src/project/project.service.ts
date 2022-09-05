@@ -31,7 +31,7 @@ export class ProjectService {
         sort?: string,
         sortBy?: string,
     ) {
-        return await this.projectRepository.getAllProjects(
+        return this.projectRepository.getAllProjects(
             limit,
             page,
             search,
@@ -42,12 +42,12 @@ export class ProjectService {
 
     async getProjectById(id: string): Promise<ProjectDocument> {
         checkObjectId(id);
-        return await this.projectRepository.getProjectById(id);
+        return this.projectRepository.getProjectById(id);
     }
 
     async getEmployeesProject(id: string) {
         checkObjectId(id);
-        return await this.projectRepository.getEmployeesProject(id);
+        return this.projectRepository.getEmployeesProject(id);
     }
 
     async countProjects(
@@ -74,7 +74,7 @@ export class ProjectService {
         const query = Object.fromEntries(
             Object.entries(oriQuery).filter(([_, v]) => v != null),
         );
-        return await this.projectRepository.countProjects(query);
+        return this.projectRepository.countProjects(query);
     }
 
     async createProject(projectDto: ProjectDto) {
@@ -95,7 +95,7 @@ export class ProjectService {
         const idEmployees = convertObjectId(employees);
         const idCustomer = new mongoose.Types.ObjectId(customer);
 
-        return await this.projectRepository.create(<ProjectDocument>{
+        return this.projectRepository.create(<ProjectDocument>{
             name,
             description,
             type: idType,
@@ -126,7 +126,7 @@ export class ProjectService {
         const idEmployees = convertObjectId(employees);
         const idCustomer = new mongoose.Types.ObjectId(customer);
 
-        return await this.projectRepository.update(id, <ProjectDocument>{
+        return this.projectRepository.update(id, <ProjectDocument>{
             name,
             description,
             type: idType,

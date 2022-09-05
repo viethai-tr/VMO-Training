@@ -18,7 +18,7 @@ export class DepartmentService {
         sort?: string,
         sortBy?: string,
     ) {
-        return await this.departmentRepository.getAllDepartments(
+        return this.departmentRepository.getAllDepartments(
             limit,
             page,
             search,
@@ -28,8 +28,8 @@ export class DepartmentService {
     }
 
     async getDepartmentById(id: string): Promise<DepartmentDocument> {
-        if (checkObjectId(id))
-            return await this.departmentRepository.getDepartmentById(id);
+        checkObjectId(id);
+        return this.departmentRepository.getDepartmentById(id);
     }
 
     async createDepartment(departmentDto: DepartmentDto) {
@@ -45,7 +45,7 @@ export class DepartmentService {
         const idEmployees = convertObjectId(employees);
         const idProjects = convertObjectId(projects);
 
-        return await this.departmentRepository.create(<DepartmentDocument>{
+        return this.departmentRepository.create(<DepartmentDocument>{
             name,
             description,
             founding_date,
@@ -68,7 +68,7 @@ export class DepartmentService {
         const idProjects = convertObjectId(projects);
         const idManager = new mongoose.Types.ObjectId(manager);
 
-        return await this.departmentRepository.update(id, <DepartmentDocument>{
+        return this.departmentRepository.update(id, <DepartmentDocument>{
             name,
             description,
             founding_date,
@@ -79,17 +79,17 @@ export class DepartmentService {
     }
 
     async deleteDepartment(id: string) {
-        if (checkObjectId(id))
-            return await this.departmentRepository.delete(id);
+        checkObjectId(id);
+        return this.departmentRepository.delete(id);
     }
 
     async getEmployeesDepartment(id: string) {
-        if (checkObjectId(id))
-            return await this.departmentRepository.getEmployeesDepartment(id);
+        checkObjectId(id);
+        return this.departmentRepository.getEmployeesDepartment(id);
     }
 
     async getProjectsDepartment(id: string) {
-        if (checkObjectId(id))
-            return await this.departmentRepository.getProjectsDepartment(id);
+        checkObjectId(id);
+        return this.departmentRepository.getProjectsDepartment(id);
     }
 }

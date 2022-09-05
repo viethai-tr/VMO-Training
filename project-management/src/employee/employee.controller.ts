@@ -68,7 +68,7 @@ export class EmployeeController {
         @Query() { limit, page }: PaginationDto,
         @Query() { sort, sortBy, search },
     ) {
-        return await this.employeeService.getAllEmployees(
+        return this.employeeService.getAllEmployees(
             limit,
             page,
             search,
@@ -92,24 +92,16 @@ export class EmployeeController {
         type: 'string',
     })
     async countEmployees(@Query() { technology, project }) {
-        try {
-            return await this.employeeService.countEmployees(
+            return this.employeeService.countEmployees(
                 technology,
                 project,
             );
-        } catch (err) {
-            throw new BadRequestException('Invalid ID');
-        }
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
     async getEmployeeById(@Param('id') id: string) {
-        try {
-            return await this.employeeService.getEmployeeById(id);
-        } catch (err) {
-            throw new BadRequestException('Invalid ID');
-        }
+            return this.employeeService.getEmployeeById(id);
     }
 
     @Patch(':id')
@@ -118,11 +110,7 @@ export class EmployeeController {
         @Param('id') id: string,
         @Body() employee: EmployeeDto,
     ) {
-        try {
             return this.employeeService.updateEmployee(id, employee);
-        } catch (err) {
-            throw new BadRequestException('Invalid ID');
-        }
     }
 
     @Post()

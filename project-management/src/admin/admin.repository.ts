@@ -96,7 +96,7 @@ export class AdminRepository extends Repository<AdminDocument> {
     }
 
     async updateAdmin(id: string, adminDto: AdminDto) {
-        return await this.adminModel.findOneAndUpdate({ _id: id }, adminDto);
+        return this.adminModel.findOneAndUpdate({ _id: id }, adminDto);
     }
 
     async getAdminInfo(id: string) {

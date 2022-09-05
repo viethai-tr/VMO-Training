@@ -64,7 +64,7 @@ export class DepartmentController {
         @Query() { limit, page }: PaginationDto,
         @Query() { search, sort, sortBy },
     ) {
-        return await this.departmentService.getAllDepartments(
+        return this.departmentService.getAllDepartments(
             limit,
             page,
             search,
@@ -78,19 +78,19 @@ export class DepartmentController {
     async getDepartmentById(
         @Param('id') id: string,
     ): Promise<DepartmentDocument> {
-        return await this.departmentService.getDepartmentById(id);
+        return this.departmentService.getDepartmentById(id);
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id/employees')
     async getEmployeesDepartment(@Param('id') id: string) {
-        return await this.departmentService.getEmployeesDepartment(id);
+        return this.departmentService.getEmployeesDepartment(id);
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id/projects')
     async getProjectsDepartment(@Param('id') id: string) {
-        return await this.departmentService.getProjectsDepartment(id);
+        return this.departmentService.getProjectsDepartment(id);
     }
 
     @Patch(':id')
@@ -98,17 +98,17 @@ export class DepartmentController {
         @Param('id') id: string,
         @Body() departmentDto: DepartmentDto,
     ) {
-        return await this.departmentService.updateDepartment(id, departmentDto);
+        return this.departmentService.updateDepartment(id, departmentDto);
     }
 
     @Post()
     @ApiBody({ type: DepartmentDto })
     async createDepartment(@Body() departmentDto: DepartmentDto) {
-        return await this.departmentService.createDepartment(departmentDto);
+        return this.departmentService.createDepartment(departmentDto);
     }
 
     @Delete(':id')
     async deleteDepartment(@Param('id') id: string) {
-        return await this.departmentService.deleteDepartment(id);
+        return this.departmentService.deleteDepartment(id);
     }
 }

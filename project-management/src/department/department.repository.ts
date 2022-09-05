@@ -65,7 +65,7 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
     }
 
     async getDepartmentById(id: string): Promise<DepartmentDocument> {
-        return await this.departmentModel
+        return this.departmentModel
             .findOne({ _id: id })
             .populate('manager', 'name')
             .populate('employees', 'name')
@@ -73,14 +73,14 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
     }
 
     async getEmployeesDepartment(id: string) {
-        return await this.departmentModel
+        return this.departmentModel
             .findOne({ _id: id }, { employees: 1, manager: 1, name: 1 })
             .populate('manager', 'name')
             .populate('employees', 'name');
     }
 
     async getProjectsDepartment(id: string) {
-        return await this.departmentModel
+        return this.departmentModel
             .findOne({ _id: id }, { name: 1, projects: 1 })
             .populate('projects', 'name');
     }

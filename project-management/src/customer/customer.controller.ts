@@ -60,28 +60,23 @@ export class CustomerController {
         @Query() { limit, page }: PaginationDto,
         @Query() { sort, search },
     ) {
-        return await this.customerService.getAllCustomers(
-            limit,
-            page,
-            search,
-            sort,
-        );
+        return this.customerService.getAllCustomers(limit, page, search, sort);
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
     async getCustomerById(@Param('id') id: string): Promise<Customer> {
-        return await this.customerService.getCustomerById(id);
+        return this.customerService.getCustomerById(id);
     }
 
     @Delete(':id')
     async deleteCustomer(@Param('id') id: string) {
-            return await this.customerService.deleteCustomer(id);
+        return this.customerService.deleteCustomer(id);
     }
 
     @Post()
     async createCustomer(@Body() customerDto: CustomerDto) {
-        return await this.customerService.createCustomer(customerDto);  
+        return this.customerService.createCustomer(customerDto);
     }
 
     @Patch(':id')
@@ -89,6 +84,6 @@ export class CustomerController {
         @Param('id') id: string,
         @Body() customerDto: CustomerDto,
     ) {
-        return await this.customerService.updateCustomer(id, customerDto);
+        return this.customerService.updateCustomer(id, customerDto);
     }
 }
