@@ -23,7 +23,6 @@ import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 @ApiBearerAuth()
 @ApiTags('Department')
 @Roles(Role.Admin)
-@UseFilters(HttpExceptionFilter)
 @UseFilters(MongoExceptionFilter)
 @Controller('department')
 export class DepartmentController {

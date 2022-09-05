@@ -25,7 +25,6 @@ import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter'
 @ApiBearerAuth()
 @ApiTags('Customer')
 @Roles(Role.Admin)
-@UseFilters(HttpExceptionFilter)
 @UseFilters(MongoExceptionFilter)
 @Controller('customer')
 export class CustomerController {

@@ -8,6 +8,7 @@ import {
     Post,
     Put,
     Query,
+    UseFilters,
     UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -18,10 +19,13 @@ import { PaginationDto } from '../core/dtos';
 import { TechnologyDto } from '../core/dtos/technology.dto';
 import { TechnologyDocument } from '../core/schemas/technology.schema';
 import { TechnologyService } from './technology.service';
+import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
+import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 
 @ApiBearerAuth()
 @ApiTags('Technology')
 @Roles(Role.Admin)
+@UseFilters(MongoExceptionFilter)
 @Controller('technology')
 export class TechnologyController {
     constructor(private technologyService: TechnologyService) {}

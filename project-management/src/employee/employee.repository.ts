@@ -8,6 +8,7 @@ import {
 import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
 import { Project, ProjectDocument } from '../core/schemas/project.schema';
 import { Repository } from '../core/Repository';
+import { checkObjectId } from 'src/shared/checkObjectId';
 
 @Injectable()
 export class EmployeeRepository extends Repository<EmployeeDocument> {
@@ -28,16 +29,6 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         sort: string = 'asc',
         sortBy: string = 'name',
     ) {
-        const totalDocs = await this.employeeModel.countDocuments();
-
-        if (limit < 0) limit = 0;
-
-        let totalPages;
-        if (limit == 0) totalPages = 1;
-        else totalPages = Math.ceil(totalDocs / limit);
-        if (page > totalPages || page < 0) page = 1;
-        else page = Math.floor(page);
-
         let sortKind;
         if (sort != undefined) {
             sort = sort.toLowerCase();
@@ -45,15 +36,23 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
             else sortKind = 'asc';
         } else sortKind = 'asc';
 
-        const employeeProperties = ['name', 'dob', 'experience'];
-        sortBy = sortBy.toLowerCase();
-        if (!employeeProperties.includes(sortBy)) sortBy = 'name';
+        if (limit < 0) limit = 0;
 
-        let listResult = await this.employeeModel
+        const listResult = await this.employeeModel
             .find({ name: new RegExp('.*' + search + '.*', 'i') })
             .sort({ [sortBy]: sortKind })
             .limit(limit)
             .populate('technologies', 'name');
+
+        const totalDocs = await this.employeeModel
+            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .countDocuments();
+
+        let totalPages;
+        if (limit == 0) totalPages = 1;
+        else totalPages = Math.ceil(totalDocs / limit);
+
+        if (page > totalPages || page < 0) page = 1;
 
         return {
             curPage: page,
@@ -89,30 +88,33 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         let listEmployeesProject;
 
         if (project) {
-            listEmployeesProject = await (
-                await this.projectModel.findOne(
-                    { _id: project },
-                    { employees: true },
-                )
-            ).employees;
+            if (checkObjectId(project)) {
+                listEmployeesProject = await (
+                    await this.projectModel.findOne(
+                        { _id: project },
+                        { employees: true },
+                    )
+                ).employees;
+                count = listEmployeesProject.length;
+            }
         }
 
         if (technology) {
-            listEmployeesTechnology = await (
-                await this.employeeModel.find({ technologies: technology })
-            ).map((item) => item._id);
+            if (checkObjectId(technology)) {
+                listEmployeesTechnology = await (
+                    await this.employeeModel.find({ technologies: technology })
+                ).map((item) => item._id);
+                count = listEmployeesTechnology.length;
+            }
         }
 
         if (project && technology) {
-            count = (
-                await listEmployeesTechnology.filter((value) =>
-                    listEmployeesProject.includes(value),
-                )
-            ).length;
-        } else if (technology) {
-            count = listEmployeesTechnology.length;
-        } else {
-            count = listEmployeesProject.length;
+            if (checkObjectId(project) && checkObjectId(technology))
+                count = (
+                    await listEmployeesTechnology.filter((value) =>
+                        listEmployeesProject.includes(value),
+                    )
+                ).length;
         }
 
         return {

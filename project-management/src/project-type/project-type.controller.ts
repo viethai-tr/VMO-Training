@@ -12,7 +12,6 @@ import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter'
 @ApiBearerAuth()
 @ApiTags('Project Type')
 @Roles(Role.Admin)
-@UseFilters(HttpExceptionFilter)
 @UseFilters(MongoExceptionFilter)
 @Controller('project-type')
 export class ProjectTypeController {

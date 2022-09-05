@@ -1,5 +1,6 @@
 import { Body, Injectable } from '@nestjs/common';
 import { AdminDocument } from 'src/core/schemas/admin.schema';
+import { checkObjectId } from 'src/shared/checkObjectId';
 import { AdminDto } from '../core/dtos/admin.dto';
 import { ChangePasswordDto } from '../core/dtos/change-password.dto';
 import { AdminRepository } from './admin.repository';
@@ -8,8 +9,8 @@ import { AdminRepository } from './admin.repository';
 export class AdminService {
     constructor(private adminRepository: AdminRepository) {}
 
-    async getAllUser(limit?: number, page?: number): Promise<AdminDocument[]> {
-        return await this.adminRepository.getAllUsers(limit, page);
+    async getAllUser(limit?: number, page?: number, search?: string, sort?: string) {
+        return await this.adminRepository.getAllUsers(limit, page, search, sort);
     }
 
     async changePassword(id: string, passwordDto: ChangePasswordDto) {
@@ -21,6 +22,7 @@ export class AdminService {
     }
 
     async getAdminInfo(id: string) {
+        checkObjectId(id);
         return this.adminRepository.getAdminInfo(id);
     }
 }

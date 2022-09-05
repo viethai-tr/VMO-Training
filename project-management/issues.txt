@@ -3,5 +3,6 @@
 - unit test
 - search (+ sort, sortby for all get info endpoints) (v) + count
 - improve paginating + sorting
+- move employees list => /employee endpoint.
 -------
 - Relationship between collections.

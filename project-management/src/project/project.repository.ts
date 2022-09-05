@@ -65,13 +65,13 @@ export class ProjectRepository extends Repository<ProjectDocument> {
     }
 
     async getProjectById(id: string) {
-            return await this.projectModel
-                .findOne({ _id: id })
-                .populate('type', 'name')
-                .populate('status', 'name')
-                .populate('technologies', 'name')
-                .populate('employees', 'name')
-                .populate('customer', 'name');
+        return await this.projectModel
+            .findOne({ _id: id })
+            .populate('type', 'name')
+            .populate('status', 'name')
+            .populate('technologies', 'name')
+            .populate('employees', 'name')
+            .populate('customer', 'name');
     }
 
     async getEmployeesProject(id: string) {
@@ -80,28 +80,16 @@ export class ProjectRepository extends Repository<ProjectDocument> {
             .populate('employees', 'name');
     }
 
-    async countProjects(
-        query
-    ) {
-        try {
-            const count = await this.projectModel.countDocuments(query);
+    async countProjects(query) {
+        const count = await this.projectModel.countDocuments(query);
 
-            return {
-                query,
-                quantity: count,
-            };
-        } catch (err) {
-            throw new HttpException(
-                {
-                    status: HttpStatus.NOT_ACCEPTABLE,
-                    error: 'Invalid ID',
-                },
-                HttpStatus.NOT_ACCEPTABLE,
-            );
-        }
+        return {
+            query,
+            quantity: count,
+        };
     }
 
     async deleteProject(id: string) {
-       return await this.projectModel.findOneAndDelete({_id: id});
+        return await this.projectModel.findOneAndDelete({ _id: id });
     }
 }

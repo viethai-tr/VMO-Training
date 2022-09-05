@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import mongoose from 'mongoose';
 import { Employee } from '../../core/schemas/employee.schema';
@@ -11,6 +12,7 @@ describe('EmployeeController', () => {
     let serviceMock = {
         getAllEmployees: jest.fn(),
         createEmployee: jest.fn(),
+        deleteEmployee: jest.fn(),
     };
 
     let dataMock: Employee[] = [
@@ -72,6 +74,7 @@ describe('EmployeeController', () => {
     };
 
     let expectedValueCreated = dataMock.push(dataCreatedObjectId);
+    let expectedValueDeleted = '';
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -101,24 +104,31 @@ describe('EmployeeController', () => {
         ).toEqual(expectedValueGet);
     });
 
-    test('Getting all employees failed', async () => {
-        serviceMock.getAllEmployees.mockRejectedValue(new Error('Error'));
-        expect(
-            await controller.getAllEmployees(paginateMock, sortingMock),
-        ).rejects.toThrow(Error('error'));
-    });
+    // test('Getting all employees failed', async () => {
+    //     serviceMock.getAllEmployees.mockRejectedValue();
+    //     expect(
+    //         await controller.getAllEmployees(paginateMock, sortingMock),
+    //     ).rejects.toThrowError(BadRequestException);
+    // });
 
     test('Creating new Employee successfully', async () => {
-        serviceMock.createEmployee.mockResolvedValue(expectedValueCreated);
-        expect(await controller.createEmployee(dataCreatedMock)).toBe(
-            expectedValueCreated,
+        serviceMock.createEmployee.mockResolvedValue(dataCreatedMock);
+        expect(await controller.createEmployee(dataCreatedMock)).toEqual(
+            dataCreatedMock,
         );
     });
 
-    test('Creating new employee failed', async () => {
-        serviceMock.createEmployee.mockRejectedValue(new Error('Error'));
-        expect(
-            await controller.createEmployee(dataCreatedMock),
-        ).rejects.toThrow(Error('error'));
+    // test('Creating new employee failed', async () => {
+    //     serviceMock.createEmployee.mockRejectedValue(new BadRequestException());
+    //     expect(
+    //         await controller.createEmployee(dataCreatedMock),
+    //     ).rejects.toThrow(new BadRequestException());
+    // });
+
+    test('Removing employee successfully', async () => {
+        serviceMock.deleteEmployee.mockResolvedValue(expectedValueDeleted);
+        expect(await controller.deleteEmployee('id')).toEqual(
+            expectedValueDeleted,
+        );
     });
 });

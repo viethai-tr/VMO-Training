@@ -3,7 +3,6 @@ import {
     HttpException,
     HttpStatus,
     Injectable,
-    UseFilters,
 } from '@nestjs/common';
 import { CustomerDto } from '../core/dtos';
 import { Customer, CustomerDocument } from '../core/schemas/customer.schema';
@@ -12,7 +11,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Project, ProjectDocument } from 'src/core/schemas/project.schema';
 import { checkObjectId } from 'src/shared/checkObjectId';
-import { check } from 'prettier';
 
 @Injectable()
 export class CustomerService {

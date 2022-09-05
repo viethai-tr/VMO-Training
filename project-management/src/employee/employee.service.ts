@@ -1,9 +1,17 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+    BadRequestException,
+    HttpException,
+    HttpStatus,
+    Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { checkObjectId } from '../shared/checkObjectId';
 import { EmployeeDto } from '../core/dtos';
-import { Department, DepartmentDocument } from '../core/schemas/department.schema';
+import {
+    Department,
+    DepartmentDocument,
+} from '../core/schemas/department.schema';
 import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
 import { Project, ProjectDocument } from '../core/schemas/project.schema';
 import { convertObjectId } from '../shared/convertObjectId';
@@ -13,41 +21,93 @@ import { EmployeeRepository } from './employee.repository';
 export class EmployeeService {
     constructor(
         private employeeRepository: EmployeeRepository,
-        @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
+        @InjectModel(Employee.name)
+        private employeeModel: Model<EmployeeDocument>,
         @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
-        @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>
-    ) { }
+        @InjectModel(Department.name)
+        private departmentModel: Model<DepartmentDocument>,
+    ) {}
 
-    async getAllEmployees(limit: number = 0, page: number = 1, search: string = '', sort: string = 'asc', sortBy: string = 'name') {
-        return await this.employeeRepository.getAllEmployeesAsync(limit, page, search, sort, sortBy);
+    async getAllEmployees(
+        limit?: number,
+        page?: number,
+        search?: string,
+        sort?: string,
+        sortBy?: string,
+    ) {
+        return await this.employeeRepository.getAllEmployeesAsync(
+            limit,
+            page,
+            search,
+            sort,
+            sortBy,
+        );
     }
 
-    async getEmployeeById(id: string) {
+    async getEmployeeById(id: string) { 
         if (checkObjectId(id))
             return await this.employeeRepository.getEmployeeByIdAsync(id);
     }
 
     async countEmployees(technology?: string, project?: string) {
-        try {
-            return await this.employeeRepository.countEmployees(technology, project);
-        } catch (err) {
-            throw new BadRequestException('Invalid ID');
-        }
+        return await this.employeeRepository.countEmployees(
+            technology,
+            project,
+        );
     }
 
     async updateEmployee(id: string, employeeDto: EmployeeDto) {
         if (checkObjectId(id)) {
-            const { name, dob, address, id_card, phone_number, technologies, experience, languages, certs } = employeeDto;
+            const {
+                name,
+                dob,
+                address,
+                id_card,
+                phone_number,
+                technologies,
+                experience,
+                languages,
+                certs,
+            } = employeeDto;
             const idTechnologies = convertObjectId(technologies);
-            return await this.employeeRepository.update(id, <EmployeeDocument>{ name, dob, address, id_card, phone_number, technologies: idTechnologies, experience, languages, certs });
+            return await this.employeeRepository.update(id, <EmployeeDocument>{
+                name,
+                dob,
+                address,
+                id_card,
+                phone_number,
+                technologies: idTechnologies,
+                experience,
+                languages,
+                certs,
+            });
         }
     }
 
     async createEmployee(employeeDto: EmployeeDto) {
-        const { name, dob, address, id_card, phone_number, technologies, experience, languages, certs } = employeeDto;
+        const {
+            name,
+            dob,
+            address,
+            id_card,
+            phone_number,
+            technologies,
+            experience,
+            languages,
+            certs,
+        } = employeeDto;
         const idTechnologies = convertObjectId(technologies);
-        await this.employeeRepository.create(<EmployeeDocument>{ name, dob, address, id_card, phone_number, technologies: idTechnologies, experience, languages, certs });
-        return employeeDto;
+        await this.employeeRepository.create(<EmployeeDocument>{
+            name,
+            dob,
+            address,
+            id_card,
+            phone_number,
+            technologies: idTechnologies,
+            experience,
+            languages,
+            certs,
+        });
     }
 
     async deleteEmployee(id: string) {

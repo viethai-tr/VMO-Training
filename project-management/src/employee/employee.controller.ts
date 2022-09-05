@@ -4,7 +4,9 @@ import {
     Controller,
     Delete,
     Get,
+    HttpCode,
     HttpException,
+    HttpStatus,
     Param,
     Patch,
     Post,
@@ -24,7 +26,7 @@ import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 @ApiBearerAuth()
 @ApiTags('Employee')
 @Roles(Role.Admin)
-@UseFilters(HttpExceptionFilter)
+// @UseFilters(HttpExceptionFilter)
 @UseFilters(MongoExceptionFilter)
 @Controller('employee')
 export class EmployeeController {
@@ -76,7 +78,7 @@ export class EmployeeController {
     }
 
     @Roles(Role.Admin, Role.User)
-    @Get('/count')
+    @Get('count')
     @ApiQuery({
         name: 'project',
         required: false,
@@ -90,13 +92,24 @@ export class EmployeeController {
         type: 'string',
     })
     async countEmployees(@Query() { technology, project }) {
-        return await this.employeeService.countEmployees(technology, project);
+        try {
+            return await this.employeeService.countEmployees(
+                technology,
+                project,
+            );
+        } catch (err) {
+            throw new BadRequestException('Invalid ID');
+        }
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
     async getEmployeeById(@Param('id') id: string) {
-        return await this.employeeService.getEmployeeById(id);
+        try {
+            return await this.employeeService.getEmployeeById(id);
+        } catch (err) {
+            throw new BadRequestException('Invalid ID');
+        }
     }
 
     @Patch(':id')
@@ -105,17 +118,22 @@ export class EmployeeController {
         @Param('id') id: string,
         @Body() employee: EmployeeDto,
     ) {
-        return await this.employeeService.updateEmployee(id, employee);
+        try {
+            return this.employeeService.updateEmployee(id, employee);
+        } catch (err) {
+            throw new BadRequestException('Invalid ID');
+        }
     }
 
     @Post()
     @ApiBody({ type: EmployeeDto })
+    // @HttpCode(HttpStatus.BAD_REQUEST)
     async createEmployee(@Body() employee: EmployeeDto) {
-        return await this.employeeService.createEmployee(employee);
+        return this.employeeService.createEmployee(employee);
     }
 
     @Delete(':id')
     async deleteEmployee(@Param('id') id: string) {
-        return await this.employeeService.deleteEmployee(id);
+        return this.employeeService.deleteEmployee(id);
     }
 }

@@ -6,8 +6,8 @@ import {
     ProjectType,
     ProjectTypeDocument,
 } from 'src/core/schemas/project-type.schema';
-import { Project, ProjectDocument } from 'src/core/schemas/project.schema';
-import { checkObjectId } from 'src/shared/checkObjectId';
+import { Project, ProjectDocument } from '../core/schemas/project.schema';
+import { checkObjectId } from '../shared/checkObjectId';
 import { ProjectTypeRepository } from './project-type.repository';
 
 @Injectable()
@@ -34,10 +34,12 @@ export class ProjectTypeService {
     }
 
     async getProjectTypeById(id: string): Promise<ProjectType> {
+        checkObjectId(id);
         return await this.projectTypeRepository.getById(id);
     }
 
     async updateProjectType(id: string, projectTypeDto: ProjectTypeDto) {
+        checkObjectId(id);
         return await this.projectTypeRepository.update(
             id,
             <ProjectTypeDocument>projectTypeDto,
@@ -51,21 +53,20 @@ export class ProjectTypeService {
     }
 
     async deleteProjectType(id: string) {
-        if (checkObjectId(id)) {
-            const checkProjectType = this.projectTypeModel.find({ _id: id });
-            if (!checkProjectType)
-                throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+        checkObjectId(id);
+        const checkProjectType = this.projectTypeModel.find({ _id: id });
+        if (!checkProjectType)
+            throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
-            const projects = await this.projectModel.find({ type: id });
-            if (!projects || projects.length == 0) {
-                await this.projectTypeRepository.delete(id);
-                return {
-                    HttpStatus: HttpStatus.OK,
-                    message: 'Delete successfully!',
-                };
-            } else {
-                throw new HttpException('Cannot delete', HttpStatus.FORBIDDEN);
-            }
+        const projects = await this.projectModel.find({ type: id });
+        if (!projects || projects.length == 0) {
+            await this.projectTypeRepository.delete(id);
+            return {
+                HttpStatus: HttpStatus.OK,
+                message: 'Delete successfully!',
+            };
+        } else {
+            throw new HttpException('Cannot delete', HttpStatus.FORBIDDEN);
         }
     }
 }

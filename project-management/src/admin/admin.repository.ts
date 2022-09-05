@@ -15,52 +15,51 @@ export class AdminRepository extends Repository<AdminDocument> {
         super(adminModel);
     }
 
-    async getAllUsers(limit?: number, page?: number) {
-        try {
-            let listResult;
-            page = Math.floor(page);
-            const totalDocs = await this.adminModel.countDocuments({
-                role: 'User',
-            });
-            const totalPages = Math.ceil(totalDocs / limit);
-            if (limit) {
-                if (page <= totalPages) {
-                    const skip = limit * (page - 1);
+    async getAllUsers(
+        limit: number = 5,
+        page: number = 1,
+        search: string = '',
+        sort: string = 'asc',
+        sortBy: string = 'name',
+    ) {
+        let sortKind;
+        if (sort != undefined) {
+            sort = sort.toLowerCase();
+            if (sort == 'desc') sortKind = 'desc';
+            else sortKind = 'asc';
+        } else sortKind = 'asc';
 
-                    listResult = await this.adminModel
-                        .find({ password: 0, rt: 0 })
-                        .skip(skip)
-                        .limit(limit);
+        if (limit < 0) limit = 0;
 
-                    return {
-                        curPage: page,
-                        totalPages: totalPages,
-                        listResult,
-                    };
-                } else if (page > totalPages) {
-                    throw new HttpException(
-                        `Page ${page} not exist!`,
-                        HttpStatus.FORBIDDEN,
-                    );
-                } else {
-                    listResult = await this.adminModel
-                        .find({ role: 'User' }, { password: 0, rt: 0 })
-                        .limit(limit);
-                    return {
-                        limit: limit,
-                        listResult,
-                    };
-                }
-            } else {
-                listResult = await this.adminModel.find(
-                    { role: 'User' },
-                    { password: 0, rt: 0 },
-                );
-            }
-            return Promise.resolve(listResult);
-        } catch (err) {
-            return Promise.reject(err);
-        }
+        const listResult = await this.adminModel
+            .find(
+                { role: 'User', name: new RegExp('.*' + search + '.*', 'i') },
+                { password: 0, rt: 0 },
+            )
+            .sort({ [sortBy]: sortKind })
+            .limit(limit);
+
+        const totalDocs = await this.adminModel
+            .find(
+                { role: 'User', name: new RegExp('.*' + search + '.*', 'i') },
+                { password: 0, rt: 0 },
+            )
+            .countDocuments();
+
+        let totalPages;
+        if (limit == 0) totalPages = 1;
+        else totalPages = Math.ceil(totalDocs / limit);
+
+        if (page > totalPages || page < 0) page = 1;
+
+        return {
+            curPage: page,
+            totalPages,
+            search,
+            sortBy,
+            sort,
+            listResult,
+        };
     }
 
     async changePassword(id: string, passwordDto: ChangePasswordDto) {
@@ -101,7 +100,10 @@ export class AdminRepository extends Repository<AdminDocument> {
     }
 
     async getAdminInfo(id: string) {
-        const curAdmin = await this.adminModel.findOne({ _id: id }, {password: 0, rt: 0});
+        const curAdmin = await this.adminModel.findOne(
+            { _id: id },
+            { password: 0, rt: 0 },
+        );
 
         return curAdmin;
     }

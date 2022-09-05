@@ -30,7 +30,18 @@ import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter'
 export class AdminController {
     constructor(private readonly adminService: AdminService) {}
 
-    // @UseInterceptors(ClassSerializerInterceptor)
+    @ApiQuery({
+        name: 'search',
+        required: false,
+        description: 'Search by name',
+        type: 'string',
+    })
+    @ApiQuery({
+        name: 'sort',
+        required: false,
+        description: 'Type of Sort',
+        enum: ['asc', 'desc'],
+    })
     @ApiQuery({
         name: 'limit',
         required: false,
@@ -44,28 +55,32 @@ export class AdminController {
         type: 'integer',
     })
     @Get('user')
-    async getAllUsers(@Query() { limit, page }: PaginationDto): Promise<AdminDocument[]> {
-        return this.adminService.getAllUser(limit, page);
+    async getAllUsers(
+        @Query() { limit, page }: PaginationDto,
+        @Query() { search, sort },
+    ) {
+        return this.adminService.getAllUser(limit, page, search, sort);
     }
 
     @ApiBody({ type: AdminDto })
+    @Roles(Role.Admin, Role.User)
     @Patch('me')
     async updateAdmin(
-        @GetCurrentAdmin('id') id: string,
+        @GetCurrentAdmin('sub') id: string,
         @Body() adminDto: AdminDto,
-        ) {
-            await this.adminService.updateAdmin(id, adminDto);
+    ) {
+        await this.adminService.updateAdmin(id, adminDto);
         return {
             HttpStatus: HttpStatus.OK,
             msg: 'Infomation updated successfully!',
         };
     }
-    
+
     @ApiBody({ type: ChangePasswordDto })
     @Roles(Role.Admin, Role.User)
     @Patch('password')
     async changePassword(
-        @GetCurrentAdmin('id') id: string,
+        @GetCurrentAdmin('sub') id: string,
         @Body() passwordDto: ChangePasswordDto,
     ) {
         return await this.adminService.changePassword(id, passwordDto);

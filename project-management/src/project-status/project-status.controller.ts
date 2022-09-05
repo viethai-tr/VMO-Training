@@ -13,7 +13,6 @@ import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter'
 @ApiBearerAuth()
 @ApiTags('Project Status')
 @Roles(Role.Admin)
-@UseFilters(HttpExceptionFilter)
 @UseFilters(MongoExceptionFilter)
 @Controller('project-status')
 export class ProjectStatusController {
