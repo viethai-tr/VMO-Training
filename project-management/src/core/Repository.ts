@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Model } from 'mongoose';
+import { checkInteger } from '../shared/utils/checkInteger';
 import { IRepository } from './database/IRepository';
 
 export class Repository<T extends Document> implements IRepository<T> {
@@ -10,7 +11,8 @@ export class Repository<T extends Document> implements IRepository<T> {
     }
 
     async update(id: string, item: T): Promise<T> {
-        return this._model.findOneAndUpdate({ _id: id }, item);
+        this._model.findOneAndUpdate({ _id: id }, item);
+        return item;
     }
 
     async delete(id: string): Promise<T> {
@@ -18,37 +20,40 @@ export class Repository<T extends Document> implements IRepository<T> {
     }
 
     async getAll(
-        limit: number = 5,
-        page: number = 1,
+        limit: string = '5',
+        page: string = '1',
         search: string = '',
         sort: string = 'asc',
         sortBy: string = 'name',
     ) {
         let sortKind;
+        let limitNum;
+        let pageNum;
+
         if (sort != undefined) {
             sort = sort.toLowerCase();
             if (sort == 'desc') sortKind = 'desc';
             else sortKind = 'asc';
         } else sortKind = 'asc';
 
-        if (limit < 0) limit = 0;
-
-        const listResult = await this._model
-            .find({ name: new RegExp('.*' + search + '.*', 'i') })
-            .sort({ [sortBy]: sortKind })
-            .limit(limit);
+        checkInteger(limit) ? (limitNum = parseInt(limit)) : (limitNum = 5);
 
         const totalDocs = await this._model
         .find({ name: new RegExp('.*' + search + '.*', 'i') }).countDocuments();
 
-        let totalPages;
-        if (limit == 0) totalPages = 1;
-        else totalPages = Math.ceil(totalDocs / limit);
+        let totalPages = Math.ceil(totalDocs / limitNum);
 
-        if (page > totalPages || page < 0) page = 1;
+        checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
+        pageNum <= totalPages ? pageNum : pageNum = totalPages;
+
+        const listResult = await this._model
+            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .sort({ [sortBy]: sortKind })
+            .limit(limitNum);
 
         return {
-            curPage: page,
+            totalDocs,
+            curPage: pageNum,
             totalPages,
             search,
             sortBy,

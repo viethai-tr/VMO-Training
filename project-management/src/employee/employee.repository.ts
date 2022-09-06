@@ -8,7 +8,9 @@ import {
 import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
 import { Project, ProjectDocument } from '../core/schemas/project.schema';
 import { Repository } from '../core/Repository';
-import { checkObjectId } from 'src/shared/checkObjectId';
+import { checkObjectId } from 'src/shared/utils/checkObjectId';
+import { checkInteger } from 'src/shared/utils/checkInteger';
+import { EMPLOYEE_PROPERTIES } from './employee.const';
 
 @Injectable()
 export class EmployeeRepository extends Repository<EmployeeDocument> {
@@ -23,39 +25,46 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
     }
 
     async getAllEmployeesAsync(
-        limit: number = 5,
-        page: number = 1,
+        limit: string = '5',
+        page: string = '1',
         search: string = '',
         sort: string = 'asc',
         sortBy: string = 'name',
     ) {
         let sortKind;
+        let limitNum: number;
+        let pageNum: number;
+
         if (sort != undefined) {
             sort = sort.toLowerCase();
             if (sort == 'desc') sortKind = 'desc';
             else sortKind = 'asc';
         } else sortKind = 'asc';
 
-        if (limit < 0) limit = 0;
+        EMPLOYEE_PROPERTIES.includes(sortBy.toLowerCase())
+            ? (sortBy = sortBy.toLowerCase())
+            : (sortBy = 'name');
 
-        const listResult = await this.employeeModel
-            .find({ name: new RegExp('.*' + search + '.*', 'i') })
-            .sort({ [sortBy]: sortKind })
-            .limit(limit)
-            .populate('technologies', 'name');
+        checkInteger(limit) ? (limitNum = parseInt(limit)) : (limitNum = 5);
 
         const totalDocs = await this.employeeModel
             .find({ name: new RegExp('.*' + search + '.*', 'i') })
             .countDocuments();
+        let totalPages = Math.ceil(totalDocs / limitNum);
 
-        let totalPages;
-        if (limit == 0) totalPages = 1;
-        else totalPages = Math.ceil(totalDocs / limit);
+        checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
+        pageNum <= totalPages ? pageNum : (pageNum = totalPages);
 
-        if (page > totalPages || page < 0) page = 1;
+        const listResult = await this.employeeModel
+            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .sort({ [sortBy]: sortKind })
+            .limit(limitNum)
+            .populate('technologies', 'name')
+            .populate('projects', 'name');
 
         return {
-            curPage: page,
+            totalDocs,
+            curPage: pageNum,
             totalPages,
             search,
             sortBy,
@@ -67,7 +76,8 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
     async getEmployeeByIdAsync(id: string): Promise<EmployeeDocument> {
         return this.employeeModel
             .findOne({ _id: id })
-            .populate('technologies', 'name');
+            .populate('technologies', 'name')
+            .populate('projects', 'name');
     }
 
     async deleteEmployee(id: string) {
@@ -76,48 +86,29 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
 
     async countEmployees(technology?: string, project?: string) {
         let count;
+        let listEmployees;
 
-        if (!technology && !project) {
-            count = await this.employeeModel.countDocuments();
-            return {
-                num_of_employees: count,
-            };
+        let oriQuery = { technologies: technology, projects: project };
+
+        const query = Object.fromEntries(
+            Object.entries(oriQuery).filter(
+                ([_, v]) => (v != null && v != '' && v != undefined),
+            ),
+        );
+
+        for (let queryProperty in query) {
+            if (queryProperty) checkObjectId(query[queryProperty]);
         }
 
-        let listEmployeesTechnology;
-        let listEmployeesProject;
-
-        if (project) {
-            checkObjectId(project);
-            listEmployeesProject = await (
-                await this.projectModel.findOne(
-                    { _id: project },
-                    { employees: true },
-                )
-            ).employees;
-            count = listEmployeesProject.length;
-        }
-
-        if (technology) {
-            checkObjectId(technology);
-            listEmployeesTechnology = await (
-                await this.employeeModel.find({ technologies: technology })
-            ).map((item) => item._id);
-            count = listEmployeesTechnology.length;
-        }
-
-        if (project && technology) {
-            checkObjectId(project);
-            checkObjectId(technology);
-            count = (
-                await listEmployeesTechnology.filter((value) =>
-                    listEmployeesProject.includes(value),
-                )
-            ).length;
-        }
+        listEmployees = await this.employeeModel
+            .find(query)
+            .populate('technologies', 'name')
+            .populate('projects', 'name');
+        count = listEmployees.length;
 
         return {
-            num_of_employees: count,
+            numEmployees: count,
+            listEmployees,
         };
     }
 }

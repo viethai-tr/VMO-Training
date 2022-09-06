@@ -1,8 +1,12 @@
 - handle error
 - authorization (v)
-- unit test
 - search (+ sort, sortby for all get info endpoints) (v) + count
 - improve paginating + sorting
+
+- unit test
 - move employees list => /employee endpoint.
+- const
+
+- project in employees collection.
 -------
 - Relationship between collections.

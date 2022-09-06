@@ -6,19 +6,17 @@ import {
     Param,
     Patch,
     Post,
-    Put,
     Query,
     UseFilters,
-    UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import Role from '../core/enums/role.enum';
 import { Roles } from '../shared/decorators/roles.decorator';
 import { DepartmentDto, PaginationDto } from '../core/dtos';
-import { DepartmentDocument } from '../core/schemas/department.schema';
 import { DepartmentService } from './department.service';
-import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
 import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
+import { API_QUERY } from '../shared/const/variables.const';
+import { DEPARTMENT_QUERY } from './department.const';
 
 @ApiBearerAuth()
 @ApiTags('Department')
@@ -30,36 +28,11 @@ export class DepartmentController {
 
     @Roles(Role.Admin, Role.User)
     @Get()
-    @ApiQuery({
-        name: 'search',
-        required: false,
-        description: 'Search',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'limit',
-        required: false,
-        description: 'Number of employees per page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'page',
-        required: false,
-        description: 'Current page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'sort',
-        required: false,
-        description: 'Type of sort',
-        enum: ['asc', 'desc'],
-    })
-    @ApiQuery({
-        name: 'sortBy',
-        required: false,
-        description: 'Sort by',
-        enum: ['name', 'founding_date'],
-    })
+    @ApiQuery(API_QUERY.SEARCH)
+    @ApiQuery(API_QUERY.LIMIT)
+    @ApiQuery(API_QUERY.PAGE)
+    @ApiQuery(API_QUERY.SORT)
+    @ApiQuery(DEPARTMENT_QUERY.SORT_BY)
     async getAllDepartments(
         @Query() { limit, page }: PaginationDto,
         @Query() { search, sort, sortBy },
@@ -77,7 +50,7 @@ export class DepartmentController {
     @Get(':id')
     async getDepartmentById(
         @Param('id') id: string,
-    ): Promise<DepartmentDocument> {
+    ) {
         return this.departmentService.getDepartmentById(id);
     }
 

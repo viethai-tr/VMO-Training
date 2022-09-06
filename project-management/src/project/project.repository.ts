@@ -7,6 +7,8 @@ import {
 } from '../core/schemas/department.schema';
 import { Project, ProjectDocument } from '../core/schemas/project.schema';
 import { Repository } from '../core/Repository';
+import { checkInteger } from 'src/shared/utils/checkInteger';
+import { PROJECT_PROPERTIES } from './project.const';
 
 @Injectable()
 export class ProjectRepository extends Repository<ProjectDocument> {
@@ -19,43 +21,47 @@ export class ProjectRepository extends Repository<ProjectDocument> {
     }
 
     async getAllProjects(
-        limit: number = 5,
-        page: number = 1,
+        limit: string = '5',
+        page: string = '1',
         search: string = '',
         sort: string = 'asc',
         sortBy: string = 'name',
     ) {
         let sortKind;
+        let limitNum;
+        let pageNum;
+
         if (sort != undefined) {
             sort = sort.toLowerCase();
             if (sort == 'desc') sortKind = 'desc';
             else sortKind = 'asc';
         } else sortKind = 'asc';
 
-        if (limit < 0) limit = 0;
+        checkInteger(limit) ? (limitNum = parseInt(limit)) : (limitNum = 5);
+        checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
 
-        const projectProperties = ['name', 'starting_date'];
-        sortBy = sortBy.toLowerCase();
-        if (!projectProperties.includes(sortBy)) sortBy = 'name';
+        PROJECT_PROPERTIES.includes(sortBy.toLowerCase())
+            ? (sortBy = sortBy.toLowerCase())
+            : (sortBy = 'name');
 
-        let listResult = await this.projectModel
+        const listResult = await this.projectModel
             .find({ name: new RegExp('.*' + search + '.*', 'i') })
             .sort({ [sortBy]: sortKind })
-            .limit(limit)
+            .limit(limitNum)
             .populate('type', 'name')
             .populate('status', 'name')
             .populate('technologies', 'name')
             .populate('employees', 'name')
             .populate('customer', 'name');
 
-        let totalPages;
-        if (limit == 0) totalPages = 1;
-        else totalPages = Math.ceil(listResult.length / limit);
-        if (page > totalPages || page < 0) page = 1;
-        else page = Math.floor(page);
+        const totalDocs = await this.projectModel
+            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .countDocuments();
+
+        let totalPages = Math.ceil(totalDocs / limitNum);
 
         return {
-            curPage: page,
+            curPage: pageNum,
             totalPages,
             search,
             sortBy,
@@ -81,11 +87,20 @@ export class ProjectRepository extends Repository<ProjectDocument> {
     }
 
     async countProjects(query) {
-        const count = await this.projectModel.countDocuments(query);
+        const listProjects = await this.projectModel
+            .find(query)
+            .populate('type', 'name')
+            .populate('status', 'name')
+            .populate('technologies', 'name')
+            .populate('employees', 'name')
+            .populate('customer', 'name');
+            
+        const count = listProjects.length;
 
         return {
             query,
             quantity: count,
+            listProjects,
         };
     }
 

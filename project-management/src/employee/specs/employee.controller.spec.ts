@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import mongoose from 'mongoose';
 import { Employee } from '../../core/schemas/employee.schema';
@@ -13,6 +13,8 @@ describe('EmployeeController', () => {
         getAllEmployees: jest.fn(),
         createEmployee: jest.fn(),
         deleteEmployee: jest.fn(),
+        updateEmployee: jest.fn(),
+        countEmployees: jest.fn(),
     };
 
     let dataMock: Employee[] = [
@@ -29,6 +31,7 @@ describe('EmployeeController', () => {
             experience: 3,
             languages: ['English', 'Japanese'],
             certs: ['Cert 1', 'Cert 2'],
+            projects: []
         },
     ];
 
@@ -45,14 +48,18 @@ describe('EmployeeController', () => {
     };
 
     const paginateMock = {
-        limit: 2,
-        page: 1,
+        limit: '5',
+        page: '1',
     };
     const sortingMock = {
         sort: 'asc',
         sortBy: 'name',
         search: '',
     };
+    const queryCount = {
+        technology: 'idTechnology',
+        project: 'idProject'
+    }
 
     // const createdMock: Employee;
 
@@ -71,10 +78,13 @@ describe('EmployeeController', () => {
         experience: 3,
         languages: ['English', 'Japanese'],
         certs: ['Cert 1', 'Cert 2'],
+        projects: []
     };
 
     let expectedValueCreated = dataMock.push(dataCreatedObjectId);
     let expectedValueDeleted = '';
+
+    const errorDelete = new NotFoundException('Not found');
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -104,13 +114,6 @@ describe('EmployeeController', () => {
         ).toEqual(expectedValueGet);
     });
 
-    // test('Getting all employees failed', async () => {
-    //     serviceMock.getAllEmployees.mockRejectedValue();
-    //     expect(
-    //         await controller.getAllEmployees(paginateMock, sortingMock),
-    //     ).rejects.toThrowError(BadRequestException);
-    // });
-
     test('Creating new Employee successfully', async () => {
         serviceMock.createEmployee.mockResolvedValue(dataCreatedMock);
         expect(await controller.createEmployee(dataCreatedMock)).toEqual(
@@ -118,17 +121,20 @@ describe('EmployeeController', () => {
         );
     });
 
-    test('Creating new employee failed', async () => {
-        serviceMock.createEmployee.mockRejectedValue(new BadRequestException());
-        expect(
-            await controller.createEmployee(dataCreatedMock),
-        ).rejects.toThrow(BadRequestException);
-    });
-
     test('Removing employee successfully', async () => {
         serviceMock.deleteEmployee.mockResolvedValue(expectedValueDeleted);
         expect(await controller.deleteEmployee('id')).toEqual(
             expectedValueDeleted,
         );
+    });
+
+    test('Updating employee successfully', async () => {
+        serviceMock.updateEmployee.mockResolvedValue(dataCreatedMock);
+        expect(await controller.updateEmployee('1', dataCreatedMock)).toEqual(dataCreatedMock);
+    });
+
+    test('Counting employees successfully', async () => {
+        serviceMock.countEmployees.mockResolvedValue(40);
+        expect(await controller.countEmployees(queryCount)).toEqual(40);
     });
 });

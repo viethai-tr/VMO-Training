@@ -14,6 +14,7 @@ import {
     Query,
     UseFilters,
     UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../shared/decorators/roles.decorator';
@@ -22,6 +23,8 @@ import { EmployeeService } from './employee.service';
 import Role from '../core/enums/role.enum';
 import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
 import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
+import { API_QUERY } from '../shared/const/variables.const';
+import { EMPLOYEE_QUERY } from './employee.const';
 
 @ApiBearerAuth()
 @ApiTags('Employee')
@@ -33,37 +36,12 @@ export class EmployeeController {
     constructor(private readonly employeeService: EmployeeService) {}
 
     @Roles(Role.Admin, Role.User)
+    @ApiQuery(API_QUERY.SEARCH)
+    @ApiQuery(API_QUERY.LIMIT)
+    @ApiQuery(API_QUERY.PAGE)
+    @ApiQuery(API_QUERY.SORT)
+    @ApiQuery(EMPLOYEE_QUERY.SORT_BY)
     @Get()
-    @ApiQuery({
-        name: 'search',
-        required: false,
-        description: 'Search by name',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'limit',
-        required: false,
-        description: 'Number of employees per page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'page',
-        required: false,
-        description: 'Current page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'sort',
-        required: false,
-        description: 'Type of sort',
-        enum: ['asc', 'desc'],
-    })
-    @ApiQuery({
-        name: 'sortBy',
-        required: false,
-        description: 'Sort by',
-        enum: ['name', 'dob', 'experience'],
-    })
     async getAllEmployees(
         @Query() { limit, page }: PaginationDto,
         @Query() { sort, sortBy, search },
@@ -92,16 +70,13 @@ export class EmployeeController {
         type: 'string',
     })
     async countEmployees(@Query() { technology, project }) {
-            return this.employeeService.countEmployees(
-                technology,
-                project,
-            );
+        return this.employeeService.countEmployees(technology, project);
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
     async getEmployeeById(@Param('id') id: string) {
-            return this.employeeService.getEmployeeById(id);
+        return this.employeeService.getEmployeeById(id);
     }
 
     @Patch(':id')
@@ -110,7 +85,7 @@ export class EmployeeController {
         @Param('id') id: string,
         @Body() employee: EmployeeDto,
     ) {
-            return this.employeeService.updateEmployee(id, employee);
+        return this.employeeService.updateEmployee(id, employee);
     }
 
     @Post()

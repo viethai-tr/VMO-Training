@@ -3,12 +3,8 @@ import { IsNumber, IsOptional, Min } from "class-validator";
 
 export class PaginationDto {
     @IsOptional()
-    @Type(() => Number)
-    @IsNumber()
-    page?: number;
+    page?: string;
 
     @IsOptional()
-    @Type(() => Number)
-    @IsNumber()
-    limit?: number;
+    limit?: string;
 }

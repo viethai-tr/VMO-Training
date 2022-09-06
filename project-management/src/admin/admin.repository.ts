@@ -1,11 +1,17 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as argon from 'argon2';
 import { Model } from 'mongoose';
+import { checkInteger } from '../shared/utils/checkInteger';
 import { AdminDto } from '../core/dtos/admin.dto';
 import { ChangePasswordDto } from '../core/dtos/change-password.dto';
 import { Repository } from '../core/Repository';
 import { Admin, AdminDocument } from '../core/schemas/admin.schema';
+import { RESPOND, RESPOND_GOT, RESPOND_UPDATED } from '../shared/const/respond.const';
 
 @Injectable()
 export class AdminRepository extends Repository<AdminDocument> {
@@ -16,20 +22,24 @@ export class AdminRepository extends Repository<AdminDocument> {
     }
 
     async getAllUsers(
-        limit: number = 5,
-        page: number = 1,
+        limit: string = '5',
+        page: string = '1',
         search: string = '',
         sort: string = 'asc',
         sortBy: string = 'name',
     ) {
         let sortKind;
+        let limitNum: number;
+        let pageNum: number;
+
         if (sort != undefined) {
             sort = sort.toLowerCase();
             if (sort == 'desc') sortKind = 'desc';
             else sortKind = 'asc';
         } else sortKind = 'asc';
 
-        if (limit < 0) limit = 0;
+        checkInteger(limit) ? (limitNum = parseInt(limit)) : (limitNum = 5);
+        checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
 
         const listResult = await this.adminModel
             .find(
@@ -37,7 +47,7 @@ export class AdminRepository extends Repository<AdminDocument> {
                 { password: 0, rt: 0 },
             )
             .sort({ [sortBy]: sortKind })
-            .limit(limit);
+            .limit(limitNum);
 
         const totalDocs = await this.adminModel
             .find(
@@ -46,13 +56,10 @@ export class AdminRepository extends Repository<AdminDocument> {
             )
             .countDocuments();
 
-        let totalPages;
-        if (limit == 0) totalPages = 1;
-        else totalPages = Math.ceil(totalDocs / limit);
-
-        if (page > totalPages || page < 0) page = 1;
+        let totalPages = Math.ceil(totalDocs / limitNum);
 
         return {
+            totalDocs,
             curPage: page,
             totalPages,
             search,
@@ -64,9 +71,8 @@ export class AdminRepository extends Repository<AdminDocument> {
 
     async changePassword(id: string, passwordDto: ChangePasswordDto) {
         if (passwordDto.newPassword != passwordDto.repeatPassword) {
-            throw new HttpException(
+            throw new BadRequestException(
                 'Password and confirm password does not match!',
-                HttpStatus.BAD_REQUEST,
             );
         }
         const curPassword = await (
@@ -83,14 +89,10 @@ export class AdminRepository extends Repository<AdminDocument> {
                 { _id: id },
                 { password: newPasswordHashed },
             );
-            return {
-                HttpStatus: HttpStatus.OK,
-                msg: 'Password changed',
-            };
+            return RESPOND_UPDATED;
         } else {
-            throw new HttpException(
+            throw new ForbiddenException(
                 'Password does not match old password!',
-                HttpStatus.FORBIDDEN,
             );
         }
     }
@@ -105,6 +107,6 @@ export class AdminRepository extends Repository<AdminDocument> {
             { password: 0, rt: 0 },
         );
 
-        return curAdmin;
+        return RESPOND(RESPOND_GOT, curAdmin);
     }
 }

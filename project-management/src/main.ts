@@ -9,9 +9,6 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.useGlobalPipes(new ValidationPipe());
 
-    const { httpAdapter } = app.get(HttpAdapterHost);
-    app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
-
     const configService = app.get(ConfigService);
 
     const config = new DocumentBuilder()

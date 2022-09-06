@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { TechnologyDto } from 'src/core/dtos/technology.dto';
 import { TechnologyDocument } from 'src/core/schemas/technology.schema';
-import { checkObjectId } from 'src/shared/checkObjectId';
+import { checkObjectId } from 'src/shared/utils/checkObjectId';
 import { TechnologyRepository } from './technology.repository';
 
 @Injectable()
@@ -9,8 +9,8 @@ export class TechnologyService {
     constructor(private technologyRepository: TechnologyRepository) {}
 
     async getAllTechnologies(
-        limit?: number,
-        page?: number,
+        limit?: string,
+        page?: string,
         search?: string,
         sort?: string,
     ) {

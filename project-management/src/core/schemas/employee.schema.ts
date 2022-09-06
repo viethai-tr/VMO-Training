@@ -31,6 +31,9 @@ export class Employee {
 
     @Prop()
     certs: string[];
+
+    @Prop([{type: mongoose.Schema.Types.ObjectId, ref: "Project"}])
+    projects: Types.ObjectId[];
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

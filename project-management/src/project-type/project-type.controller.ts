@@ -1,13 +1,12 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseFilters, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import Role from '../core/enums/role.enum';
 import { Roles } from '../shared/decorators/roles.decorator';
 import { PaginationDto, ProjectTypeDto } from '../core/dtos';
-import { ProjectType, ProjectTypeDocument } from '../core/schemas/project-type.schema';
+import { ProjectTypeDocument } from '../core/schemas/project-type.schema';
 import { ProjectTypeService } from './project-type.service';
-import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter';
-import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter';
+import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
+import { API_QUERY } from '../shared/const/variables.const';
 
 @ApiBearerAuth()
 @ApiTags('Project Type')
@@ -21,30 +20,10 @@ export class ProjectTypeController {
 
     @Roles(Role.Admin, Role.User)
     @Get()
-    @ApiQuery({
-        name: 'search',
-        required: false,
-        description: 'Search',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'limit',
-        required: false,
-        description: 'Number of employees per page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'page',
-        required: false,
-        description: 'Current page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'sort',
-        required: false,
-        description: 'Type of sort',
-        enum: ['asc', 'desc'],
-    })
+    @ApiQuery(API_QUERY.SEARCH)
+    @ApiQuery(API_QUERY.LIMIT)
+    @ApiQuery(API_QUERY.PAGE)
+    @ApiQuery(API_QUERY.SORT)
     async getAllProjectTypes(@Query() { limit, page }: PaginationDto,
         @Query() { sort, search }) {
         return this.projectTypeService.getAllProjectTypes(limit, page, search, sort);
@@ -52,7 +31,7 @@ export class ProjectTypeController {
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
-    async getProjectTypeById(@Param('id') id: string): Promise<ProjectType> {
+    async getProjectTypeById(@Param('id') id: string) {
         return this.projectTypeService.getProjectTypeById(id);
     }
 

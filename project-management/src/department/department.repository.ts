@@ -6,6 +6,8 @@ import {
     DepartmentDocument,
 } from '../core/schemas/department.schema';
 import { Repository } from '../core/Repository';
+import { checkInteger } from 'src/shared/utils/checkInteger';
+import { DEPARTMENT_PROPERTIES_CONST } from './department.const';
 
 export class DepartmentRepository extends Repository<DepartmentDocument> {
     constructor(
@@ -16,43 +18,43 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
     }
 
     async getAllDepartments(
-        limit: number = 5,
-        page: number = 1,
+        limit: string = '5',
+        page: string = '1',
         search: string = '',
         sort: string = 'asc',
         sortBy: string = 'name',
     ) {
 
         let sortKind;
+        let limitNum: number;
+        let pageNum: number;
+
         if (sort != undefined) {
             sort = sort.toLowerCase();
             if (sort == 'desc') sortKind = 'desc';
             else sortKind = 'asc';
         } else sortKind = 'asc';
-
-        if (limit < 0) limit = 0;
         
-        const departmentProperties = ['name', 'founding_date'];
-        sortBy = sortBy.toLowerCase();
-        if (!departmentProperties.includes(sortBy)) sortBy = 'name';
+        DEPARTMENT_PROPERTIES_CONST.includes(sortBy.toLowerCase()) ? sortBy = sortBy.toLowerCase() : sortBy = 'name';
 
-        let listResult = await this.departmentModel
-            .find({ name: new RegExp('.*' + search + '.*', 'i') })
-            .sort({ [sortBy]: sortKind })
-            .limit(limit)
-            .populate('manager', 'name')
-            .populate('employees', 'name')
-            .populate('projects', 'name');
+        checkInteger(limit) ? (limitNum = parseInt(limit)) : (limitNum = 5);
 
         const totalDocs = await this.departmentModel
             .find({ name: new RegExp('.*' + search + '.*', 'i') })
             .countDocuments();
 
-        let totalPages;
-        if (limit == 0) totalPages = 1;
-        else totalPages = Math.ceil(totalDocs / limit);
+        let totalPages = Math.ceil(totalDocs / limitNum);
 
-        if (page > totalPages || page < 0) page = 1;
+        checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
+        pageNum <= totalPages ? pageNum : pageNum = totalPages;
+
+        let listResult = await this.departmentModel
+            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .sort({ [sortBy]: sortKind })
+            .limit(limitNum)
+            .populate('manager', 'name')
+            .populate('employees', 'name')
+            .populate('projects', 'name');
 
         return {
             curPage: page,

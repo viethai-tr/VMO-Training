@@ -6,27 +6,37 @@ import {
     Query,
 } from '@nestjs/common';
 import mongoose, { Model } from 'mongoose';
-import { EmployeeDocument } from '../core/schemas/employee.schema';
+import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
 import { ProjectDto } from '../core/dtos/project.dto';
 import { Project, ProjectDocument } from '../core/schemas/project.schema';
-import { convertObjectId } from '../shared/convertObjectId';
+import { convertObjectId } from '../shared/utils/convertObjectId';
 import { ProjectRepository } from './project.repository';
-import { checkObjectId } from 'src/shared/checkObjectId';
+import { checkObjectId } from '../shared/utils/checkObjectId';
 import { InjectModel } from '@nestjs/mongoose';
-import { Department } from 'src/core/schemas/department.schema';
+import { Department } from '../core/schemas/department.schema';
+import { checkValidDate } from '../shared/utils/checkValidDate';
+import {
+    RESPOND,
+    RESPOND_CREATED,
+    RESPOND_DELETED,
+    RESPOND_GOT,
+    RESPOND_UPDATED,
+} from 'src/shared/const/respond.const';
 
 @Injectable()
 export class ProjectService {
     constructor(
         private projectRepository: ProjectRepository,
         @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
+        @InjectModel(Employee.name)
+        private employeeModel: Model<EmployeeDocument>,
         @InjectModel(Department.name)
         private departmentModel: Model<ProjectDocument>,
     ) {}
 
     async getAllProjects(
-        limit?: number,
-        page?: number,
+        limit?: string,
+        page?: string,
         search?: string,
         sort?: string,
         sortBy?: string,
@@ -40,14 +50,20 @@ export class ProjectService {
         );
     }
 
-    async getProjectById(id: string): Promise<ProjectDocument> {
+    async getProjectById(id: string) {
         checkObjectId(id);
-        return this.projectRepository.getProjectById(id);
+        const curProject = await this.projectRepository.getProjectById(id);
+
+        return RESPOND(RESPOND_GOT, curProject);
     }
 
     async getEmployeesProject(id: string) {
         checkObjectId(id);
-        return this.projectRepository.getEmployeesProject(id);
+        const listEmployees = await this.projectRepository.getEmployeesProject(
+            id,
+        );
+
+        return RESPOND(RESPOND_GOT, listEmployees);
     }
 
     async countProjects(
@@ -57,12 +73,6 @@ export class ProjectService {
         technology?: string,
         startingDate?: string,
     ) {
-        checkObjectId(type);
-        checkObjectId(status);
-        checkObjectId(customer);
-        checkObjectId(technology);
-        checkObjectId(startingDate);
-
         let oriQuery = {
             type: type,
             status: status,
@@ -72,13 +82,23 @@ export class ProjectService {
         };
 
         const query = Object.fromEntries(
-            Object.entries(oriQuery).filter(([_, v]) => v != null),
+            Object.entries(oriQuery).filter(
+                ([_, v]) => v != null && v != '' && v != undefined,
+            ),
         );
+
+        for (let queryProperty in query) {
+            if (queryProperty != 'starting_date')
+                checkObjectId(query[queryProperty]);
+        }
+
+        if (startingDate) checkValidDate(startingDate);
+
         return this.projectRepository.countProjects(query);
     }
 
     async createProject(projectDto: ProjectDto) {
-        const {
+        let {
             name,
             description,
             type,
@@ -89,13 +109,26 @@ export class ProjectService {
             starting_date,
         } = projectDto;
 
+        technologies = [...new Set(technologies)];
+        employees = [...new Set(employees)];
+
+        checkObjectId(type);
+        checkObjectId(status);
+        checkObjectId(customer);
+        for (let technology of technologies) checkObjectId(technology);
+        for (let employee of employees) checkObjectId(employee);
+
+        checkValidDate(starting_date);
+
         const idType = new mongoose.Types.ObjectId(type);
         const idStatus = new mongoose.Types.ObjectId(status);
         const idTechnologies = convertObjectId(technologies);
         const idEmployees = convertObjectId(employees);
         const idCustomer = new mongoose.Types.ObjectId(customer);
 
-        return this.projectRepository.create(<ProjectDocument>{
+        const newProject = await this.projectRepository.create(<
+            ProjectDocument
+        >{
             name,
             description,
             type: idType,
@@ -105,12 +138,20 @@ export class ProjectService {
             customer: idCustomer,
             starting_date,
         });
+
+        await this.employeeModel.updateMany(
+            { _id: { $in: employees } },
+            { $push: { projects: newProject._id } },
+            { multi: true, upsert: true },
+        );
+
+        return RESPOND(RESPOND_CREATED, newProject);
     }
 
     async updateProject(id: string, projectDto: ProjectDto) {
         checkObjectId(id);
 
-        const {
+        let {
             name,
             description,
             type,
@@ -120,13 +161,35 @@ export class ProjectService {
             customer,
             starting_date,
         } = projectDto;
+
+        technologies = [...new Set(technologies)];
+        employees = [...new Set(employees)];
+
+        checkObjectId(type);
+        checkObjectId(status);
+        checkObjectId(customer);
+        for (let technology of technologies) checkObjectId(technology);
+        for (let employee of employees) checkObjectId(employee);
+
+        checkValidDate(starting_date);
+
         const idType = new mongoose.Types.ObjectId(type);
         const idStatus = new mongoose.Types.ObjectId(status);
         const idTechnologies = convertObjectId(technologies);
         const idEmployees = convertObjectId(employees);
         const idCustomer = new mongoose.Types.ObjectId(customer);
 
-        return this.projectRepository.update(id, <ProjectDocument>{
+        const listEmployees = (await this.projectModel.findOne({ _id: id }))
+            .employees;
+
+        await this.employeeModel.updateMany(
+            { _id: { $in: listEmployees } },
+            { $pull: { projects: new mongoose.Types.ObjectId(id) } },
+        );
+
+        const updatedProject = await this.projectRepository.update(id, <
+            ProjectDocument
+        >{
             name,
             description,
             type: idType,
@@ -136,6 +199,14 @@ export class ProjectService {
             customer: idCustomer,
             starting_date,
         });
+
+        await this.employeeModel.updateMany(
+            { _id: { $in: employees } },
+            { $push: { projects: new mongoose.Types.ObjectId(id) } },
+            { multi: true, upsert: true },
+        );
+
+        return RESPOND(RESPOND_UPDATED, updatedProject);
     }
 
     async deleteProject(id: string) {
@@ -147,11 +218,15 @@ export class ProjectService {
 
         const checkDepartment = this.departmentModel.find({ projects: id });
         if (!checkDepartment || (await checkDepartment).length == 0) {
+            const listEmployees = (await this.projectModel.findOne({ _id: id }))
+                .employees;
             await this.projectModel.findOneAndDelete({ _id: id });
-            return {
-                HttpStatus: HttpStatus.OK,
-                message: 'Delete successfully!',
-            };
+            await this.employeeModel.updateMany(
+                { _id: { $in: listEmployees } },
+                { $pull: { projects: id } },
+            );
+
+            return RESPOND(RESPOND_DELETED, { id: id });
         } else {
             throw new HttpException('Cannot be deleted', HttpStatus.FORBIDDEN);
         }

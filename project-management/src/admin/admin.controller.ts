@@ -1,6 +1,5 @@
 import {
     Body,
-    ClassSerializerInterceptor,
     Controller,
     Get,
     HttpStatus,
@@ -17,9 +16,9 @@ import { AdminDto } from '../core/dtos/admin.dto';
 import { Roles } from '../shared/decorators/roles.decorator';
 import Role from '../core/enums/role.enum';
 import { PaginationDto } from '../core/dtos';
-import { AdminDocument } from '../core/schemas/admin.schema';
-import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter';
-import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter';
+import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
+import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
+import { API_QUERY } from '../shared/const/variables.const';
 
 @ApiBearerAuth()
 @ApiTags('Admin')
@@ -30,30 +29,10 @@ import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter'
 export class AdminController {
     constructor(private readonly adminService: AdminService) {}
 
-    @ApiQuery({
-        name: 'search',
-        required: false,
-        description: 'Search by name',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'sort',
-        required: false,
-        description: 'Type of Sort',
-        enum: ['asc', 'desc'],
-    })
-    @ApiQuery({
-        name: 'limit',
-        required: false,
-        description: 'Number of employees per page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'page',
-        required: false,
-        description: 'Current page',
-        type: 'integer',
-    })
+    @ApiQuery(API_QUERY.SEARCH)
+    @ApiQuery(API_QUERY.SORT)
+    @ApiQuery(API_QUERY.LIMIT)
+    @ApiQuery(API_QUERY.PAGE)
     @Get('user')
     async getAllUsers(
         @Query() { limit, page }: PaginationDto,
@@ -72,7 +51,7 @@ export class AdminController {
         await this.adminService.updateAdmin(id, adminDto);
         return {
             HttpStatus: HttpStatus.OK,
-            msg: 'Infomation updated successfully!',
+            message: 'Infomation updated successfully!',
         };
     }
 

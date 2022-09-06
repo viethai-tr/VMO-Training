@@ -7,7 +7,7 @@ export interface IRepository<T extends Document> {
 
     delete(id: string): Promise<T>;
 
-    getAll();
+    getAll(limit: string, page: string, search: string, sort: string, sortBy: string);
 
     getById(id: string): Promise<T>;
 

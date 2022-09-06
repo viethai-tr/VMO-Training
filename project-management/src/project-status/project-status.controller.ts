@@ -1,14 +1,25 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseFilters, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Put,
+    Query,
+    UseFilters,
+    UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import Role from '../core/enums/role.enum';
 import { Roles } from '../shared/decorators/roles.decorator';
 import { PaginationDto } from '../core/dtos';
 import { ProjectStatusDto } from '../core/dtos/project-status.dto';
-import { ProjectStatusDocument } from '../core/schemas/project-status.schema';
 import { ProjectStatusService } from './project-status.service';
-import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter';
-import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter';
+import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
+import { API_QUERY } from '../shared/const/variables.const';
 
 @ApiBearerAuth()
 @ApiTags('Project Status')
@@ -20,38 +31,25 @@ export class ProjectStatusController {
 
     @Roles(Role.Admin, Role.User)
     @Get()
-    @ApiQuery({
-        name: 'search',
-        required: false,
-        description: 'Search',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'limit',
-        required: false,
-        description: 'Number of records per page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'page',
-        required: false,
-        description: 'Current page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'sort',
-        required: false,
-        description: 'Type of sort',
-        enum: ['asc', 'desc'],
-    })
-    async getAllProjectStatuses(@Query() {limit, page}: PaginationDto,
-    @Query() {search, sort}) {
-        return this.projectStatusService.getAllProjectStatuses(limit, page, search, sort);
+    @ApiQuery(API_QUERY.SEARCH)
+    @ApiQuery(API_QUERY.LIMIT)
+    @ApiQuery(API_QUERY.PAGE)
+    @ApiQuery(API_QUERY.SORT)
+    async getAllProjectStatuses(
+        @Query() { limit, page }: PaginationDto,
+        @Query() { search, sort },
+    ) {
+        return this.projectStatusService.getAllProjectStatuses(
+            limit,
+            page,
+            search,
+            sort,
+        );
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
-    async getProjectStatusById(@Param('id') id: string): Promise<ProjectStatusDocument> {
+    async getProjectStatusById(@Param('id') id: string) {
         return this.projectStatusService.getProjectStatusById(id);
     }
 
@@ -61,8 +59,14 @@ export class ProjectStatusController {
     }
 
     @Patch(':id')
-    async updateProjectStatus(@Param('id') id: string, @Body() projectStatusDto: ProjectStatusDto) {
-        return this.projectStatusService.updateProjectStatus(id, projectStatusDto);
+    async updateProjectStatus(
+        @Param('id') id: string,
+        @Body() projectStatusDto: ProjectStatusDto,
+    ) {
+        return this.projectStatusService.updateProjectStatus(
+            id,
+            projectStatusDto,
+        );
     }
 
     @Delete(':id')

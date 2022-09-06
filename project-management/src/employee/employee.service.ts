@@ -1,12 +1,12 @@
 import {
-    BadRequestException,
     HttpException,
     HttpStatus,
     Injectable,
+    NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { checkObjectId } from '../shared/checkObjectId';
+import { checkObjectId } from '../shared/utils/checkObjectId';
 import { EmployeeDto } from '../core/dtos';
 import {
     Department,
@@ -14,8 +14,15 @@ import {
 } from '../core/schemas/department.schema';
 import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
 import { Project, ProjectDocument } from '../core/schemas/project.schema';
-import { convertObjectId } from '../shared/convertObjectId';
+import { convertObjectId } from '../shared/utils/convertObjectId';
 import { EmployeeRepository } from './employee.repository';
+import {
+    RESPOND,
+    RESPOND_CREATED,
+    RESPOND_DELETED,
+    RESPOND_GOT,
+    RESPOND_UPDATED,
+} from '../shared/const/respond.const';
 
 @Injectable()
 export class EmployeeService {
@@ -29,8 +36,8 @@ export class EmployeeService {
     ) {}
 
     async getAllEmployees(
-        limit?: number,
-        page?: number,
+        limit?: string,
+        page?: string,
         search?: string,
         sort?: string,
         sortBy?: string,
@@ -46,7 +53,11 @@ export class EmployeeService {
 
     async getEmployeeById(id: string) {
         checkObjectId(id);
-        return this.employeeRepository.getEmployeeByIdAsync(id);
+        const curEmployee = await this.employeeRepository.getEmployeeByIdAsync(
+            id,
+        );
+
+        return RESPOND(RESPOND_GOT, curEmployee);
     }
 
     async countEmployees(technology?: string, project?: string) {
@@ -55,7 +66,7 @@ export class EmployeeService {
 
     async updateEmployee(id: string, employeeDto: EmployeeDto) {
         checkObjectId(id);
-        const {
+        let {
             name,
             dob,
             address,
@@ -66,8 +77,15 @@ export class EmployeeService {
             languages,
             certs,
         } = employeeDto;
+
+        technologies = [...new Set(technologies)];
+        for (let technology of technologies) checkObjectId(technology);
+
         const idTechnologies = convertObjectId(technologies);
-        return this.employeeRepository.update(id, <EmployeeDocument>{
+
+        const updatedEmployee = await this.employeeRepository.update(id, <
+            EmployeeDocument
+        >{
             name,
             dob,
             address,
@@ -78,10 +96,12 @@ export class EmployeeService {
             languages,
             certs,
         });
+
+        return RESPOND(RESPOND_UPDATED, updatedEmployee);
     }
 
     async createEmployee(employeeDto: EmployeeDto) {
-        const {
+        let {
             name,
             dob,
             address,
@@ -92,8 +112,15 @@ export class EmployeeService {
             languages,
             certs,
         } = employeeDto;
+
+        technologies = [...new Set(technologies)];
+        for (let technology of technologies) checkObjectId(technology);
+
         const idTechnologies = convertObjectId(technologies);
-        await this.employeeRepository.create(<EmployeeDocument>{
+
+        const newEmployee = await this.employeeRepository.create(<
+            EmployeeDocument
+        >{
             name,
             dob,
             address,
@@ -104,14 +131,15 @@ export class EmployeeService {
             languages,
             certs,
         });
+
+        return RESPOND(RESPOND_CREATED, newEmployee);
     }
 
     async deleteEmployee(id: string) {
         checkObjectId(id);
         let checkEmployee = await this.employeeModel.findOne({ _id: id });
 
-        if (!checkEmployee)
-            throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+        if (!checkEmployee) throw new NotFoundException('Employee not exist');
 
         const projects = this.projectModel.find({ employees: id });
         const departments = this.departmentModel.find({ employees: id });
@@ -123,10 +151,9 @@ export class EmployeeService {
             (!manager || (await manager).length == 0)
         ) {
             await this.employeeRepository.deleteEmployee(id);
-            return {
-                HttpStatus: HttpStatus.OK,
-                msg: 'Delete successfully!',
-            };
+            return RESPOND(RESPOND_DELETED, {
+                id: id,
+            });
         } else {
             throw new HttpException('Cannot be deleted', HttpStatus.FORBIDDEN);
         }

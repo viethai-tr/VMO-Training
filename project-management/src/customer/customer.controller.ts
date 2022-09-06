@@ -1,26 +1,21 @@
 import {
-    BadRequestException,
     Body,
     Controller,
     Delete,
     Get,
-    HttpException,
-    HttpStatus,
     Param,
     Patch,
     Post,
     Query,
     UseFilters,
-    UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
 import { CustomerDto, PaginationDto } from '../core/dtos';
-import { Customer, CustomerDocument } from '../core/schemas/customer.schema';
 import { CustomerService } from './customer.service';
-import { Roles } from 'src/shared/decorators/roles.decorator';
-import Role from 'src/core/enums/role.enum';
-import { MongoExceptionFilter } from 'src/shared/filters/mongo-exception.filter';
+import { Roles } from '../shared/decorators/roles.decorator';
+import Role from '../core/enums/role.enum';
+import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
+import { API_QUERY } from '../shared/const/variables.const';
 
 @ApiBearerAuth()
 @ApiTags('Customer')
@@ -32,30 +27,10 @@ export class CustomerController {
 
     @Roles(Role.Admin, Role.User)
     @Get()
-    @ApiQuery({
-        name: 'search',
-        required: false,
-        description: 'Search',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'limit',
-        required: false,
-        description: 'Number of records per page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'page',
-        required: false,
-        description: 'Current page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'sort',
-        required: false,
-        description: 'Type of sort',
-        enum: ['asc', 'desc'],
-    })
+    @ApiQuery(API_QUERY.SEARCH)
+    @ApiQuery(API_QUERY.LIMIT)
+    @ApiQuery(API_QUERY.PAGE)
+    @ApiQuery(API_QUERY.SORT)
     async getAllCustomers(
         @Query() { limit, page }: PaginationDto,
         @Query() { sort, search },
@@ -65,7 +40,7 @@ export class CustomerController {
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
-    async getCustomerById(@Param('id') id: string): Promise<Customer> {
+    async getCustomerById(@Param('id') id: string) {
         return this.customerService.getCustomerById(id);
     }
 

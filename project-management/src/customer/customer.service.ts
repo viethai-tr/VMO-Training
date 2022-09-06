@@ -9,8 +9,9 @@ import { Customer, CustomerDocument } from '../core/schemas/customer.schema';
 import { CustomerRepository } from './customer.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Project, ProjectDocument } from 'src/core/schemas/project.schema';
-import { checkObjectId } from 'src/shared/checkObjectId';
+import { Project, ProjectDocument } from '../core/schemas/project.schema';
+import { checkObjectId } from '../shared/utils/checkObjectId';
+import { RESPOND, RESPOND_CREATED, RESPOND_DELETED, RESPOND_GOT, RESPOND_UPDATED } from '../shared/const/respond.const';
 
 @Injectable()
 export class CustomerService {
@@ -22,8 +23,8 @@ export class CustomerService {
     ) {}
 
     async getAllCustomers(
-        limit?: number,
-        page?: number,
+        limit?: string,
+        page?: string,
         sort?: string,
         search?: string,
     ) {
@@ -31,20 +32,24 @@ export class CustomerService {
     }
 
     async getCustomerById(id: string) {
-        if (checkObjectId(id)) return this.customerRepository.getById(id);
+        checkObjectId(id);
+        const customer = await this.customerRepository.getById(id);
+        return RESPOND(RESPOND_GOT, customer);
     }
 
     async updateCustomer(id: string, customerDto: CustomerDto) {
-        if (checkObjectId(id)) {
-            return this.customerRepository.update(
-                id,
-                <CustomerDocument>customerDto,
-            );
-        }
+        checkObjectId(id);
+        const updatedCustomer = await this.customerRepository.update(
+            id,
+            <CustomerDocument>customerDto,
+        );
+
+        return RESPOND(RESPOND_UPDATED, updatedCustomer);
     }
 
     async createCustomer(customerDto: CustomerDto) {
-        return this.customerRepository.create(<CustomerDocument>customerDto);
+        const newCustomer = await this.customerRepository.create(<CustomerDocument>customerDto);
+        return RESPOND(RESPOND_CREATED, newCustomer);
     }
 
     async deleteCustomer(id: string) {
@@ -59,10 +64,9 @@ export class CustomerService {
         const projects = this.projectModel.find({ customer: id });
         if (!projects || (await projects).length == 0) {
             await this.customerRepository.deleteCustomer(id);
-            return {
-                HttpStatus: HttpStatus.OK,
-                msg: 'Delete successfully!',
-            };
+            return RESPOND(RESPOND_DELETED, {
+                id: id
+            });
         } else {
             throw new HttpException('Cannot be deleted', HttpStatus.FORBIDDEN);
         }

@@ -10,7 +10,6 @@ import {
     UseFilters,
     UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ProjectCountDto } from '../core/dtos/project-count.dto';
 import { Roles } from '../shared/decorators/roles.decorator';
@@ -18,8 +17,9 @@ import { PaginationDto, ProjectDto } from '../core/dtos';
 import { ProjectDocument } from '../core/schemas/project.schema';
 import { ProjectService } from './project.service';
 import Role from '../core/enums/role.enum';
-import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
 import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
+import { API_QUERY } from 'src/shared/const/variables.const';
+import { PROJECT_COUNT, PROJECT_QUERY } from './project.const';
 
 @ApiBearerAuth()
 @ApiTags('Project')
@@ -31,36 +31,11 @@ export class ProjectController {
 
     @Get()
     @Roles(Role.Admin, Role.User)
-    @ApiQuery({
-        name: 'search',
-        required: false,
-        description: 'Search by name',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'limit',
-        required: false,
-        description: 'Number of employees per page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'page',
-        required: false,
-        description: 'Current page',
-        type: 'integer',
-    })
-    @ApiQuery({
-        name: 'sort',
-        required: false,
-        description: 'Type of sort',
-        enum: ['asc', 'desc'],
-    })
-    @ApiQuery({
-        name: 'sortBy',
-        required: false,
-        description: 'Sort by',
-        enum: ['name', 'starting_date'],
-    })
+    @ApiQuery(API_QUERY.SEARCH)
+    @ApiQuery(API_QUERY.LIMIT)
+    @ApiQuery(API_QUERY.PAGE)
+    @ApiQuery(API_QUERY.SORT)
+    @ApiQuery(PROJECT_QUERY.SORT_BY)
     async getAllProjects(
         @Query() { limit, page }: PaginationDto,
         @Query() { sort, sortBy, search },
@@ -70,42 +45,17 @@ export class ProjectController {
             page,
             search,
             sort,
-            sortBy
+            sortBy,
         );
     }
 
     @Roles(Role.Admin, Role.User)
     @Get('count')
-    @ApiQuery({
-        name: 'status',
-        required: false,
-        description: 'Project status',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'type',
-        required: false,
-        description: 'Project type',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'customer',
-        required: false,
-        description: 'Customer',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'technology',
-        required: false,
-        description: 'Technology',
-        type: 'string',
-    })
-    @ApiQuery({
-        name: 'startingDate',
-        required: false,
-        description: 'Starting date of project',
-        type: 'string',
-    })
+    @ApiQuery(PROJECT_COUNT.STATUS)
+    @ApiQuery(PROJECT_COUNT.TYPE)
+    @ApiQuery(PROJECT_COUNT.CUSTOMER)
+    @ApiQuery(PROJECT_COUNT.TECHNOLOGY)
+    @ApiQuery(PROJECT_COUNT.STARTING_DATE)
     async countProjects(
         @Query()
         { type, status, customer, technology, startingDate }: ProjectCountDto,
@@ -127,12 +77,12 @@ export class ProjectController {
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
-    async getProjectById(@Param('id') id: string): Promise<ProjectDocument> {
+    async getProjectById(@Param('id') id: string) {
         return this.projectService.getProjectById(id);
     }
 
     @Post()
-    @ApiBody({ type: ProjectDto})
+    @ApiBody({ type: ProjectDto })
     async createProject(@Body() projectDto: ProjectDto) {
         return this.projectService.createProject(projectDto);
     }

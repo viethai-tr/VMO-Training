@@ -8,7 +8,14 @@ import {
     ProjectStatusDocument,
 } from 'src/core/schemas/project-status.schema';
 import { Project, ProjectDocument } from 'src/core/schemas/project.schema';
-import { checkObjectId } from 'src/shared/checkObjectId';
+import {
+    RESPOND,
+    RESPOND_CREATED,
+    RESPOND_DELETED,
+    RESPOND_GOT,
+    RESPOND_UPDATED,
+} from 'src/shared/const/respond.const';
+import { checkObjectId } from 'src/shared/utils/checkObjectId';
 import { ProjectStatusRepository } from './project-status.repository';
 
 @Injectable()
@@ -21,36 +28,37 @@ export class ProjectStatusService {
     ) {}
 
     async getAllProjectStatuses(
-        limit?: number,
-        page?: number,
+        limit?: string,
+        page?: string,
         search?: string,
         sort?: string,
     ) {
-        return this.projectStatusRepository.getAll(
-            limit,
-            page,
-            search,
-            sort,
-        );
+        return this.projectStatusRepository.getAll(limit, page, search, sort);
     }
 
     async getProjectStatusById(id: string) {
         checkObjectId(id);
-        return this.projectStatusRepository.getById(id);
+        const curProjectStatus = await this.projectStatusRepository.getById(id);
+
+        return RESPOND(RESPOND_GOT, curProjectStatus);
     }
 
     async createProjectStatus(projectStatusDto: ProjectStatusDto) {
-        return this.projectStatusRepository.create(
+        const newProjectStatus = await this.projectStatusRepository.create(
             <ProjectStatusDocument>projectStatusDto,
         );
+
+        return RESPOND(RESPOND_CREATED, newProjectStatus);
     }
 
     async updateProjectStatus(id: string, projectStatusDto: ProjectStatusDto) {
         checkObjectId(id);
-        return this.projectStatusRepository.update(
+        const updatedProjectStatus = await this.projectStatusRepository.update(
             id,
             <ProjectStatusDocument>projectStatusDto,
         );
+
+        return RESPOND(RESPOND_UPDATED, updatedProjectStatus);
     }
 
     async deleteProjectStatus(id: string) {
@@ -62,9 +70,11 @@ export class ProjectStatusService {
         const projects = await this.projectModel.find({ status: id });
         if (!projects || projects.length == 0) {
             await this.projectStatusRepository.delete(id);
-            return 'Delete successfully!';
+            return RESPOND(RESPOND_DELETED, {
+                id: id,
+            });
         } else {
-            throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+            throw new HttpException('Cannot be deleted', HttpStatus.FORBIDDEN);
         }
     }
 }
