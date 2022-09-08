@@ -1,4 +1,3 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -24,7 +23,6 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
         sort: string = 'asc',
         sortBy: string = 'name',
     ) {
-
         let sortKind;
         let limitNum: number;
         let pageNum: number;
@@ -34,22 +32,30 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
             if (sort == 'desc') sortKind = 'desc';
             else sortKind = 'asc';
         } else sortKind = 'asc';
-        
-        DEPARTMENT_PROPERTIES_CONST.includes(sortBy.toLowerCase()) ? sortBy = sortBy.toLowerCase() : sortBy = 'name';
+
+        DEPARTMENT_PROPERTIES_CONST.includes(sortBy.toLowerCase())
+            ? (sortBy = sortBy.toLowerCase())
+            : (sortBy = 'name');
 
         checkInteger(limit) ? (limitNum = parseInt(limit)) : (limitNum = 5);
 
         const totalDocs = await this.departmentModel
-            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .find({
+                name: new RegExp('.*' + search + '.*', 'i'),
+                deleted: false,
+            })
             .countDocuments();
 
         let totalPages = Math.ceil(totalDocs / limitNum);
 
         checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
-        pageNum <= totalPages ? pageNum : pageNum = totalPages;
+        pageNum <= totalPages ? pageNum : (pageNum = totalPages);
 
         let listResult = await this.departmentModel
-            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .find({
+                name: new RegExp('.*' + search + '.*', 'i'),
+                deleted: false,
+            })
             .sort({ [sortBy]: sortKind })
             .limit(limitNum)
             .populate('manager', 'name')
@@ -68,7 +74,7 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
 
     async getDepartmentById(id: string): Promise<DepartmentDocument> {
         return this.departmentModel
-            .findOne({ _id: id })
+            .findOne({ _id: id, deleted: false })
             .populate('manager', 'name')
             .populate('employees', 'name')
             .populate('projects', 'name');
@@ -76,14 +82,21 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
 
     async getEmployeesDepartment(id: string) {
         return this.departmentModel
-            .findOne({ _id: id }, { employees: 1, manager: 1, name: 1 })
+            .findOne(
+                { _id: id, deleted: false },
+                { employees: 1, manager: 1, name: 1 },
+            )
             .populate('manager', 'name')
             .populate('employees', 'name');
     }
 
     async getProjectsDepartment(id: string) {
         return this.departmentModel
-            .findOne({ _id: id }, { name: 1, projects: 1 })
+            .findOne({ _id: id, deleted: false }, { name: 1, projects: 1 })
             .populate('projects', 'name');
+    }
+
+    async findByCondition(query) {
+        return this.departmentModel.find(query);
     }
 }

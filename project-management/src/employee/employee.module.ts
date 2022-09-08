@@ -2,9 +2,11 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Mongoose } from 'mongoose';
-import { Department, DepartmentSchema } from 'src/core/schemas/department.schema';
-import { Project, ProjectSchema } from 'src/core/schemas/project.schema';
-import { Technology, TechnologySchema } from 'src/core/schemas/technology.schema';
+import { Department, DepartmentSchema } from '../core/schemas/department.schema';
+import { Project, ProjectSchema } from '../core/schemas/project.schema';
+import { Technology, TechnologySchema } from '../core/schemas/technology.schema';
+import { DepartmentModule } from '../department/department.module';
+import { ProjectModule } from '../project/project.module';
 import { Employee, EmployeeSchema } from '../core/schemas/employee.schema';
 import { EmployeeController } from './employee.controller';
 import { EmployeeRepository } from './employee.repository';
@@ -20,7 +22,10 @@ import { EmployeeService } from './employee.service';
       { name: Project.name, schema: ProjectSchema },
       { name: Department.name, schema: DepartmentSchema }
     ]),
-    JwtModule.register({})
+    JwtModule.register({}),
+
+    ProjectModule,
+    DepartmentModule
   ],
   exports: [EmployeeService]
 })

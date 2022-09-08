@@ -11,7 +11,11 @@ import { AdminDto } from '../core/dtos/admin.dto';
 import { ChangePasswordDto } from '../core/dtos/change-password.dto';
 import { Repository } from '../core/Repository';
 import { Admin, AdminDocument } from '../core/schemas/admin.schema';
-import { RESPOND, RESPOND_GOT, RESPOND_UPDATED } from '../shared/const/respond.const';
+import {
+    RESPOND,
+    RESPOND_GOT,
+    RESPOND_UPDATED,
+} from '../shared/const/respond.const';
 
 @Injectable()
 export class AdminRepository extends Repository<AdminDocument> {
@@ -43,7 +47,11 @@ export class AdminRepository extends Repository<AdminDocument> {
 
         const listResult = await this.adminModel
             .find(
-                { role: 'User', name: new RegExp('.*' + search + '.*', 'i') },
+                {
+                    role: 'User',
+                    name: new RegExp('.*' + search + '.*', 'i'),
+                    deleted: false,
+                },
                 { password: 0, rt: 0 },
             )
             .sort({ [sortBy]: sortKind })
@@ -51,7 +59,11 @@ export class AdminRepository extends Repository<AdminDocument> {
 
         const totalDocs = await this.adminModel
             .find(
-                { role: 'User', name: new RegExp('.*' + search + '.*', 'i') },
+                {
+                    role: 'User',
+                    name: new RegExp('.*' + search + '.*', 'i'),
+                    deleted: false,
+                },
                 { password: 0, rt: 0 },
             )
             .countDocuments();
@@ -108,5 +120,9 @@ export class AdminRepository extends Repository<AdminDocument> {
         );
 
         return RESPOND(RESPOND_GOT, curAdmin);
+    }
+
+    async findByCondition(query) {
+        return this.adminModel.find(query);
     }
 }

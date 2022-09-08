@@ -27,7 +27,6 @@ import {
 export class ProjectService {
     constructor(
         private projectRepository: ProjectRepository,
-        @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
         @InjectModel(Employee.name)
         private employeeModel: Model<EmployeeDocument>,
         @InjectModel(Department.name)
@@ -73,7 +72,7 @@ export class ProjectService {
         technology?: string,
         startingDate?: string,
     ) {
-        let oriQuery = {
+        let query = {
             type: type,
             status: status,
             customer: customer,
@@ -81,10 +80,8 @@ export class ProjectService {
             starting_date: startingDate,
         };
 
-        const query = Object.fromEntries(
-            Object.entries(oriQuery).filter(
-                ([_, v]) => v != null && v != '' && v != undefined,
-            ),
+        Object.keys(query).forEach((key) =>
+            query[key] === undefined ? delete query[key] : {},
         );
 
         for (let queryProperty in query) {
@@ -179,7 +176,7 @@ export class ProjectService {
         const idEmployees = convertObjectId(employees);
         const idCustomer = new mongoose.Types.ObjectId(customer);
 
-        const listEmployees = (await this.projectModel.findOne({ _id: id }))
+        const listEmployees = (await this.projectRepository.getById(id))
             .employees;
 
         await this.employeeModel.updateMany(
@@ -211,16 +208,16 @@ export class ProjectService {
 
     async deleteProject(id: string) {
         checkObjectId(id);
-        const checkProject = await this.projectModel.findOne({ _id: id });
+        const checkProject = await this.projectRepository.getById(id);
 
         if (!checkProject)
             throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
         const checkDepartment = this.departmentModel.find({ projects: id });
         if (!checkDepartment || (await checkDepartment).length == 0) {
-            const listEmployees = (await this.projectModel.findOne({ _id: id }))
+            const listEmployees = (await this.projectRepository.getById(id))
                 .employees;
-            await this.projectModel.findOneAndDelete({ _id: id });
+            await this.projectRepository.deleteProject(id);
             await this.employeeModel.updateMany(
                 { _id: { $in: listEmployees } },
                 { $pull: { projects: id } },
@@ -230,5 +227,9 @@ export class ProjectService {
         } else {
             throw new HttpException('Cannot be deleted', HttpStatus.FORBIDDEN);
         }
+    }
+
+    async findByCondition(query) {
+        return this.projectRepository.findByCondition(query);
     }
 }

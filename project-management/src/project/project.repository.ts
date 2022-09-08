@@ -1,10 +1,6 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-    Department,
-    DepartmentDocument,
-} from '../core/schemas/department.schema';
 import { Project, ProjectDocument } from '../core/schemas/project.schema';
 import { Repository } from '../core/Repository';
 import { checkInteger } from 'src/shared/utils/checkInteger';
@@ -14,8 +10,6 @@ import { PROJECT_PROPERTIES } from './project.const';
 export class ProjectRepository extends Repository<ProjectDocument> {
     constructor(
         @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
-        @InjectModel(Department.name)
-        private departmentModel: Model<DepartmentDocument>,
     ) {
         super(projectModel);
     }
@@ -106,5 +100,9 @@ export class ProjectRepository extends Repository<ProjectDocument> {
 
     async deleteProject(id: string) {
         return this.projectModel.findOneAndDelete({ _id: id });
+    }
+
+    async findByCondition(query) {
+        return this.projectModel.find(query);
     }
 }

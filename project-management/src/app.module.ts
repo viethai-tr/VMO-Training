@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
@@ -13,7 +13,7 @@ import { ProjectStatusModule } from './project-status/project-status.module';
 import { DepartmentModule } from './department/department.module';
 import { AdminModule } from './admin/admin.module';
 import configuration from './config/configuration';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { AtGuard } from './shared/auth/guards/at.guard';
 import { RolesGuard } from './shared/auth/guards/roles.guard';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
@@ -59,12 +59,9 @@ import { MongoExceptionFilter } from './shared/filters/mongo-exception.filter';
         { provide: APP_GUARD, useClass: RolesGuard },
         {
             provide: APP_FILTER,
-            useClass: HttpExceptionFilter,
-        },
-        {
-            provide: APP_FILTER,
             useClass: MongoExceptionFilter,
         },
+        { provide: APP_PIPE, useClass: ValidationPipe },
     ],
 })
-export class AppModule { }
+export class AppModule {}

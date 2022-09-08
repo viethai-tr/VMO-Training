@@ -140,4 +140,8 @@ export class DepartmentService {
 
         return RESPOND(RESPOND_GOT, listProjects);
     }
+
+    async findByCondition(query) {
+        return this.departmentRepository.findByCondition(query);
+    }
 }

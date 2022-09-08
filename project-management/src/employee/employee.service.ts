@@ -4,16 +4,9 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { checkObjectId } from '../shared/utils/checkObjectId';
 import { EmployeeDto } from '../core/dtos';
-import {
-    Department,
-    DepartmentDocument,
-} from '../core/schemas/department.schema';
-import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
-import { Project, ProjectDocument } from '../core/schemas/project.schema';
+import { EmployeeDocument } from '../core/schemas/employee.schema';
 import { convertObjectId } from '../shared/utils/convertObjectId';
 import { EmployeeRepository } from './employee.repository';
 import {
@@ -23,16 +16,16 @@ import {
     RESPOND_GOT,
     RESPOND_UPDATED,
 } from '../shared/const/respond.const';
+import { ProjectService } from '../project/project.service';
+import { DepartmentService } from '../department/department.service';
+import { checkValidDate } from 'src/shared/utils/checkValidDate';
 
 @Injectable()
 export class EmployeeService {
     constructor(
         private employeeRepository: EmployeeRepository,
-        @InjectModel(Employee.name)
-        private employeeModel: Model<EmployeeDocument>,
-        @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
-        @InjectModel(Department.name)
-        private departmentModel: Model<DepartmentDocument>,
+        private projectService: ProjectService,
+        private departmentService: DepartmentService
     ) {}
 
     async getAllEmployees(
@@ -118,6 +111,8 @@ export class EmployeeService {
 
         const idTechnologies = convertObjectId(technologies);
 
+        checkValidDate(dob);
+
         const newEmployee = await this.employeeRepository.create(<
             EmployeeDocument
         >{
@@ -137,13 +132,13 @@ export class EmployeeService {
 
     async deleteEmployee(id: string) {
         checkObjectId(id);
-        let checkEmployee = await this.employeeModel.findOne({ _id: id });
+        let checkEmployee = await this.employeeRepository.getById(id);
 
         if (!checkEmployee) throw new NotFoundException('Employee not exist');
 
-        const projects = this.projectModel.find({ employees: id });
-        const departments = this.departmentModel.find({ employees: id });
-        const manager = this.departmentModel.find({ manager: id });
+        const projects = this.projectService.findByCondition({employees: id});
+        const departments = this.departmentService.findByCondition({employees: id});
+        const manager = this.departmentService.findByCondition({manager: id});
 
         if (
             (!projects || (await projects).length == 0) &&

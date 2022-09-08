@@ -8,7 +8,6 @@ import { Repository } from "src/core/Repository";
 export class ProjectTypeRepository extends Repository<ProjectTypeDocument> {
     constructor(
         @InjectModel(ProjectType.name) private projectTypeModel: Model<ProjectTypeDocument>,
-        @InjectModel(Project.name) private projectModel: Model<ProjectDocument>
     ) {
         super(projectTypeModel);
     }

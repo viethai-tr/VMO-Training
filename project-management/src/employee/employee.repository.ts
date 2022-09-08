@@ -88,13 +88,9 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         let count;
         let listEmployees;
 
-        let oriQuery = { technologies: technology, projects: project };
+        let query = { technologies: technology, projects: project };
 
-        const query = Object.fromEntries(
-            Object.entries(oriQuery).filter(
-                ([_, v]) => (v != null && v != '' && v != undefined),
-            ),
-        );
+        Object.keys(query).forEach(key => query[key] === undefined ? delete query[key] : {});
 
         for (let queryProperty in query) {
             if (queryProperty) checkObjectId(query[queryProperty]);

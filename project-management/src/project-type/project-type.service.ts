@@ -1,19 +1,16 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { ProjectTypeDto } from 'src/core/dtos';
+import { ProjectTypeDto } from '../core/dtos';
 import {
-    ProjectType,
     ProjectTypeDocument,
-} from 'src/core/schemas/project-type.schema';
+} from '../core/schemas/project-type.schema';
+import { ProjectService } from '../project/project.service';
 import {
     RESPOND,
     RESPOND_CREATED,
     RESPOND_DELETED,
     RESPOND_GOT,
     RESPOND_UPDATED,
-} from 'src/shared/const/respond.const';
-import { Project, ProjectDocument } from '../core/schemas/project.schema';
+} from '../shared/const/respond.const';
 import { checkObjectId } from '../shared/utils/checkObjectId';
 import { ProjectTypeRepository } from './project-type.repository';
 
@@ -21,9 +18,7 @@ import { ProjectTypeRepository } from './project-type.repository';
 export class ProjectTypeService {
     constructor(
         private projectTypeRepository: ProjectTypeRepository,
-        @InjectModel(ProjectType.name)
-        private projectTypeModel: Model<ProjectTypeDocument>,
-        @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
+        private projectService: ProjectService
     ) {}
 
     async getAllProjectTypes(
@@ -62,11 +57,11 @@ export class ProjectTypeService {
 
     async deleteProjectType(id: string) {
         checkObjectId(id);
-        const checkProjectType = this.projectTypeModel.find({ _id: id });
+        const checkProjectType = this.projectTypeRepository.getById(id);
         if (!checkProjectType)
             throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
-        const projects = await this.projectModel.find({ type: id });
+        const projects = await this.projectService.findByCondition({type: id});
         if (!projects || projects.length == 0) {
             await this.projectTypeRepository.delete(id);
             return RESPOND(RESPOND_DELETED, {

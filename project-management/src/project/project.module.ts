@@ -24,8 +24,8 @@ import { ProjectService } from './project.service';
       { name: Employee.name, schema: EmployeeSchema },
       { name: Customer.name, schema: CustomerSchema },
       { name: Department.name, schema: DepartmentSchema }
-    ]),
-    ProjectTypeModule
+    ])
   ],
+  exports: [ProjectService]
 })
 export class ProjectModule {}

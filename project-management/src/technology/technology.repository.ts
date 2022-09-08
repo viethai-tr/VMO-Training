@@ -8,6 +8,7 @@ import {
     TechnologyDocument,
 } from '../core/schemas/technology.schema';
 import { Repository } from '../core/Repository';
+import { RESPOND, RESPOND_DELETED } from 'src/shared/const/respond.const';
 
 export class TechnologyRepository extends Repository<TechnologyDocument> {
     constructor(
@@ -30,11 +31,10 @@ export class TechnologyRepository extends Repository<TechnologyDocument> {
                 (!projects || (await projects).length == 0) &&
                 (!employees || (await employees).length == 0);
             if (checkLinked) {
-                await this.technologyModel.findOneAndDelete({ _id: id });
-                return {
-                    statusCode: HttpStatus.OK,
-                    message: 'Delete successfully!',
-                };
+                await this.technologyModel.findOneAndUpdate({ _id: id }, {deleted: true});
+                return RESPOND(RESPOND_DELETED, {
+                    id: id,
+                });
             } else {
                 throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
             }

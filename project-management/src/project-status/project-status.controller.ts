@@ -6,12 +6,9 @@ import {
     Param,
     Patch,
     Post,
-    Put,
     Query,
     UseFilters,
-    UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import Role from '../core/enums/role.enum';
 import { Roles } from '../shared/decorators/roles.decorator';

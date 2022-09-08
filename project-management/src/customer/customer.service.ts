@@ -1,25 +1,20 @@
 import {
-    BadRequestException,
     HttpException,
     HttpStatus,
     Injectable,
 } from '@nestjs/common';
 import { CustomerDto } from '../core/dtos';
-import { Customer, CustomerDocument } from '../core/schemas/customer.schema';
+import { CustomerDocument } from '../core/schemas/customer.schema';
 import { CustomerRepository } from './customer.repository';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Project, ProjectDocument } from '../core/schemas/project.schema';
 import { checkObjectId } from '../shared/utils/checkObjectId';
 import { RESPOND, RESPOND_CREATED, RESPOND_DELETED, RESPOND_GOT, RESPOND_UPDATED } from '../shared/const/respond.const';
+import { ProjectService } from '../project/project.service';
 
 @Injectable()
 export class CustomerService {
     constructor(
         private customerRepository: CustomerRepository,
-        @InjectModel(Customer.name)
-        private customerModel: Model<CustomerDocument>,
-        @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
+        private projectService: ProjectService
     ) {}
 
     async getAllCustomers(
@@ -56,12 +51,12 @@ export class CustomerService {
         checkObjectId(id);
 
         let checkCustomer;
-        checkCustomer = await this.customerModel.findOne({ _id: id });
+        checkCustomer = await this.customerRepository.getById(id);
 
         if (!checkCustomer)
             throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
-        const projects = this.projectModel.find({ customer: id });
+        const projects = this.projectService.findByCondition({customer: id});
         if (!projects || (await projects).length == 0) {
             await this.customerRepository.deleteCustomer(id);
             return RESPOND(RESPOND_DELETED, {

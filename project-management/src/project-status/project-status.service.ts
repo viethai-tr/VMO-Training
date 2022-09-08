@@ -1,30 +1,24 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { ProjectStatusDto } from 'src/core/dtos/project-status.dto';
-import { Employee, EmployeeDocument } from 'src/core/schemas/employee.schema';
+import { ProjectStatusDto } from '../core/dtos/project-status.dto';
 import {
-    ProjectStatus,
     ProjectStatusDocument,
-} from 'src/core/schemas/project-status.schema';
-import { Project, ProjectDocument } from 'src/core/schemas/project.schema';
+} from '../core/schemas/project-status.schema';
+import { ProjectService } from '../project/project.service';
 import {
     RESPOND,
     RESPOND_CREATED,
     RESPOND_DELETED,
     RESPOND_GOT,
     RESPOND_UPDATED,
-} from 'src/shared/const/respond.const';
-import { checkObjectId } from 'src/shared/utils/checkObjectId';
+} from '../shared/const/respond.const';
+import { checkObjectId } from '../shared/utils/checkObjectId';
 import { ProjectStatusRepository } from './project-status.repository';
 
 @Injectable()
 export class ProjectStatusService {
     constructor(
         private projectStatusRepository: ProjectStatusRepository,
-        @InjectModel(ProjectStatus.name)
-        private projectStatusModel: Model<ProjectStatusDocument>,
-        @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
+        private projectService: ProjectService
     ) {}
 
     async getAllProjectStatuses(
@@ -63,11 +57,11 @@ export class ProjectStatusService {
 
     async deleteProjectStatus(id: string) {
         checkObjectId(id);
-        const checkProjectStatus = this.projectStatusModel.find({ _id: id });
+        const checkProjectStatus = this.projectStatusRepository.getById(id);
         if (!checkProjectStatus)
             throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
-        const projects = await this.projectModel.find({ status: id });
+        const projects = await this.projectService.findByCondition({statuses: id});
         if (!projects || projects.length == 0) {
             await this.projectStatusRepository.delete(id);
             return RESPOND(RESPOND_DELETED, {

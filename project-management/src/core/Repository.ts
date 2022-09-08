@@ -1,4 +1,3 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { checkInteger } from '../shared/utils/checkInteger';
 import { IRepository } from './database/IRepository';

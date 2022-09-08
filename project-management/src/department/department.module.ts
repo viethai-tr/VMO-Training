@@ -10,6 +10,7 @@ import { DepartmentService } from './department.service';
   providers: [DepartmentService, DepartmentRepository],
   imports: [
     MongooseModule.forFeature([{name: Department.name, schema: DepartmentSchema}])
-  ]
+  ],
+  exports: [DepartmentService]
 })
 export class DepartmentModule {}

@@ -5,10 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Admin, AdminSchema } from '../../core/schemas/admin.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { Employee, EmployeeSchema } from '../../core/schemas/employee.schema';
-import { EmployeeModule } from 'src/employee/employee.module';
-import { CustomerModule } from 'src/customer/customer.module';
+import { EmployeeModule } from '../../employee/employee.module';
+import { CustomerModule } from '../../customer/customer.module';
 import { RtStrategy } from './strategy/rt.strategy';
 import { AtStrategy } from './strategy/at.strategy';
+import { AdminModule } from '../../admin/admin.module';
 // import { RtStrategy } from './strategy/rt.strategy';
 
 @Module({
@@ -17,9 +18,10 @@ import { AtStrategy } from './strategy/at.strategy';
     MongooseModule.forFeature([{name: Employee.name, schema: EmployeeSchema}]),
     JwtModule.register({}),
     EmployeeModule,
-    CustomerModule
+    CustomerModule,
+    AdminModule
   ],
   providers: [AuthService, AtStrategy, RtStrategy],
-  controllers: [AuthController]
+  controllers: [AuthController],
 })
 export class AuthModule {}

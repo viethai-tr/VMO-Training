@@ -1,9 +1,12 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
     HttpStatus,
+    Param,
     Patch,
+    Post,
     Query,
     UseFilters,
     UseInterceptors,
@@ -19,6 +22,7 @@ import { PaginationDto } from '../core/dtos';
 import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
 import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 import { API_QUERY } from '../shared/const/variables.const';
+import { CreateUserDto } from 'src/core/dtos/create-user.dto';
 
 @ApiBearerAuth()
 @ApiTags('Admin')
@@ -69,5 +73,16 @@ export class AdminController {
     @Get('me')
     async getAdminInfo(@GetCurrentAdmin('sub') id: string) {
         return this.adminService.getAdminInfo(id);
+    }
+
+    @ApiBody({ type: CreateUserDto })
+    @Post('create')
+    async createUser(@Body() createUserDto: CreateUserDto) {
+        return this.adminService.createUser(createUserDto);
+    }
+
+    @Delete(':id')
+    async deleteUser(@Param('id') id: string) {
+        return this.adminService.deleteUser(id);
     }
 }
