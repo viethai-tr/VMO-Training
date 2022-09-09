@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 import { checkInteger } from '../shared/utils/checkInteger';
 import { IRepository } from './database/IRepository';
 
@@ -9,12 +9,12 @@ export class Repository<T extends Document> implements IRepository<T> {
         return this._model.create(item);
     }
 
-    async update(id: string, item: T): Promise<T> {
+    async update(id: Types.ObjectId, item: T): Promise<T> {
         this._model.findOneAndUpdate({ _id: id }, item);
         return item;
     }
 
-    async delete(id: string): Promise<T> {
+    async delete(id: Types.ObjectId): Promise<T> {
         return this._model.findOneAndDelete({ _id: id });
     }
 
@@ -26,14 +26,12 @@ export class Repository<T extends Document> implements IRepository<T> {
         sortBy: string = 'name',
     ) {
         let sortKind;
-        let limitNum;
-        let pageNum;
+        let limitNum: number;
+        let pageNum: number;
+        let skip: number;
 
-        if (sort != undefined) {
-            sort = sort.toLowerCase();
-            if (sort == 'desc') sortKind = 'desc';
-            else sortKind = 'asc';
-        } else sortKind = 'asc';
+        sort = sort.trim().toLowerCase();
+        sort == 'desc' ? sortKind = 'desc' : sortKind = 'asc';
 
         checkInteger(limit) ? (limitNum = parseInt(limit)) : (limitNum = 5);
 
@@ -45,9 +43,12 @@ export class Repository<T extends Document> implements IRepository<T> {
         checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
         pageNum <= totalPages ? pageNum : pageNum = totalPages;
 
+        skip = limitNum * (pageNum - 1);
+
         const listResult = await this._model
             .find({ name: new RegExp('.*' + search + '.*', 'i') })
             .sort({ [sortBy]: sortKind })
+            .skip(skip)
             .limit(limitNum);
 
         return {
@@ -56,12 +57,12 @@ export class Repository<T extends Document> implements IRepository<T> {
             totalPages,
             search,
             sortBy,
-            sort,
+            sort: sortKind,
             listResult,
         };
     }
 
-    async getById(id: string): Promise<T> {
+    async getById(id: Types.ObjectId): Promise<T> {
         return this._model.findOne({ _id: id });
     }
 }

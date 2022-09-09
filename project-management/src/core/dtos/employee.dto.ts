@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsString, Length, Matches } from 'class-validator';
+import { OBJECTID_PATTERN } from '../../shared/const/regex.const';
 
 export class EmployeeDto {
     @IsString()
@@ -38,6 +39,7 @@ export class EmployeeDto {
     @IsArray()
     @IsNotEmpty()
     @IsString({ each: true })
+    @Matches(OBJECTID_PATTERN, {each: true})
     @ApiProperty({
         example: ['62f32902db3f35d4abfe2d0a', '62f32942db3f35d4abfe2d0b'],
     })

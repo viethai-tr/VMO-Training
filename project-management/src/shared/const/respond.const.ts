@@ -8,7 +8,7 @@ export function RESPOND(respond, data) {
 }
 
 export const RESPOND_DELETED = {
-    statusCode: HttpStatus.OK,
+    statusCode: HttpStatus.NO_CONTENT,
     message: 'Deleted successfully',
 };
 

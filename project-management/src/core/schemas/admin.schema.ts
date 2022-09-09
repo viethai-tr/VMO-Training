@@ -3,7 +3,7 @@ import { Exclude } from 'class-transformer';
 
 export type AdminDocument = Admin & Document;
 
-@Schema({ collection: 'admins' })
+@Schema({ collection: 'admins', timestamps: true })
 export class Admin {
     @Prop({ unique: true, required: true })
     username: string;

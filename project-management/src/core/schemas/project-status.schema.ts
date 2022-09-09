@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
 export type ProjectStatusDocument = ProjectStatus & Document;
 
-@Schema({collection: 'statuses'})
+@Schema({collection: 'statuses', timestamps: true})
 export class ProjectStatus {
     @Prop({ required: true})
     name: string;

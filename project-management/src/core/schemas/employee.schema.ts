@@ -3,7 +3,7 @@ import mongoose, { Types } from "mongoose";
 
 export type EmployeeDocument = Employee & Document;
 
-@Schema({collection: 'employees'})
+@Schema({collection: 'employees', timestamps: true})
 export class Employee {
     @Prop({ required: true })
     name: string;

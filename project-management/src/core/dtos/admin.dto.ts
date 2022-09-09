@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import Status from "../enums/status.enum";
 
 export class AdminDto {
     @IsString()
@@ -9,7 +10,7 @@ export class AdminDto {
     })
     name: string;
 
-    @IsString()
+    @IsEnum(Status)
     @ApiProperty({
         example: 'Active'
     })

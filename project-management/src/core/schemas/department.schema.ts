@@ -3,7 +3,7 @@ import mongoose, { Types } from "mongoose";
 
 export type DepartmentDocument = Department & Document;
 
-@Schema()
+@Schema({collection: 'departments', timestamps: true})
 export class Department {
     @Prop({ required: true})
     name: string;
