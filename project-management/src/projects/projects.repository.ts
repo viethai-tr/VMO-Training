@@ -73,7 +73,7 @@ export class ProjectRepository extends Repository<ProjectDocument> {
         };
     }
 
-    async getProjectById(id: Types.ObjectId) {
+    async getProjectById(id: string) {
         return this.projectModel
             .findOne({ _id: id, isDeleted: false})
             .populate('type', 'name')
@@ -83,7 +83,7 @@ export class ProjectRepository extends Repository<ProjectDocument> {
             .populate('customer', 'name');
     }
 
-    async getEmployeesProject(id: Types.ObjectId) {
+    async getEmployeesProject(id: string) {
         return this.projectModel
             .findOne({ _id: id, isDeleted: false}, { projects: 1, name: 1 })
             .populate('employees', 'name');
@@ -107,7 +107,7 @@ export class ProjectRepository extends Repository<ProjectDocument> {
         };
     }
 
-    async deleteProject(id: Types.ObjectId) {
+    async deleteProject(id: string) {
         return this.projectModel.softDelete({_id: id});
     }
 

@@ -13,14 +13,14 @@ export class CustomerRepository extends Repository<CustomerDocument> {
         super(customerModel);
     }
 
-    async deleteCustomer(id: Types.ObjectId) {
+    async deleteCustomer(id: string) {
         return this.customerModel.updateOne(
             { _id: id, deleted: false },
             { $set: { deleted: true } },
         );
     }
 
-    // async deleteCustomer(id: Types.ObjectId) {
+    // async deleteCustomer(id: string) {
     //     return this.customerModel.findOneAndDelete({ _id: id });
     // }
 }

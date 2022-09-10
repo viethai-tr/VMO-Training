@@ -52,7 +52,7 @@ export class AdminController {
     @Roles(Role.Admin, Role.User)
     @Patch('me')
     async updateAdmin(
-        @GetCurrentAdmin('sub', ParseObjectIdPipe) id: Types.ObjectId,
+        @GetCurrentAdmin('sub', ParseObjectIdPipe) id: string,
         @Body() adminDto: AdminDto,
     ) {
         await this.adminService.updateAdmin(id, adminDto);
@@ -66,7 +66,7 @@ export class AdminController {
     @Roles(Role.Admin, Role.User)
     @Patch('password')
     async changePassword(
-        @GetCurrentAdmin('sub', ParseObjectIdPipe) id: Types.ObjectId,
+        @GetCurrentAdmin('sub', ParseObjectIdPipe) id: string,
         @Body() passwordDto: ChangePasswordDto,
     ) {
         return this.adminService.changePassword(id, passwordDto);
@@ -74,7 +74,7 @@ export class AdminController {
 
     @Roles(Role.Admin, Role.User)
     @Get('me')
-    async getAdminInfo(@GetCurrentAdmin('sub', ParseObjectIdPipe) id: Types.ObjectId) {
+    async getAdminInfo(@GetCurrentAdmin('sub', ParseObjectIdPipe) id: string) {
         return this.adminService.getAdminInfo(id);
     }
 
@@ -87,12 +87,12 @@ export class AdminController {
 
     @Delete(':id')
     @HttpCode(204)
-    async deleteUser(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async deleteUser(@Param('id', ParseObjectIdPipe) id: string) {
         return this.adminService.deleteUser(id);
     }
 
     @Post('restore/:id')
-    async restoreUser(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async restoreUser(@Param('id', ParseObjectIdPipe) id: string) {
         return this.adminService.restoreUser(id);
     }
 }

@@ -35,13 +35,13 @@ export class ProjectTypeService {
         return this.projectTypeRepository.getAll(limit, page, search, sort);
     }
 
-    async getProjectTypeById(id: Types.ObjectId) {
+    async getProjectTypeById(id: string) {
         const curProjectType = await this.projectTypeRepository.getById(id);
 
         return RESPOND(RESPOND_GOT, curProjectType);
     }
 
-    async updateProjectType(id: Types.ObjectId, projectTypeDto: ProjectTypeDto) {
+    async updateProjectType(id: string, projectTypeDto: ProjectTypeDto) {
         const updatedProjectType = await this.projectTypeRepository.update(
             id,
             <ProjectTypeDocument>projectTypeDto,
@@ -58,7 +58,7 @@ export class ProjectTypeService {
         return RESPOND(RESPOND_CREATED, newProjectType);
     }
 
-    async deleteProjectType(id: Types.ObjectId) {
+    async deleteProjectType(id: string) {
         const checkProjectType = this.projectTypeRepository.getById(id);
         if (!checkProjectType)
             throw new HttpException('Not found', HttpStatus.NOT_FOUND);
@@ -71,7 +71,7 @@ export class ProjectTypeService {
         }
     }
 
-    async restoreProjectType(id: Types.ObjectId) {
+    async restoreProjectType(id: string) {
         return this.projectTypeModel.restore({ _id: id });
     }
 }

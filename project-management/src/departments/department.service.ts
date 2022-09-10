@@ -46,7 +46,7 @@ export class DepartmentService {
         );
     }
 
-    async getDepartmentById(id: Types.ObjectId) {
+    async getDepartmentById(id: string) {
         return this.departmentRepository.getDepartmentById(id);
     }
 
@@ -81,7 +81,7 @@ export class DepartmentService {
         });
     }
 
-    async updateDepartment(id: Types.ObjectId, departmentDto: DepartmentDto) {
+    async updateDepartment(id: string, departmentDto: DepartmentDto) {
         let { name, description, founding_date, manager, employees, projects } =
             departmentDto;
 
@@ -112,22 +112,22 @@ export class DepartmentService {
         });
     }
 
-    async deleteDepartment(id: Types.ObjectId) {
+    async deleteDepartment(id: string) {
         return this.departmentModel.softDelete({_id: id});
     }
 
-    async restoreDepartment(id: Types.ObjectId) {
+    async restoreDepartment(id: string) {
         return this.departmentModel.restore({_id: id});
     }
 
-    async getEmployeesDepartment(id: Types.ObjectId) {
+    async getEmployeesDepartment(id: string) {
         const listEmployees =
             await this.departmentRepository.getEmployeesDepartment(id);
 
         return RESPOND(RESPOND_GOT, listEmployees);
     }
 
-    async getProjectsDepartment(id: Types.ObjectId) {
+    async getProjectsDepartment(id: string) {
         const listProjects =
             await this.departmentRepository.getProjectsDepartment(id);
 

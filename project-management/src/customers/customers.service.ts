@@ -30,11 +30,11 @@ export class CustomerService {
         return this.customerRepository.getAll(limit, page, sort, search);
     }
 
-    async getCustomerById(id: Types.ObjectId) {
+    async getCustomerById(id: string) {
         return this.customerRepository.getById(id);
     }
 
-    async updateCustomer(id: Types.ObjectId, customerDto: CustomerDto) {
+    async updateCustomer(id: string, customerDto: CustomerDto) {
         return this.customerRepository.update(
             id,
             <CustomerDocument>customerDto,
@@ -47,7 +47,7 @@ export class CustomerService {
         );
     }
 
-    async deleteCustomer(id: Types.ObjectId) {
+    async deleteCustomer(id: string) {
         let checkCustomer;
         checkCustomer = await this.customerRepository.getById(id);
         // console.log(checkCustomer);
@@ -66,7 +66,7 @@ export class CustomerService {
         // return this.customerRepository.deleteCustomer(id);
     }
 
-    async restoreCustomer(id: Types.ObjectId) {
+    async restoreCustomer(id: string) {
         return this.customerModel.restore({_id: id});
     }
 }

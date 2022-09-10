@@ -50,17 +50,17 @@ export class EmployeeService {
         );
     }
 
-    async getEmployeeById(id: Types.ObjectId) {
+    async getEmployeeById(id: string) {
         return this.employeeRepository.getEmployeeByIdAsync(
             id,
         );
     }
 
-    async countEmployees(technology?: Types.ObjectId, project?: Types.ObjectId) {
+    async countEmployees(technology?: string, project?: string) {
         return this.employeeRepository.countEmployees(technology, project);
     }
 
-    async updateEmployee(id: Types.ObjectId, employeeDto: EmployeeDto) {
+    async updateEmployee(id: string, employeeDto: EmployeeDto) {
         let {
             name,
             dob,
@@ -126,7 +126,7 @@ export class EmployeeService {
         });
     }
 
-    async deleteEmployee(id: Types.ObjectId) {
+    async deleteEmployee(id: string) {
         let checkEmployee = await this.employeeRepository.getById(id);
 
         if (!checkEmployee) throw new NotFoundException('Employee not exist');
@@ -146,7 +146,7 @@ export class EmployeeService {
         }
     }
 
-    async restoreEmployee(id: Types.ObjectId) {
+    async restoreEmployee(id: string) {
         return this.employeeModel.restore({_id: id});
     }
 }

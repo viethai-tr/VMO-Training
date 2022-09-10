@@ -74,18 +74,18 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         };
     }
 
-    async getEmployeeByIdAsync(id: Types.ObjectId): Promise<EmployeeDocument> {
+    async getEmployeeByIdAsync(id: string): Promise<EmployeeDocument> {
         return this.employeeModel
             .findOne({ _id: id, isDeleted: false})
             .populate('technologies', 'name')
             .populate('projects', 'name');
     }
 
-    async deleteEmployee(id: Types.ObjectId) {
+    async deleteEmployee(id: string) {
         return this.employeeModel.findOneAndDelete({ _id: id, isDeleted: false});
     }
 
-    async countEmployees(technology?: Types.ObjectId, project?: Types.ObjectId) {
+    async countEmployees(technology?: string, project?: string) {
         let count;
         let listEmployees;
 

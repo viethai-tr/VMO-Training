@@ -10,12 +10,12 @@ export class Repository<T extends Document> implements IRepository<T> {
         return this._model.create(item);
     }
 
-    async update(id: Types.ObjectId, item: any): Promise<T> {
+    async update(id: string, item: any): Promise<T> {
         this._model.findOneAndUpdate({ _id: id, isDeleted: false }, item);
         return item;
     }
 
-    // async delete(id: Types.ObjectId): Promise<T> {
+    // async delete(id: string): Promise<T> {
     //     return this._model.findOneAndUpdate({ _id: id, isDeleted: false }, {isDeleted: true});
     // }
 
@@ -64,7 +64,7 @@ export class Repository<T extends Document> implements IRepository<T> {
         };
     }
 
-    async getById(id: Types.ObjectId): Promise<T> {
+    async getById(id: string): Promise<T> {
         return this._model.findOne({ _id: id, isDeleted: false });
     }
 }

@@ -76,7 +76,7 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
         };
     }
 
-    async getDepartmentById(id: Types.ObjectId): Promise<DepartmentDocument> {
+    async getDepartmentById(id: string): Promise<DepartmentDocument> {
         return this.departmentModel
             .findOne({ _id: id, isDeleted: false})
             .populate('manager', 'name')
@@ -84,7 +84,7 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
             .populate('projects', 'name');
     }
 
-    async getEmployeesDepartment(id: Types.ObjectId) {
+    async getEmployeesDepartment(id: string) {
         return this.departmentModel
             .findOne(
                 { _id: id, isDeleted: false},
@@ -94,7 +94,7 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
             .populate('employees', 'name');
     }
 
-    async getProjectsDepartment(id: Types.ObjectId) {
+    async getProjectsDepartment(id: string) {
         return this.departmentModel
             .findOne({ _id: id, isDeleted: false}, { name: 1, projects: 1 })
             .populate('projects', 'name');

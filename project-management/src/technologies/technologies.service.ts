@@ -23,11 +23,11 @@ export class TechnologyService {
         );
     }
 
-    async getTechnologyById(id: Types.ObjectId): Promise<TechnologyDocument> {
+    async getTechnologyById(id: string): Promise<TechnologyDocument> {
         return this.technologyRepository.getById(id);
     }
 
-    async updateTechnology(id: Types.ObjectId, technologyDto: TechnologyDto) {
+    async updateTechnology(id: string, technologyDto: TechnologyDto) {
         
         return this.technologyRepository.update(
             id,
@@ -41,7 +41,7 @@ export class TechnologyService {
         );
     }
 
-    async deleteTechnology(id: Types.ObjectId) {
+    async deleteTechnology(id: string) {
         
         return this.technologyRepository.deleteTechnology(id);
     }

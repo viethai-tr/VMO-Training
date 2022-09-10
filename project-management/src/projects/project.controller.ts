@@ -72,13 +72,13 @@ export class ProjectController {
 
     @Roles(Role.Admin, Role.User)
     @Get(':id/employee')
-    async getEmployeesProject(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async getEmployeesProject(@Param('id', ParseObjectIdPipe) id: string) {
         return this.projectService.getEmployeesProject(id);
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
-    async getProjectById(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async getProjectById(@Param('id', ParseObjectIdPipe) id: string) {
         return this.projectService.getProjectById(id);
     }
 
@@ -91,7 +91,7 @@ export class ProjectController {
 
     @Patch(':id')
     async updateProject(
-        @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+        @Param('id', ParseObjectIdPipe) id: string,
         @Body() projectDto: ProjectDto,
     ) {
         return this.projectService.updateProject(id, projectDto);
@@ -99,12 +99,12 @@ export class ProjectController {
 
     @Delete(':id')
     @HttpCode(204)
-    async deleteProject(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async deleteProject(@Param('id', ParseObjectIdPipe) id: string) {
         return this.projectService.deleteProject(id);
     }
 
     @Post('restore/:id')
-    async restoreProject(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async restoreProject(@Param('id', ParseObjectIdPipe) id: string) {
         return this.projectService.restoreProject(id);
     }
 }

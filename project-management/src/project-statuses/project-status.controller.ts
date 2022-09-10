@@ -49,7 +49,7 @@ export class ProjectStatusController {
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
-    async getProjectStatusById(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async getProjectStatusById(@Param('id', ParseObjectIdPipe) id: string) {
         return this.projectStatusService.getProjectStatusById(id);
     }
 
@@ -61,7 +61,7 @@ export class ProjectStatusController {
 
     @Patch(':id')
     async updateProjectStatus(
-        @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+        @Param('id', ParseObjectIdPipe) id: string,
         @Body() projectStatusDto: ProjectStatusDto,
     ) {
         return this.projectStatusService.updateProjectStatus(
@@ -72,12 +72,12 @@ export class ProjectStatusController {
 
     @Delete(':id')
     @HttpCode(204)
-    async deleteProjectStatus(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async deleteProjectStatus(@Param('id', ParseObjectIdPipe) id: string) {
         return this.projectStatusService.deleteProjectStatus(id);
     }
 
     @Post('restore/:id')
-    async restoreProjectStatus(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async restoreProjectStatus(@Param('id', ParseObjectIdPipe) id: string) {
         return this.projectStatusService.restoreProjectStatus(id);
     }
 }

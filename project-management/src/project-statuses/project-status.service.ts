@@ -35,7 +35,7 @@ export class ProjectStatusService {
         return this.projectStatusRepository.getAll(limit, page, search, sort);
     }
 
-    async getProjectStatusById(id: Types.ObjectId) {
+    async getProjectStatusById(id: string) {
         const curProjectStatus = await this.projectStatusRepository.getById(id);
 
         return RESPOND(RESPOND_GOT, curProjectStatus);
@@ -49,7 +49,7 @@ export class ProjectStatusService {
         return RESPOND(RESPOND_CREATED, newProjectStatus);
     }
 
-    async updateProjectStatus(id: Types.ObjectId, projectStatusDto: ProjectStatusDto) {
+    async updateProjectStatus(id: string, projectStatusDto: ProjectStatusDto) {
         const updatedProjectStatus = await this.projectStatusRepository.update(
             id,
             <ProjectStatusDocument>projectStatusDto,
@@ -58,7 +58,7 @@ export class ProjectStatusService {
         return RESPOND(RESPOND_UPDATED, updatedProjectStatus);
     }
 
-    async deleteProjectStatus(id: Types.ObjectId) {
+    async deleteProjectStatus(id: string) {
         const checkProjectStatus = this.projectStatusRepository.getById(id);
         if (!checkProjectStatus)
             throw new HttpException('Not found', HttpStatus.NOT_FOUND);
@@ -71,7 +71,7 @@ export class ProjectStatusService {
         }
     }
 
-    async restoreProjectStatus(id: Types.ObjectId) {
+    async restoreProjectStatus(id: string) {
         return this.projectStatusModel.restore({_id: id});
     }
 }

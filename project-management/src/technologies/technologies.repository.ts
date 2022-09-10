@@ -21,7 +21,7 @@ export class TechnologyRepository extends Repository<TechnologyDocument> {
         super(technologyModel);
     }
 
-    async deleteTechnology(id: Types.ObjectId) {
+    async deleteTechnology(id: string) {
         const checkTechnology = await this.technologyModel.find({ _id: id });
         if (checkTechnology) {
             const employees = this.employeeModel.find({ technologies: id });

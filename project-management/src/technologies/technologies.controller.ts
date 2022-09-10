@@ -52,7 +52,7 @@ export class TechnologyController {
     @Roles(Role.Admin, Role.User)
     @Get(':id')
     async getTechnologyById(
-        @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+        @Param('id', ParseObjectIdPipe) id: string,
     ): Promise<TechnologyDocument> {
         return this.technologyService.getTechnologyById(id);
     }
@@ -66,7 +66,7 @@ export class TechnologyController {
 
     @Patch(':id')
     async updateTechnology(
-        @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+        @Param('id', ParseObjectIdPipe) id: string,
         @Body() technologyDto: TechnologyDto,
     ) {
         return this.technologyService.updateTechnology(
@@ -76,7 +76,7 @@ export class TechnologyController {
     }
 
     @Delete(':id')
-    async deleteTechnology(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async deleteTechnology(@Param('id', ParseObjectIdPipe) id: string) {
         return this.technologyService.deleteTechnology(id);
     }
 }

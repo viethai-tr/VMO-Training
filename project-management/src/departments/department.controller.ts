@@ -52,26 +52,26 @@ export class DepartmentController {
     @Roles(Role.Admin, Role.User)
     @Get(':id')
     async getDepartmentById(
-        @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+        @Param('id', ParseObjectIdPipe) id: string,
     ) {
         return this.departmentService.getDepartmentById(id);
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id/employees')
-    async getEmployeesDepartment(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async getEmployeesDepartment(@Param('id', ParseObjectIdPipe) id: string) {
         return this.departmentService.getEmployeesDepartment(id);
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id/projects')
-    async getProjectsDepartment(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async getProjectsDepartment(@Param('id', ParseObjectIdPipe) id: string) {
         return this.departmentService.getProjectsDepartment(id);
     }
 
     @Patch(':id')
     async updateDepartment(
-        @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+        @Param('id', ParseObjectIdPipe) id: string,
         @Body() departmentDto: DepartmentDto,
     ) {
         return this.departmentService.updateDepartment(id, departmentDto);
@@ -86,12 +86,12 @@ export class DepartmentController {
 
     @Delete(':id')
     @HttpCode(204)
-    async deleteDepartment(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async deleteDepartment(@Param('id', ParseObjectIdPipe) id: string) {
         return this.departmentService.deleteDepartment(id);
     }
 
     @Post('restore/:id')
-    async restoreDepartment(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async restoreDepartment(@Param('id', ParseObjectIdPipe) id: string) {
         return this.departmentService.restoreDepartment(id);
     }
 }

@@ -50,13 +50,13 @@ export class ProjectService {
         );
     }
 
-    async getProjectById(id: Types.ObjectId) {
+    async getProjectById(id: string) {
         const curProject = await this.projectRepository.getProjectById(id);
 
         return RESPOND(RESPOND_GOT, curProject);
     }
 
-    async getEmployeesProject(id: Types.ObjectId) {
+    async getEmployeesProject(id: string) {
         const listEmployees = await this.projectRepository.getEmployeesProject(
             id,
         );
@@ -137,7 +137,7 @@ export class ProjectService {
         return RESPOND(RESPOND_CREATED, newProject);
     }
 
-    async updateProject(id: Types.ObjectId, projectDto: ProjectDto) {
+    async updateProject(id: string, projectDto: ProjectDto) {
 
         let {
             name,
@@ -193,7 +193,7 @@ export class ProjectService {
 
     }
 
-    async deleteProject(id: Types.ObjectId) {
+    async deleteProject(id: string) {
         
         const checkProject = await this.projectRepository.getById(id);
 
@@ -214,7 +214,7 @@ export class ProjectService {
         }
     }
 
-    async restoreProject(id: Types.ObjectId) {
+    async restoreProject(id: string) {
         return this.projectModel.restore({_id: id});
     }
 

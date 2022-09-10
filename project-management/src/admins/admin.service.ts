@@ -17,17 +17,17 @@ export class AdminService {
         return this.adminRepository.getAllUsers(limit, page, search, sort);
     }
 
-    async changePassword(id: Types.ObjectId, passwordDto: ChangePasswordDto) {
+    async changePassword(id: string, passwordDto: ChangePasswordDto) {
         
         return this.adminRepository.changePassword(id, passwordDto);
     }
 
-    async updateAdmin(id: Types.ObjectId, adminDto: AdminDto) {
+    async updateAdmin(id: string, adminDto: AdminDto) {
         
         return this.adminRepository.updateAdmin(id, adminDto);
     }
 
-    async getAdminInfo(id: Types.ObjectId) {
+    async getAdminInfo(id: string) {
         
         return this.adminRepository.getAdminInfo(id);
     }
@@ -37,7 +37,7 @@ export class AdminService {
         return this.adminRepository.create(<AdminDocument>(createUserDto));
     }
 
-    async deleteUser(id: Types.ObjectId) {
+    async deleteUser(id: string) {
         
         const checkUser = await this.adminRepository.getById(id);
         if (!checkUser) throw new NotFoundException('User not found');
@@ -46,7 +46,7 @@ export class AdminService {
         return this.adminModel.softDelete({ _id: id });
     }
 
-    async restoreUser(id: Types.ObjectId) {
+    async restoreUser(id: string) {
         return this.adminModel.restore({ _id: id });
     }
 

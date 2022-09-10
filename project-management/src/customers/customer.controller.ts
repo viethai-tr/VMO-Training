@@ -44,18 +44,18 @@ export class CustomerController {
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
-    async getCustomerById(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async getCustomerById(@Param('id', ParseObjectIdPipe) id: string) {
         return this.customerService.getCustomerById(id);
     }
 
     @Delete(':id')
     @HttpCode(204)
-    async deleteCustomer(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async deleteCustomer(@Param('id', ParseObjectIdPipe) id: string) {
         return this.customerService.deleteCustomer(id);
     }
 
     @Post('restore/:id')
-    async restoreCustomer(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async restoreCustomer(@Param('id', ParseObjectIdPipe) id: string) {
         return this.customerService.restoreCustomer(id);
     }
 
@@ -67,7 +67,7 @@ export class CustomerController {
 
     @Patch(':id')
     async updateCustomer(
-        @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+        @Param('id', ParseObjectIdPipe) id: string,
         @Body() customerDto: CustomerDto,
     ) {
         return this.customerService.updateCustomer(id, customerDto);

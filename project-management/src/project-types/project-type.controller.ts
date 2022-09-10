@@ -33,12 +33,12 @@ export class ProjectTypeController {
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
-    async getProjectTypeById(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async getProjectTypeById(@Param('id', ParseObjectIdPipe) id: string) {
         return this.projectTypeService.getProjectTypeById(id);
     }
 
     @Patch(':id')
-    async updateProjectType(@Param('id', ParseObjectIdPipe) id: Types.ObjectId, @Body() projectTypeDto: ProjectTypeDto) {
+    async updateProjectType(@Param('id', ParseObjectIdPipe) id: string, @Body() projectTypeDto: ProjectTypeDto) {
         return this.projectTypeService.updateProjectType(id, <ProjectTypeDocument>(projectTypeDto));
     }
 
@@ -50,12 +50,12 @@ export class ProjectTypeController {
 
     @Delete(':id')
     @HttpCode(204)
-    async deleteProjectType(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async deleteProjectType(@Param('id', ParseObjectIdPipe) id: string) {
         return this.projectTypeService.deleteProjectType(id);
     }
 
     @Post('restore/:id')
-    async restoreProjectType(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async restoreProjectType(@Param('id', ParseObjectIdPipe) id: string) {
         return this.projectTypeService.restoreProjectType(id);
     }
 }

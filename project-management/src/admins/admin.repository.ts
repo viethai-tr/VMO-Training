@@ -81,7 +81,7 @@ export class AdminRepository extends Repository<AdminDocument> {
         };
     }
 
-    async changePassword(id: Types.ObjectId, passwordDto: ChangePasswordDto) {
+    async changePassword(id: string, passwordDto: ChangePasswordDto) {
         if (passwordDto.newPassword != passwordDto.repeatPassword) {
             throw new BadRequestException(
                 'Password and confirm password does not match!',
@@ -109,11 +109,11 @@ export class AdminRepository extends Repository<AdminDocument> {
         }
     }
 
-    async updateAdmin(id: Types.ObjectId, adminDto: AdminDto) {
+    async updateAdmin(id: string, adminDto: AdminDto) {
         return this.adminModel.findOneAndUpdate({ _id: id }, adminDto);
     }
 
-    async getAdminInfo(id: Types.ObjectId) {
+    async getAdminInfo(id: string) {
         return this.adminModel.findOne(
             { _id: id },
             { password: 0, rt: 0 },

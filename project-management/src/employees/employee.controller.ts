@@ -65,22 +65,22 @@ export class EmployeeController {
         type: 'string',
     })
     async countEmployees(
-        @Query('technology', ParseObjectIdPipe) technology: Types.ObjectId,
-        @Query('project', ParseObjectIdPipe) project: Types.ObjectId,
+        @Query('technology', ParseObjectIdPipe) technology: string,
+        @Query('project', ParseObjectIdPipe) project: string,
     ) {
         return this.employeeService.countEmployees(technology, project);
     }
 
     @Roles(Role.Admin, Role.User)
     @Get(':id')
-    async getEmployeeById(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async getEmployeeById(@Param('id', ParseObjectIdPipe) id: string) {
         return this.employeeService.getEmployeeById(id);
     }
 
     @Patch(':id')
     @ApiBody({ type: EmployeeDto })
     async updateEmployee(
-        @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+        @Param('id', ParseObjectIdPipe) id: string,
         @Body() employee: EmployeeDto,
     ) {
         return this.employeeService.updateEmployee(id, employee);
@@ -95,12 +95,12 @@ export class EmployeeController {
 
     @Delete(':id')
     @HttpCode(204)
-    async deleteEmployee(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async deleteEmployee(@Param('id', ParseObjectIdPipe) id: string) {
         return this.employeeService.deleteEmployee(id);
     }
 
     @Post('restore/:id')
-    async restoreEmployee(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    async restoreEmployee(@Param('id', ParseObjectIdPipe) id: string) {
         return this.employeeService.restoreEmployee(id);
     }
 }
