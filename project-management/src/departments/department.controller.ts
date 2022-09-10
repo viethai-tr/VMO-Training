@@ -20,6 +20,7 @@ import { API_QUERY } from '../shared/const/variables.const';
 import { DEPARTMENT_QUERY } from './department.const';
 import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
 import { Types } from 'mongoose';
+import { UpdateDepartmentDto } from './dtos/update.department.dto';
 
 @ApiBearerAuth()
 @ApiTags('Department')
@@ -72,9 +73,9 @@ export class DepartmentController {
     @Patch(':id')
     async updateDepartment(
         @Param('id', ParseObjectIdPipe) id: string,
-        @Body() departmentDto: DepartmentDto,
+        @Body() updateDepartmentDto: UpdateDepartmentDto,
     ) {
-        return this.departmentService.updateDepartment(id, departmentDto);
+        return this.departmentService.updateDepartment(id, updateDepartmentDto);
     }
 
     @Post()

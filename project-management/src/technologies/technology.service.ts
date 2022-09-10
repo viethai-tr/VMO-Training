@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { TechnologyDto } from 'src/core/dtos/technology.dto';
+import { TechnologyDto } from 'src/technologies/dtos/create.technology.dto';
 import { TechnologyDocument } from 'src/core/schemas/technology.schema';
 import { checkObjectId } from 'src/shared/utils/checkObjectId';
-import { TechnologyRepository } from './technologies.repository';
+import { TechnologyRepository } from './technology.repository';
+import { UpdateTechnologyDto } from './dtos/update.technology.dto';
 
 @Injectable()
 export class TechnologyService {
@@ -27,11 +28,10 @@ export class TechnologyService {
         return this.technologyRepository.getById(id);
     }
 
-    async updateTechnology(id: string, technologyDto: TechnologyDto) {
+    async updateTechnology(id: string, updateTechnologyDto: UpdateTechnologyDto) {
         
         return this.technologyRepository.update(
-            id,
-            <TechnologyDocument>technologyDto,
+            id, updateTechnologyDto,
         );
     }
 

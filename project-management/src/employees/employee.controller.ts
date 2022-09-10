@@ -20,6 +20,7 @@ import { API_QUERY } from '../shared/const/variables.const';
 import { EMPLOYEE_QUERY } from './employee.const';
 import { Types } from 'mongoose';
 import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
+import { UpdateEmployeeDto } from './dtos/update.employee.dto';
 
 @ApiBearerAuth()
 @ApiTags('Employee')
@@ -81,9 +82,9 @@ export class EmployeeController {
     @ApiBody({ type: EmployeeDto })
     async updateEmployee(
         @Param('id', ParseObjectIdPipe) id: string,
-        @Body() employee: EmployeeDto,
+        @Body() updateEmployeeDto: UpdateEmployeeDto,
     ) {
-        return this.employeeService.updateEmployee(id, employee);
+        return this.employeeService.updateEmployee(id, updateEmployeeDto);
     }
 
     @Post()

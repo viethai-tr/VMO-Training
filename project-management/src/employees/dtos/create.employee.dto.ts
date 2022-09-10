@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsNumber, IsString, Length, Matches } from 'class-validator';
+import { IsArray, IsDate, IsNotEmpty, IsNumber, IsString, Length, Matches } from 'class-validator';
 import { OBJECTID_PATTERN } from '../../shared/const/regex.const';
 
 export class EmployeeDto {
@@ -12,6 +12,7 @@ export class EmployeeDto {
     name: string;
 
     @Type(() => Date)
+    @IsDate()
     @ApiProperty({
         example: '1999-11-05',
     })

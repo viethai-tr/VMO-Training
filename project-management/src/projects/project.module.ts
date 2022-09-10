@@ -7,10 +7,9 @@ import { ProjectStatus, ProjectStatusSchema } from '../core/schemas/project-stat
 import { ProjectType, ProjectTypeSchema } from '../core/schemas/project-type.schema';
 import { Project, ProjectSchema } from '../core/schemas/project.schema';
 import { Technology, TechnologySchema } from '../core/schemas/technology.schema';
-import { ProjectTypeModule } from '../project-types/project-types.module';
 import { ProjectController } from './project.controller';
-import { ProjectRepository } from './projects.repository';
-import { ProjectService } from './projects.service';
+import { ProjectRepository } from './project.repository';
+import { ProjectService } from './project.service';
 
 @Module({
   controllers: [ProjectController],
@@ -24,7 +23,8 @@ import { ProjectService } from './projects.service';
       { name: Employee.name, schema: EmployeeSchema },
       { name: Customer.name, schema: CustomerSchema },
       { name: Department.name, schema: DepartmentSchema }
-    ])
+    ]),
+
   ],
   exports: [ProjectService]
 })

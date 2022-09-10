@@ -83,6 +83,16 @@ export class ProjectRepository extends Repository<ProjectDocument> {
             .populate('customer', 'name');
     }
 
+    async getDeletedProject(id: string) {
+        return this.projectModel
+            .findOne({ _id: id, isDeleted: true})
+            .populate('type', 'name')
+            .populate('status', 'name')
+            .populate('technologies', 'name')
+            .populate('employees', 'name')
+            .populate('customer', 'name');
+    }
+
     async getEmployeesProject(id: string) {
         return this.projectModel
             .findOne({ _id: id, isDeleted: false}, { projects: 1, name: 1 })

@@ -10,8 +10,9 @@ export class TechnologyDto {
     name: string;
 
     @IsString()
+    @IsNotEmpty()
     @ApiProperty({
-        example: 'Working'
+        example: true
     })
-    status: string;
+    status: boolean;
 }

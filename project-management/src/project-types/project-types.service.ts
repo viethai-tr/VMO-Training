@@ -7,7 +7,7 @@ import {
     ProjectType,
     ProjectTypeDocument,
 } from '../core/schemas/project-type.schema';
-import { ProjectService } from '../projects/projects.service';
+import { ProjectService } from '../projects/project.service';
 import {
     RESPOND,
     RESPOND_CREATED,
@@ -15,6 +15,7 @@ import {
     RESPOND_GOT,
     RESPOND_UPDATED,
 } from '../shared/const/respond.const';
+import { UpdateProjectTypeDto } from './dtos/update.project-type.dto';
 import { ProjectTypeRepository } from './project-types.repository';
 
 @Injectable()
@@ -36,26 +37,19 @@ export class ProjectTypeService {
     }
 
     async getProjectTypeById(id: string) {
-        const curProjectType = await this.projectTypeRepository.getById(id);
-
-        return RESPOND(RESPOND_GOT, curProjectType);
+        return this.projectTypeRepository.getById(id);
     }
 
-    async updateProjectType(id: string, projectTypeDto: ProjectTypeDto) {
-        const updatedProjectType = await this.projectTypeRepository.update(
-            id,
-            <ProjectTypeDocument>projectTypeDto,
+    async updateProjectType(id: string, updateProjectTypeDto: UpdateProjectTypeDto) {
+        return this.projectTypeRepository.update(
+            id, updateProjectTypeDto,
         );
-
-        return RESPOND(RESPOND_UPDATED, updatedProjectType);
     }
 
     async createProjectType(projectTypeDto: ProjectTypeDto) {
-        const newProjectType = await this.projectTypeRepository.create(
+        return this.projectTypeRepository.create(
             <ProjectTypeDocument>projectTypeDto,
         );
-
-        return RESPOND(RESPOND_CREATED, newProjectType);
     }
 
     async deleteProjectType(id: string) {

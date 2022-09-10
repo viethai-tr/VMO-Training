@@ -2,12 +2,12 @@ import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nes
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { ProjectStatusDto } from '../core/dtos/project-status.dto';
+import { ProjectStatusDto } from './dtos/create.project-status.dto';
 import {
     ProjectStatus,
     ProjectStatusDocument,
 } from '../core/schemas/project-status.schema';
-import { ProjectService } from '../projects/projects.service';
+import { ProjectService } from '../projects/project.service';
 import {
     RESPOND,
     RESPOND_CREATED,
@@ -16,6 +16,7 @@ import {
     RESPOND_UPDATED,
 } from '../shared/const/respond.const';
 import { ProjectStatusRepository } from './project-status.repository';
+import { UpdateProjectStatusDto } from './dtos/update.project-status.dto';
 
 @Injectable()
 export class ProjectStatusService {
@@ -36,26 +37,19 @@ export class ProjectStatusService {
     }
 
     async getProjectStatusById(id: string) {
-        const curProjectStatus = await this.projectStatusRepository.getById(id);
-
-        return RESPOND(RESPOND_GOT, curProjectStatus);
+        return this.projectStatusRepository.getById(id);
     }
 
     async createProjectStatus(projectStatusDto: ProjectStatusDto) {
-        const newProjectStatus = await this.projectStatusRepository.create(
+        return this.projectStatusRepository.create(
             <ProjectStatusDocument>projectStatusDto,
         );
-
-        return RESPOND(RESPOND_CREATED, newProjectStatus);
     }
 
-    async updateProjectStatus(id: string, projectStatusDto: ProjectStatusDto) {
-        const updatedProjectStatus = await this.projectStatusRepository.update(
-            id,
-            <ProjectStatusDocument>projectStatusDto,
+    async updateProjectStatus(id: string, updateProjectStatusDto: UpdateProjectStatusDto) {
+        return this.projectStatusRepository.update(
+            id, updateProjectStatusDto,
         );
-
-        return RESPOND(RESPOND_UPDATED, updatedProjectStatus);
     }
 
     async deleteProjectStatus(id: string) {

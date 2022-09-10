@@ -9,8 +9,8 @@ export class ProjectStatus {
     @Prop({ required: true})
     name: string;
 
-    @Prop({ required: true})
-    status: string;
+    @Prop({ required: true })
+    status: boolean;
 }
 
 export const ProjectStatusSchema = SchemaFactory.createForClass(ProjectStatus).plugin(softDeletePlugin);

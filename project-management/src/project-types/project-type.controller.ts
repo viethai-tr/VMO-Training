@@ -9,6 +9,7 @@ import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 import { API_QUERY } from '../shared/const/variables.const';
 import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
 import { Types } from 'mongoose';
+import { UpdateProjectTypeDto } from './dtos/update.project-type.dto';
 
 @ApiBearerAuth()
 @ApiTags('Project Type')
@@ -38,8 +39,8 @@ export class ProjectTypeController {
     }
 
     @Patch(':id')
-    async updateProjectType(@Param('id', ParseObjectIdPipe) id: string, @Body() projectTypeDto: ProjectTypeDto) {
-        return this.projectTypeService.updateProjectType(id, <ProjectTypeDocument>(projectTypeDto));
+    async updateProjectType(@Param('id', ParseObjectIdPipe) id: string, @Body() updateProjectTypeDto: UpdateProjectTypeDto) {
+        return this.projectTypeService.updateProjectType(id, <ProjectTypeDocument>(updateProjectTypeDto));
     }
 
     @Post()

@@ -14,12 +14,12 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import Role from '../core/enums/role.enum';
 import { Roles } from '../shared/decorators/roles.decorator';
 import { PaginationDto } from '../core/dtos';
-import { ProjectStatusDto } from '../core/dtos/project-status.dto';
+import { ProjectStatusDto } from './dtos/create.project-status.dto';
 import { ProjectStatusService } from './project-status.service';
 import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 import { API_QUERY } from '../shared/const/variables.const';
 import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
-import { Types } from 'mongoose';
+import { UpdateProjectStatusDto } from './dtos/update.project-status.dto';
 
 @ApiBearerAuth()
 @ApiTags('Project Status')
@@ -62,11 +62,11 @@ export class ProjectStatusController {
     @Patch(':id')
     async updateProjectStatus(
         @Param('id', ParseObjectIdPipe) id: string,
-        @Body() projectStatusDto: ProjectStatusDto,
+        @Body() updateProjectStatusDto: UpdateProjectStatusDto,
     ) {
         return this.projectStatusService.updateProjectStatus(
             id,
-            projectStatusDto,
+            updateProjectStatusDto,
         );
     }
 

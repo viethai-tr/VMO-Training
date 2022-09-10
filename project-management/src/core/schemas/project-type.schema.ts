@@ -10,7 +10,7 @@ export class ProjectType {
     name: string;
 
     @Prop()
-    status: string;
+    status: boolean;
 }
 
 export const ProjectTypeSchema = SchemaFactory.createForClass(ProjectType).plugin(softDeletePlugin);

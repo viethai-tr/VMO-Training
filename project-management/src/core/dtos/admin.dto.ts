@@ -10,9 +10,8 @@ export class AdminDto {
     })
     name: string;
 
-    @IsEnum(Status)
     @ApiProperty({
-        example: 'Active'
+        example: false,
     })
-    status: string;
+    status: boolean;
 }

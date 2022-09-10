@@ -17,8 +17,8 @@ export class Admin {
     @Exclude()
     password: string;
 
-    @Prop({ default: 'INACTIVE' })
-    status: string;
+    @Prop({ default: false })
+    status: boolean;
 
     @Prop({ required: true, default: 'User' })
     role: string;

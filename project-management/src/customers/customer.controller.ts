@@ -20,6 +20,7 @@ import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 import { API_QUERY } from '../shared/const/variables.const';
 import { ParseObjectIdPipe } from 'src/shared/pipes/objectid.pipe';
 import { ObjectId, Types } from 'mongoose';
+import { UpdateCustomerDto } from './dtos/update.customer.dto';
 
 @ApiBearerAuth()
 @ApiTags('Customer')
@@ -68,8 +69,8 @@ export class CustomerController {
     @Patch(':id')
     async updateCustomer(
         @Param('id', ParseObjectIdPipe) id: string,
-        @Body() customerDto: CustomerDto,
+        @Body() updateCustomerDto: UpdateCustomerDto,
     ) {
-        return this.customerService.updateCustomer(id, customerDto);
+        return this.customerService.updateCustomer(id, updateCustomerDto);
     }
 }

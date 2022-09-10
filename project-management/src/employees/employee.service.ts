@@ -16,12 +16,13 @@ import {
     RESPOND_GOT,
     RESPOND_UPDATED,
 } from '../shared/const/respond.const';
-import { ProjectService } from '../projects/projects.service';
+import { ProjectService } from '../projects/project.service';
 import { DepartmentService } from '../departments/department.service';
 import { checkValidDate } from '../shared/utils/checkValidDate';
 import { Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { UpdateEmployeeDto } from './dtos/update.employee.dto';
 
 @Injectable()
 export class EmployeeService {
@@ -31,7 +32,6 @@ export class EmployeeService {
         private departmentService: DepartmentService,
         @InjectModel(Employee.name)
         private employeeModel: SoftDeleteModel<EmployeeDocument>,
-
     ) {}
 
     async getAllEmployees(
@@ -51,16 +51,14 @@ export class EmployeeService {
     }
 
     async getEmployeeById(id: string) {
-        return this.employeeRepository.getEmployeeByIdAsync(
-            id,
-        );
+        return this.employeeRepository.getEmployeeByIdAsync(id);
     }
 
     async countEmployees(technology?: string, project?: string) {
         return this.employeeRepository.countEmployees(technology, project);
     }
 
-    async updateEmployee(id: string, employeeDto: EmployeeDto) {
+    async updateEmployee(id: string, updateEmployeeDto: UpdateEmployeeDto) {
         let {
             name,
             dob,
@@ -71,15 +69,16 @@ export class EmployeeService {
             experience,
             languages,
             certs,
-        } = employeeDto;
+        } = updateEmployeeDto;
 
-        technologies = [...new Set(technologies)];
+        let idTechnologies: Types.ObjectId[];
 
-        const idTechnologies = convertObjectId(technologies);
+        if (technologies) {
+            technologies = [...new Set(technologies)];
+            idTechnologies = convertObjectId(technologies);
+        }
 
-        return this.employeeRepository.update(id, <
-            EmployeeDocument
-        >{
+        return this.employeeRepository.update(id, <EmployeeDocument>{
             name,
             dob,
             address,
@@ -109,11 +108,7 @@ export class EmployeeService {
 
         const idTechnologies = convertObjectId(technologies);
 
-        checkValidDate(dob);
-
-        return this.employeeRepository.create(<
-            EmployeeDocument
-        >{
+        return this.employeeRepository.create(<EmployeeDocument>{
             name,
             dob,
             address,
@@ -131,22 +126,31 @@ export class EmployeeService {
 
         if (!checkEmployee) throw new NotFoundException('Employee not exist');
 
-        const projects = this.projectService.findByCondition({employees: id, isDeleted: false});
-        const departments = this.departmentService.findByCondition({employees: id, isDeleted: false});
-        const manager = this.departmentService.findByCondition({manager: id, isDeleted: false});
+        const projects = this.projectService.findByCondition({
+            employees: id,
+            isDeleted: false,
+        });
+        const departments = this.departmentService.findByCondition({
+            employees: id,
+            isDeleted: false,
+        });
+        const manager = this.departmentService.findByCondition({
+            manager: id,
+            isDeleted: false,
+        });
 
         if (
             (!projects || (await projects).length == 0) &&
             (!departments || (await departments).length == 0) &&
             (!manager || (await manager).length == 0)
         ) {
-            return this.employeeModel.softDelete({_id: id});
+            return this.employeeModel.softDelete({ _id: id });
         } else {
             throw new BadRequestException('Cannot delete');
         }
     }
 
     async restoreEmployee(id: string) {
-        return this.employeeModel.restore({_id: id});
+        return this.employeeModel.restore({ _id: id });
     }
 }

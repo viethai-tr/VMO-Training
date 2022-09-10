@@ -7,10 +7,11 @@ import {
 import { CustomerDto } from '../core/dtos';
 import { Customer, CustomerDocument } from '../core/schemas/customer.schema';
 import { CustomerRepository } from './customer.repository';
-import { ProjectService } from '../projects/projects.service';
+import { ProjectService } from '../projects/project.service';
 import { Types } from 'mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { UpdateCustomerDto } from './dtos/update.customer.dto';
 
 @Injectable()
 export class CustomerService {
@@ -34,10 +35,9 @@ export class CustomerService {
         return this.customerRepository.getById(id);
     }
 
-    async updateCustomer(id: string, customerDto: CustomerDto) {
+    async updateCustomer(id: string, updateCustomerDto: UpdateCustomerDto) {
         return this.customerRepository.update(
-            id,
-            <CustomerDocument>customerDto,
+            id, updateCustomerDto,
         );
     }
 

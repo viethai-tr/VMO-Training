@@ -6,7 +6,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './shared/auth/auth.module';
 import { EmployeeModule } from './employees/employee.module';
 import { CustomerModule } from './customers/customer.module';
-import { TechnologyModule } from './technologies/technologies.module';
+import { TechnologyModule } from './technologies/technology.module';
 import { ProjectTypeModule } from './project-types/project-types.module';
 import { ProjectModule } from './projects/project.module';
 import { ProjectStatusModule } from './project-statuses/project-status.module';

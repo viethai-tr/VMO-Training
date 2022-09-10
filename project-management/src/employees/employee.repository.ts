@@ -56,12 +56,11 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         skip = limitNum * (pageNum - 1);
 
         const listResult = await this.employeeModel
-            .find({ name: new RegExp('.*' + search + '.*', 'i'), isDeleted: false})
+            .find({ name: new RegExp('.*' + search + '.*', 'i'), isDeleted: false}, {projects: 0})
             .sort({ [sortBy]: sortKind })
             .skip(skip)
             .limit(limitNum)
-            .populate('technologies', 'name')
-            .populate('projects', 'name');
+            .populate('technologies', 'name');
 
         return {
             totalDocs,
@@ -76,9 +75,8 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
 
     async getEmployeeByIdAsync(id: string): Promise<EmployeeDocument> {
         return this.employeeModel
-            .findOne({ _id: id, isDeleted: false})
+            .findOne({ _id: id, isDeleted: false}, {projects: 0})
             .populate('technologies', 'name')
-            .populate('projects', 'name');
     }
 
     async deleteEmployee(id: string) {
@@ -94,9 +92,8 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         Object.keys(query).forEach(key => query[key] === undefined ? delete query[key] : {});
 
         listEmployees = await this.employeeModel
-            .find(query)
-            .populate('technologies', 'name')
-            .populate('projects', 'name');
+            .find(query, {projects: 0})
+            .populate('technologies', 'name');
         count = listEmployees.length;
 
         return {

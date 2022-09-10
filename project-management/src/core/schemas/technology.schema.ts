@@ -10,7 +10,7 @@ export class Technology {
     name: string;
 
     @Prop()
-    status: string;
+    status: boolean;
 }
 
 export const TechnologySchema = SchemaFactory.createForClass(Technology).plugin(softDeletePlugin);

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
 
 export class ProjectStatusDto {
     @IsString()
@@ -9,8 +9,8 @@ export class ProjectStatusDto {
     })
     name: string;
 
-    @IsString()
     @IsNotEmpty()
+    @IsBoolean()
     @ApiProperty()
-    status: string;
+    status: boolean;
 }

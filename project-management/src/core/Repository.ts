@@ -11,7 +11,10 @@ export class Repository<T extends Document> implements IRepository<T> {
     }
 
     async update(id: string, item: any): Promise<T> {
-        this._model.findOneAndUpdate({ _id: id, isDeleted: false }, item);
+        await this._model.findOneAndUpdate(
+            { _id: id, isDeleted: false },
+            { $set: item },
+        );
         return item;
     }
 
@@ -32,23 +35,30 @@ export class Repository<T extends Document> implements IRepository<T> {
         let skip: number;
 
         sort = sort.trim().toLowerCase();
-        sort == 'desc' ? sortKind = 'desc' : sortKind = 'asc';
+        sort == 'desc' ? (sortKind = 'desc') : (sortKind = 'asc');
 
         checkInteger(limit) ? (limitNum = parseInt(limit)) : (limitNum = 5);
 
         const totalDocs = await this._model
-        .find({ name: new RegExp('.*' + search + '.*', 'i'), isDeleted: false }).countDocuments();
+            .find({
+                name: new RegExp('.*' + search + '.*', 'i'),
+                isDeleted: false,
+            })
+            .countDocuments();
 
         let totalPages = Math.ceil(totalDocs / limitNum);
 
         checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
-        pageNum <= totalPages ? pageNum : pageNum = totalPages;
-        pageNum <= 0 ? pageNum = 1 : pageNum;
+        pageNum <= totalPages ? pageNum : (pageNum = totalPages);
+        pageNum <= 0 ? (pageNum = 1) : pageNum;
 
         skip = limitNum * (pageNum - 1);
 
         const listResult = await this._model
-            .find({ name: new RegExp('.*' + search + '.*', 'i'), isDeleted: false })
+            .find({
+                name: new RegExp('.*' + search + '.*', 'i'),
+                isDeleted: false,
+            })
             .sort({ [sortBy]: sortKind })
             .skip(skip)
             .limit(limitNum);

@@ -32,7 +32,7 @@ export class AuthService {
 
         await this.adminModel.findOneAndUpdate(
             { username: authDto.username,isDeleted: false },
-            { status: 'ACTIVE' },
+            { status: true },
         );
 
         const id = admin._id.toString();
@@ -45,7 +45,7 @@ export class AuthService {
     async logout(id: string): Promise<boolean> {
         await this.adminModel.findOneAndUpdate(
             { _id: id },
-            { rt: null, status: 'INACTIVE' },
+            { rt: null, status: false },
         );
         return true;
     }

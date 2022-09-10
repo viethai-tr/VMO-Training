@@ -3,6 +3,7 @@ import {
     Controller,
     Delete,
     Get,
+    HttpCode,
     Param,
     Patch,
     Post,
@@ -15,13 +16,14 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import Role from '../core/enums/role.enum';
 import { Roles } from '../shared/decorators/roles.decorator';
 import { PaginationDto } from '../core/dtos';
-import { TechnologyDto } from '../core/dtos/technology.dto';
+import { TechnologyDto } from './dtos/create.technology.dto';
 import { TechnologyDocument } from '../core/schemas/technology.schema';
-import { TechnologyService } from './technologies.service';
+import { TechnologyService } from './technology.service';
 import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 import { API_QUERY } from '../shared/const/variables.const';
 import { ParseObjectIdPipe } from 'src/shared/pipes/objectid.pipe';
 import { Types } from 'mongoose';
+import { UpdateTechnologyDto } from './dtos/update.technology.dto';
 
 @ApiBearerAuth()
 @ApiTags('Technology')
@@ -58,6 +60,7 @@ export class TechnologyController {
     }
 
     @Post()
+    @HttpCode(201)
     async createTechnology(@Body() technologyDto: TechnologyDto) {
         return this.technologyService.createTechnology(
             <TechnologyDocument>(technologyDto),
@@ -67,15 +70,15 @@ export class TechnologyController {
     @Patch(':id')
     async updateTechnology(
         @Param('id', ParseObjectIdPipe) id: string,
-        @Body() technologyDto: TechnologyDto,
+        @Body() updateTechnologyDto: UpdateTechnologyDto,
     ) {
         return this.technologyService.updateTechnology(
-            id,
-            <TechnologyDocument>(technologyDto),
+            id, updateTechnologyDto,
         );
     }
 
     @Delete(':id')
+    @HttpCode(204)
     async deleteTechnology(@Param('id', ParseObjectIdPipe) id: string) {
         return this.technologyService.deleteTechnology(id);
     }
