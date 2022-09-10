@@ -3,6 +3,7 @@ import {
     Controller,
     Delete,
     Get,
+    HttpCode,
     Param,
     Patch,
     Post,
@@ -18,7 +19,7 @@ import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 import { API_QUERY } from '../shared/const/variables.const';
 import { DEPARTMENT_QUERY } from './department.const';
 import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
-import { ObjectId, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 @ApiBearerAuth()
 @ApiTags('Department')
@@ -78,12 +79,19 @@ export class DepartmentController {
 
     @Post()
     @ApiBody({ type: DepartmentDto })
+    @HttpCode(201)
     async createDepartment(@Body() departmentDto: DepartmentDto) {
         return this.departmentService.createDepartment(departmentDto);
     }
 
     @Delete(':id')
+    @HttpCode(204)
     async deleteDepartment(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
         return this.departmentService.deleteDepartment(id);
+    }
+
+    @Post('restore/:id')
+    async restoreDepartment(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+        return this.departmentService.restoreDepartment(id);
     }
 }

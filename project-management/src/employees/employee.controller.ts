@@ -98,4 +98,9 @@ export class EmployeeController {
     async deleteEmployee(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
         return this.employeeService.deleteEmployee(id);
     }
+
+    @Post('restore/:id')
+    async restoreEmployee(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+        return this.employeeService.restoreEmployee(id);
+    }
 }

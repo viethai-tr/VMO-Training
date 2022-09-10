@@ -3,6 +3,7 @@ import {
     Controller,
     Delete,
     Get,
+    HttpCode,
     Param,
     Patch,
     Post,
@@ -53,6 +54,7 @@ export class ProjectStatusController {
     }
 
     @Post()
+    @HttpCode(201)
     async createProjectStatus(@Body() projectStatusDto: ProjectStatusDto) {
         return this.projectStatusService.createProjectStatus(projectStatusDto);
     }
@@ -69,7 +71,13 @@ export class ProjectStatusController {
     }
 
     @Delete(':id')
+    @HttpCode(204)
     async deleteProjectStatus(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
         return this.projectStatusService.deleteProjectStatus(id);
+    }
+
+    @Post('restore/:id')
+    async restoreProjectStatus(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+        return this.projectStatusService.restoreProjectStatus(id);
     }
 }

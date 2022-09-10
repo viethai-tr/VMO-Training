@@ -14,18 +14,13 @@ export class CustomerRepository extends Repository<CustomerDocument> {
     }
 
     async deleteCustomer(id: Types.ObjectId) {
-        // try {
-        //     checkCustomer = await this.customerModel.findOne({ _id: id });
-        // } catch (err) {
-        //     throw new HttpException(
-        //         {
-        //             status: HttpStatus.NOT_ACCEPTABLE,
-        //             error: 'Not a valid ID',
-        //         },
-        //         HttpStatus.NOT_ACCEPTABLE,
-        //     );
-        // }
-
-        return this.customerModel.findOneAndDelete({ _id: id });
+        return this.customerModel.updateOne(
+            { _id: id, deleted: false },
+            { $set: { deleted: true } },
+        );
     }
+
+    // async deleteCustomer(id: Types.ObjectId) {
+    //     return this.customerModel.findOneAndDelete({ _id: id });
+    // }
 }

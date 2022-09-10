@@ -43,6 +43,7 @@ export class ProjectTypeController {
     }
 
     @Post()
+    @HttpCode(201)
     async createProjectType(@Body() projectTypeDto: ProjectTypeDto) {
         return this.projectTypeService.createProjectType(projectTypeDto);
     }
@@ -51,5 +52,10 @@ export class ProjectTypeController {
     @HttpCode(204)
     async deleteProjectType(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
         return this.projectTypeService.deleteProjectType(id);
+    }
+
+    @Post('restore/:id')
+    async restoreProjectType(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+        return this.projectTypeService.restoreProjectType(id);
     }
 }

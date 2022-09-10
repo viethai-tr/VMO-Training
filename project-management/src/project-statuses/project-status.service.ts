@@ -1,7 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { ProjectStatusDto } from '../core/dtos/project-status.dto';
 import {
+    ProjectStatus,
     ProjectStatusDocument,
 } from '../core/schemas/project-status.schema';
 import { ProjectService } from '../projects/projects.service';
@@ -18,6 +21,8 @@ import { ProjectStatusRepository } from './project-status.repository';
 export class ProjectStatusService {
     constructor(
         private projectStatusRepository: ProjectStatusRepository,
+        @InjectModel(ProjectStatus.name)
+        private projectStatusModel: SoftDeleteModel<ProjectStatusDocument>,
         private projectService: ProjectService
     ) {}
 
@@ -58,14 +63,15 @@ export class ProjectStatusService {
         if (!checkProjectStatus)
             throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
-        const projects = await this.projectService.findByCondition({statuses: id});
+        const projects = await this.projectService.findByCondition({statuses: id, isDeleted: false});
         if (!projects || projects.length == 0) {
-            await this.projectStatusRepository.delete(id);
-            return RESPOND(RESPOND_DELETED, {
-                id: id,
-            });
+            return this.projectStatusModel.softDelete({_id: id});
         } else {
-            throw new HttpException('Cannot be deleted', HttpStatus.FORBIDDEN);
+            throw new BadRequestException('Cannot delete');
         }
+    }
+
+    async restoreProjectStatus(id: Types.ObjectId) {
+        return this.projectStatusModel.restore({_id: id});
     }
 }

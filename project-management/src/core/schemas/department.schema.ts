@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { Types } from "mongoose";
+import mongoose, { Types, Document } from "mongoose";
+import { softDeletePlugin } from "soft-delete-plugin-mongoose";
 
 export type DepartmentDocument = Department & Document;
 
@@ -24,4 +25,4 @@ export class Department {
     projects: Types.ObjectId[];
 }
 
-export const DepartmentSchema = SchemaFactory.createForClass(Department);
+export const DepartmentSchema = SchemaFactory.createForClass(Department).plugin(softDeletePlugin);

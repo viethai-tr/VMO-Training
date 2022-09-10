@@ -1,4 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
+import { softDeletePlugin } from "soft-delete-plugin-mongoose";
 
 export type ProjectStatusDocument = ProjectStatus & Document;
 
@@ -11,4 +13,4 @@ export class ProjectStatus {
     status: string;
 }
 
-export const ProjectStatusSchema = SchemaFactory.createForClass(ProjectStatus);
+export const ProjectStatusSchema = SchemaFactory.createForClass(ProjectStatus).plugin(softDeletePlugin);

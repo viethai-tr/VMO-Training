@@ -3,6 +3,7 @@ import {
     Controller,
     Delete,
     Get,
+    HttpCode,
     Param,
     Patch,
     Post,
@@ -83,6 +84,7 @@ export class ProjectController {
 
     @Post()
     @ApiBody({ type: ProjectDto })
+    @HttpCode(201)
     async createProject(@Body() projectDto: ProjectDto) {
         return this.projectService.createProject(projectDto);
     }
@@ -96,7 +98,13 @@ export class ProjectController {
     }
 
     @Delete(':id')
+    @HttpCode(204)
     async deleteProject(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
         return this.projectService.deleteProject(id);
+    }
+
+    @Post('restore/:id')
+    async restoreProject(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+        return this.projectService.restoreProject(id);
     }
 }

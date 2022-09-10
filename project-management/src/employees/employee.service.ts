@@ -1,11 +1,12 @@
 import {
+    BadRequestException,
     HttpException,
     HttpStatus,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
 import { EmployeeDto } from '../core/dtos';
-import { EmployeeDocument } from '../core/schemas/employee.schema';
+import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
 import { convertObjectId } from '../shared/utils/convertObjectId';
 import { EmployeeRepository } from './employee.repository';
 import {
@@ -19,13 +20,18 @@ import { ProjectService } from '../projects/projects.service';
 import { DepartmentService } from '../departments/department.service';
 import { checkValidDate } from '../shared/utils/checkValidDate';
 import { Types } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 
 @Injectable()
 export class EmployeeService {
     constructor(
         private employeeRepository: EmployeeRepository,
         private projectService: ProjectService,
-        private departmentService: DepartmentService
+        private departmentService: DepartmentService,
+        @InjectModel(Employee.name)
+        private employeeModel: SoftDeleteModel<EmployeeDocument>,
+
     ) {}
 
     async getAllEmployees(
@@ -45,11 +51,9 @@ export class EmployeeService {
     }
 
     async getEmployeeById(id: Types.ObjectId) {
-        const curEmployee = await this.employeeRepository.getEmployeeByIdAsync(
+        return this.employeeRepository.getEmployeeByIdAsync(
             id,
         );
-
-        return RESPOND(RESPOND_GOT, curEmployee);
     }
 
     async countEmployees(technology?: Types.ObjectId, project?: Types.ObjectId) {
@@ -73,7 +77,7 @@ export class EmployeeService {
 
         const idTechnologies = convertObjectId(technologies);
 
-        const updatedEmployee = await this.employeeRepository.update(id, <
+        return this.employeeRepository.update(id, <
             EmployeeDocument
         >{
             name,
@@ -86,8 +90,6 @@ export class EmployeeService {
             languages,
             certs,
         });
-
-        return RESPOND(RESPOND_UPDATED, updatedEmployee);
     }
 
     async createEmployee(employeeDto: EmployeeDto) {
@@ -104,13 +106,12 @@ export class EmployeeService {
         } = employeeDto;
 
         technologies = [...new Set(technologies)];
-        
 
         const idTechnologies = convertObjectId(technologies);
 
         checkValidDate(dob);
 
-        const newEmployee = await this.employeeRepository.create(<
+        return this.employeeRepository.create(<
             EmployeeDocument
         >{
             name,
@@ -123,8 +124,6 @@ export class EmployeeService {
             languages,
             certs,
         });
-
-        return RESPOND(RESPOND_CREATED, newEmployee);
     }
 
     async deleteEmployee(id: Types.ObjectId) {
@@ -132,21 +131,22 @@ export class EmployeeService {
 
         if (!checkEmployee) throw new NotFoundException('Employee not exist');
 
-        const projects = this.projectService.findByCondition({employees: id});
-        const departments = this.departmentService.findByCondition({employees: id});
-        const manager = this.departmentService.findByCondition({manager: id});
+        const projects = this.projectService.findByCondition({employees: id, isDeleted: false});
+        const departments = this.departmentService.findByCondition({employees: id, isDeleted: false});
+        const manager = this.departmentService.findByCondition({manager: id, isDeleted: false});
 
         if (
             (!projects || (await projects).length == 0) &&
             (!departments || (await departments).length == 0) &&
             (!manager || (await manager).length == 0)
         ) {
-            await this.employeeRepository.deleteEmployee(id);
-            return RESPOND(RESPOND_DELETED, {
-                id: id,
-            });
+            return this.employeeModel.softDelete({_id: id});
         } else {
-            throw new HttpException('Cannot be deleted', HttpStatus.FORBIDDEN);
+            throw new BadRequestException('Cannot delete');
         }
+    }
+
+    async restoreEmployee(id: Types.ObjectId) {
+        return this.employeeModel.restore({_id: id});
     }
 }

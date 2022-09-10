@@ -1,4 +1,5 @@
-import { Model, ObjectId, Types } from 'mongoose';
+import { Model, Types, Document } from 'mongoose';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { checkInteger } from '../shared/utils/checkInteger';
 import { IRepository } from './database/IRepository';
 
@@ -9,14 +10,14 @@ export class Repository<T extends Document> implements IRepository<T> {
         return this._model.create(item);
     }
 
-    async update(id: Types.ObjectId, item: T): Promise<T> {
-        this._model.findOneAndUpdate({ _id: id }, item);
+    async update(id: Types.ObjectId, item: any): Promise<T> {
+        this._model.findOneAndUpdate({ _id: id, isDeleted: false }, item);
         return item;
     }
 
-    async delete(id: Types.ObjectId): Promise<T> {
-        return this._model.findOneAndDelete({ _id: id });
-    }
+    // async delete(id: Types.ObjectId): Promise<T> {
+    //     return this._model.findOneAndUpdate({ _id: id, isDeleted: false }, {isDeleted: true});
+    // }
 
     async getAll(
         limit: string = '5',
@@ -36,17 +37,18 @@ export class Repository<T extends Document> implements IRepository<T> {
         checkInteger(limit) ? (limitNum = parseInt(limit)) : (limitNum = 5);
 
         const totalDocs = await this._model
-        .find({ name: new RegExp('.*' + search + '.*', 'i') }).countDocuments();
+        .find({ name: new RegExp('.*' + search + '.*', 'i'), isDeleted: false }).countDocuments();
 
         let totalPages = Math.ceil(totalDocs / limitNum);
 
         checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
         pageNum <= totalPages ? pageNum : pageNum = totalPages;
+        pageNum <= 0 ? pageNum = 1 : pageNum;
 
         skip = limitNum * (pageNum - 1);
 
         const listResult = await this._model
-            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .find({ name: new RegExp('.*' + search + '.*', 'i'), isDeleted: false })
             .sort({ [sortBy]: sortKind })
             .skip(skip)
             .limit(limitNum);
@@ -63,6 +65,6 @@ export class Repository<T extends Document> implements IRepository<T> {
     }
 
     async getById(id: Types.ObjectId): Promise<T> {
-        return this._model.findOne({ _id: id });
+        return this._model.findOne({ _id: id, isDeleted: false });
     }
 }

@@ -5,11 +5,12 @@ import { Project, ProjectDocument } from '../core/schemas/project.schema';
 import { Repository } from '../core/Repository';
 import { checkInteger } from 'src/shared/utils/checkInteger';
 import { PROJECT_PROPERTIES } from './project.const';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 
 @Injectable()
 export class ProjectRepository extends Repository<ProjectDocument> {
     constructor(
-        @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
+        @InjectModel(Project.name) private projectModel: SoftDeleteModel<ProjectDocument>,
     ) {
         super(projectModel);
     }
@@ -40,15 +41,19 @@ export class ProjectRepository extends Repository<ProjectDocument> {
             : (sortBy = 'name');
 
         const totalDocs = await this.projectModel
-            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .find({ name: new RegExp('.*' + search + '.*', 'i'), isDeleted: false})
             .countDocuments();
 
         let totalPages = Math.ceil(totalDocs / limitNum);
 
+        checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
+        pageNum <= totalPages ? pageNum : (pageNum = totalPages);
+        pageNum <= 0 ? pageNum = 1 : pageNum;
+
         skip = limitNum * (pageNum - 1);
 
         const listResult = await this.projectModel
-            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .find({ name: new RegExp('.*' + search + '.*', 'i'), isDeleted: false})
             .sort({ [sortBy]: sortKind })
             .skip(skip)
             .limit(limitNum)
@@ -70,7 +75,7 @@ export class ProjectRepository extends Repository<ProjectDocument> {
 
     async getProjectById(id: Types.ObjectId) {
         return this.projectModel
-            .findOne({ _id: id })
+            .findOne({ _id: id, isDeleted: false})
             .populate('type', 'name')
             .populate('status', 'name')
             .populate('technologies', 'name')
@@ -80,7 +85,7 @@ export class ProjectRepository extends Repository<ProjectDocument> {
 
     async getEmployeesProject(id: Types.ObjectId) {
         return this.projectModel
-            .findOne({ _id: id }, { projects: 1, name: 1 })
+            .findOne({ _id: id, isDeleted: false}, { projects: 1, name: 1 })
             .populate('employees', 'name');
     }
 
@@ -103,7 +108,7 @@ export class ProjectRepository extends Repository<ProjectDocument> {
     }
 
     async deleteProject(id: Types.ObjectId) {
-        return this.projectModel.findOneAndDelete({ _id: id });
+        return this.projectModel.softDelete({_id: id});
     }
 
     async findByCondition(query) {

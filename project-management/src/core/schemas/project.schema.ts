@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { Types } from "mongoose";
+import mongoose, { Types, Document } from "mongoose";
+import { softDeletePlugin } from "soft-delete-plugin-mongoose";
 
 export type ProjectDocument = Project & Document;
 
@@ -30,4 +31,4 @@ export class Project {
     starting_date: Date;
 }
 
-export const ProjectSchema = SchemaFactory.createForClass(Project);
+export const ProjectSchema = SchemaFactory.createForClass(Project).plugin(softDeletePlugin);

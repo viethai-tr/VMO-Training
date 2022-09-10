@@ -1,9 +1,8 @@
 import {
-    BadRequestException,
     HttpException,
     HttpStatus,
     Injectable,
-    Query,
+    NotFoundException,
 } from '@nestjs/common';
 import mongoose, { Model, Types } from 'mongoose';
 import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
@@ -11,26 +10,28 @@ import { ProjectDto } from '../core/dtos/project.dto';
 import { Project, ProjectDocument } from '../core/schemas/project.schema';
 import { convertObjectId } from '../shared/utils/convertObjectId';
 import { ProjectRepository } from './projects.repository';
-import { checkObjectId } from '../shared/utils/checkObjectId';
 import { InjectModel } from '@nestjs/mongoose';
-import { Department } from '../core/schemas/department.schema';
+import { Department, DepartmentDocument } from '../core/schemas/department.schema';
 import { checkValidDate } from '../shared/utils/checkValidDate';
 import {
     RESPOND,
     RESPOND_CREATED,
-    RESPOND_DELETED,
     RESPOND_GOT,
-    RESPOND_UPDATED,
 } from '../shared/const/respond.const';
+import { Customer, CustomerDocument } from '../core/schemas/customer.schema';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 
 @Injectable()
 export class ProjectService {
     constructor(
         private projectRepository: ProjectRepository,
         @InjectModel(Employee.name)
-        private employeeModel: Model<EmployeeDocument>,
+        private employeeModel: SoftDeleteModel<EmployeeDocument>,
         @InjectModel(Department.name)
-        private departmentModel: Model<ProjectDocument>,
+        private departmentModel: SoftDeleteModel<DepartmentDocument>,
+        @InjectModel(Customer.name)
+        private customerModel: SoftDeleteModel<CustomerDocument>,
+        @InjectModel(Project.name) private projectModel: SoftDeleteModel<ProjectDocument>
     ) {}
 
     async getAllProjects(
@@ -76,6 +77,7 @@ export class ProjectService {
             customer: customer,
             technologies: technology,
             starting_date: startingDate,
+            isDeleted: false,
         };
 
         Object.keys(query).forEach((key) =>
@@ -109,6 +111,9 @@ export class ProjectService {
         const idTechnologies = convertObjectId(technologies);
         const idEmployees = convertObjectId(employees);
         const idCustomer = new mongoose.Types.ObjectId(customer);
+
+        let checkCustomerExists = this.customerModel.find({_id: idCustomer});
+        if (!checkCustomerExists) throw new NotFoundException('Customer not exists');
 
         const newProject = await this.projectRepository.create(<
             ProjectDocument
@@ -156,6 +161,9 @@ export class ProjectService {
         const idEmployees = convertObjectId(employees);
         const idCustomer = new mongoose.Types.ObjectId(customer);
 
+        let checkCustomerExists = this.customerModel.find({_id: idCustomer});
+        if (!checkCustomerExists) throw new NotFoundException('Customer not exists');
+
         const listEmployees = (await this.projectRepository.getById(id))
             .employees;
 
@@ -183,7 +191,6 @@ export class ProjectService {
             { multi: true, upsert: true },
         );
 
-        return RESPOND(RESPOND_UPDATED, updatedProject);
     }
 
     async deleteProject(id: Types.ObjectId) {
@@ -197,16 +204,18 @@ export class ProjectService {
         if (!checkDepartment || (await checkDepartment).length == 0) {
             const listEmployees = (await this.projectRepository.getById(id))
                 .employees;
-            await this.projectRepository.deleteProject(id);
-            await this.employeeModel.updateMany(
-                { _id: { $in: listEmployees } },
-                { $pull: { projects: id } },
-            );
-
-            return RESPOND(RESPOND_DELETED, { id: id });
+                await this.employeeModel.updateMany(
+                    { _id: { $in: listEmployees } },
+                    { $pull: { projects: id } },
+                );
+            return this.projectRepository.deleteProject(id);
         } else {
             throw new HttpException('Cannot be deleted', HttpStatus.FORBIDDEN);
         }
+    }
+
+    async restoreProject(id: Types.ObjectId) {
+        return this.projectModel.restore({_id: id});
     }
 
     async findByCondition(query) {

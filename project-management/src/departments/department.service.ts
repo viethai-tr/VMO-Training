@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import mongoose, { Types } from 'mongoose';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import mongoose, { Model, Types } from 'mongoose';
+import { EmployeeService } from '../employees/employee.service';
 import { DepartmentDto } from '../core/dtos';
-import { DepartmentDocument } from '../core/schemas/department.schema';
+import {
+    Department,
+    DepartmentDocument,
+} from '../core/schemas/department.schema';
 import {
     RESPOND,
     RESPOND_CREATED,
@@ -9,14 +13,22 @@ import {
     RESPOND_GOT,
     RESPOND_UPDATED,
 } from '../shared/const/respond.const';
-import { checkObjectId } from '../shared/utils/checkObjectId';
 import { checkValidDate } from '../shared/utils/checkValidDate';
 import { convertObjectId } from '../shared/utils/convertObjectId';
 import { DepartmentRepository } from './department.repository';
+import { InjectModel } from '@nestjs/mongoose';
+import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 
 @Injectable()
 export class DepartmentService {
-    constructor(private departmentRepository: DepartmentRepository) {}
+    constructor(
+        private departmentRepository: DepartmentRepository,
+        @InjectModel(Employee.name)
+        private employeeModel: Model<EmployeeDocument>,
+        @InjectModel(Department.name)
+        private departmentModel: SoftDeleteModel<DepartmentDocument>,
+    ) {}
 
     async getAllDepartments(
         limit?: string,
@@ -35,19 +47,20 @@ export class DepartmentService {
     }
 
     async getDepartmentById(id: Types.ObjectId) {
-        const curDepartment = await this.departmentRepository.getDepartmentById(
-            id,
-        );
-
-        return RESPOND(RESPOND_GOT, curDepartment);
+        return this.departmentRepository.getDepartmentById(id);
     }
 
     async createDepartment(departmentDto: DepartmentDto) {
         let { name, description, founding_date, manager, employees, projects } =
             departmentDto;
-
-        checkObjectId(manager);
         const idManager = new mongoose.Types.ObjectId(manager);
+
+        let checkManagerExists = this.employeeModel.find({
+            _id: idManager,
+            isDeleted: false,
+        });
+        if (!checkManagerExists)
+            throw new NotFoundException('Manager does not exist');
 
         employees = [...new Set(employees)];
         projects = [...new Set(projects)];
@@ -58,9 +71,7 @@ export class DepartmentService {
 
         checkValidDate(founding_date);
 
-        const newDepartment = await this.departmentRepository.create(<
-            DepartmentDocument
-        >{
+        return this.departmentRepository.create(<DepartmentDocument>{
             name,
             description,
             founding_date,
@@ -68,8 +79,6 @@ export class DepartmentService {
             employees: idEmployees,
             projects: idProjects,
         });
-
-        return RESPOND(RESPOND_CREATED, newDepartment);
     }
 
     async updateDepartment(id: Types.ObjectId, departmentDto: DepartmentDto) {
@@ -77,6 +86,12 @@ export class DepartmentService {
             departmentDto;
 
         const idManager = new mongoose.Types.ObjectId(manager);
+        let checkManagerExists = this.employeeModel.find({
+            _id: idManager,
+            isDeleted: false,
+        });
+        if (!checkManagerExists)
+            throw new NotFoundException('Manager does not exist');
 
         employees = [...new Set(employees)];
         projects = [...new Set(projects)];
@@ -87,9 +102,7 @@ export class DepartmentService {
 
         checkValidDate(founding_date);
 
-        const updatedDepartment = await this.departmentRepository.update(id, <
-            DepartmentDocument
-        >{
+        return this.departmentRepository.update(id, <DepartmentDocument>{
             name,
             description,
             founding_date,
@@ -97,16 +110,14 @@ export class DepartmentService {
             employees: idEmployees,
             projects: idProjects,
         });
-
-        return RESPOND(RESPOND_UPDATED, updatedDepartment);
     }
 
     async deleteDepartment(id: Types.ObjectId) {
-        await this.departmentRepository.delete(id);
+        return this.departmentModel.softDelete({_id: id});
+    }
 
-        return RESPOND(RESPOND_DELETED, {
-            id: id,
-        });
+    async restoreDepartment(id: Types.ObjectId) {
+        return this.departmentModel.restore({_id: id});
     }
 
     async getEmployeesDepartment(id: Types.ObjectId) {

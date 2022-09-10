@@ -50,7 +50,7 @@ export class AdminRepository extends Repository<AdminDocument> {
                 {
                     role: 'User',
                     name: new RegExp('.*' + search + '.*', 'i'),
-                    deleted: false,
+                    isDeleted: false,
                 },
                 { password: 0, rt: 0 },
             )
@@ -62,7 +62,7 @@ export class AdminRepository extends Repository<AdminDocument> {
                 {
                     role: 'User',
                     name: new RegExp('.*' + search + '.*', 'i'),
-                    deleted: false,
+                    isDeleted: false,
                 },
                 { password: 0, rt: 0 },
             )
@@ -114,12 +114,10 @@ export class AdminRepository extends Repository<AdminDocument> {
     }
 
     async getAdminInfo(id: Types.ObjectId) {
-        const curAdmin = await this.adminModel.findOne(
+        return this.adminModel.findOne(
             { _id: id },
             { password: 0, rt: 0 },
         );
-
-        return RESPOND(RESPOND_GOT, curAdmin);
     }
 
     async findByCondition(query) {

@@ -1,20 +1,24 @@
 import {
+    BadRequestException,
     HttpException,
     HttpStatus,
     Injectable,
 } from '@nestjs/common';
 import { CustomerDto } from '../core/dtos';
-import { CustomerDocument } from '../core/schemas/customer.schema';
+import { Customer, CustomerDocument } from '../core/schemas/customer.schema';
 import { CustomerRepository } from './customer.repository';
-import { RESPOND, RESPOND_CREATED, RESPOND_DELETED, RESPOND_GOT, RESPOND_UPDATED } from '../shared/const/respond.const';
 import { ProjectService } from '../projects/projects.service';
 import { Types } from 'mongoose';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class CustomerService {
     constructor(
         private customerRepository: CustomerRepository,
-        private projectService: ProjectService
+        @InjectModel(Customer.name)
+        private customerModel: SoftDeleteModel<CustomerDocument>,
+        private projectService: ProjectService,
     ) {}
 
     async getAllCustomers(
@@ -23,44 +27,46 @@ export class CustomerService {
         sort?: string,
         search?: string,
     ) {
-        return await this.customerRepository.getAll(limit, page, sort, search);
+        return this.customerRepository.getAll(limit, page, sort, search);
     }
 
     async getCustomerById(id: Types.ObjectId) {
-        const customer = await this.customerRepository.getById(id);
-        return RESPOND(RESPOND_GOT, customer);
+        return this.customerRepository.getById(id);
     }
 
     async updateCustomer(id: Types.ObjectId, customerDto: CustomerDto) {
-        const updatedCustomer = await this.customerRepository.update(
+        return this.customerRepository.update(
             id,
             <CustomerDocument>customerDto,
         );
-
-        return RESPOND(RESPOND_UPDATED, updatedCustomer);
     }
 
     async createCustomer(customerDto: CustomerDto) {
-        const newCustomer = await this.customerRepository.create(<CustomerDocument>customerDto);
-        return RESPOND(RESPOND_CREATED, newCustomer);
+        return this.customerRepository.create(
+            <CustomerDocument>customerDto,
+        );
     }
 
     async deleteCustomer(id: Types.ObjectId) {
-
         let checkCustomer;
         checkCustomer = await this.customerRepository.getById(id);
+        // console.log(checkCustomer);
 
         if (!checkCustomer)
             throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
-        const projects = this.projectService.findByCondition({customer: id});
-        if (!projects || (await projects).length == 0) {
-            await this.customerRepository.deleteCustomer(id);
-            return RESPOND(RESPOND_DELETED, {
-                id: id
-            });
-        } else {
-            throw new HttpException('Cannot be deleted', HttpStatus.FORBIDDEN);
-        }
+        const projects = await this.projectService.findByCondition({
+            customer: id, isDeleted: false
+        });
+        if (projects.length > 0)
+            throw new BadRequestException('Cannot be deleted');
+
+        return this.customerModel.softDelete({ _id: id});
+
+        // return this.customerRepository.deleteCustomer(id);
+    }
+
+    async restoreCustomer(id: Types.ObjectId) {
+        return this.customerModel.restore({_id: id});
     }
 }

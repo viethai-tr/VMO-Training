@@ -3,6 +3,7 @@ import {
     Controller,
     Delete,
     Get,
+    HttpCode,
     HttpStatus,
     Param,
     Patch,
@@ -79,12 +80,19 @@ export class AdminController {
 
     @ApiBody({ type: CreateUserDto })
     @Post('create')
+    @HttpCode(201)
     async createUser(@Body() createUserDto: CreateUserDto) {
         return this.adminService.createUser(createUserDto);
     }
 
     @Delete(':id')
+    @HttpCode(204)
     async deleteUser(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
         return this.adminService.deleteUser(id);
+    }
+
+    @Post('restore/:id')
+    async restoreUser(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+        return this.adminService.restoreUser(id);
     }
 }

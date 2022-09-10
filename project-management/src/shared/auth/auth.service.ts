@@ -18,7 +18,7 @@ export class AuthService {
 
     async login(authDto: AuthDto) {
         const admin = await this.adminModel.findOne({
-            username: authDto.username,
+            username: authDto.username, isDeleted: false
         });
         if (!admin)
             throw new HttpException('Admin not found', HttpStatus.BAD_REQUEST);
@@ -31,7 +31,7 @@ export class AuthService {
             );
 
         await this.adminModel.findOneAndUpdate(
-            { username: authDto.username },
+            { username: authDto.username,isDeleted: false },
             { status: 'ACTIVE' },
         );
 

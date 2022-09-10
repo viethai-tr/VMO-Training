@@ -3,9 +3,11 @@ import {
     Controller,
     Delete,
     Get,
+    HttpCode,
     Param,
     Patch,
     Post,
+    Put,
     Query,
     UseFilters,
 } from '@nestjs/common';
@@ -47,11 +49,18 @@ export class CustomerController {
     }
 
     @Delete(':id')
+    @HttpCode(204)
     async deleteCustomer(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
         return this.customerService.deleteCustomer(id);
     }
 
+    @Post('restore/:id')
+    async restoreCustomer(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+        return this.customerService.restoreCustomer(id);
+    }
+
     @Post()
+    @HttpCode(201)
     async createCustomer(@Body() customerDto: CustomerDto) {
         return this.customerService.createCustomer(customerDto);
     }

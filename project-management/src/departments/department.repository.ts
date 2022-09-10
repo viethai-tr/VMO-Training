@@ -26,6 +26,7 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
         let sortKind;
         let limitNum: number;
         let pageNum: number;
+        let skip: number;
 
         if (sort != undefined) {
             sort = sort.toLowerCase();
@@ -41,22 +42,25 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
 
         const totalDocs = await this.departmentModel
             .find({
-                name: new RegExp('.*' + search + '.*', 'i'),
-                deleted: false,
+                name: new RegExp('.*' + search + '.*', 'i'), isDeleted: false
             })
             .countDocuments();
 
         let totalPages = Math.ceil(totalDocs / limitNum);
 
         checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
-        pageNum <= totalPages ? pageNum : (pageNum = totalPages);
+        pageNum <= totalPages ? pageNum = pageNum : (pageNum = totalPages);
+        pageNum <= 0 ? pageNum = 1 : pageNum;
+
+        skip = limitNum * (pageNum - 1);
 
         let listResult = await this.departmentModel
             .find({
                 name: new RegExp('.*' + search + '.*', 'i'),
-                deleted: false,
+                isDeleted: false,
             })
             .sort({ [sortBy]: sortKind })
+            .skip(skip)
             .limit(limitNum)
             .populate('manager', 'name')
             .populate('employees', 'name')
@@ -74,7 +78,7 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
 
     async getDepartmentById(id: Types.ObjectId): Promise<DepartmentDocument> {
         return this.departmentModel
-            .findOne({ _id: id, deleted: false })
+            .findOne({ _id: id, isDeleted: false})
             .populate('manager', 'name')
             .populate('employees', 'name')
             .populate('projects', 'name');
@@ -83,7 +87,7 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
     async getEmployeesDepartment(id: Types.ObjectId) {
         return this.departmentModel
             .findOne(
-                { _id: id, deleted: false },
+                { _id: id, isDeleted: false},
                 { employees: 1, manager: 1, name: 1 },
             )
             .populate('manager', 'name')
@@ -92,7 +96,7 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
 
     async getProjectsDepartment(id: Types.ObjectId) {
         return this.departmentModel
-            .findOne({ _id: id, deleted: false }, { name: 1, projects: 1 })
+            .findOne({ _id: id, isDeleted: false}, { name: 1, projects: 1 })
             .populate('projects', 'name');
     }
 

@@ -45,17 +45,18 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         checkInteger(limit) ? (limitNum = parseInt(limit)) : (limitNum = 5);
 
         const totalDocs = await this.employeeModel
-            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .find({ name: new RegExp('.*' + search + '.*', 'i'), isDeleted: false})
             .countDocuments();
         let totalPages = Math.ceil(totalDocs / limitNum);
 
         checkInteger(page) ? (pageNum = parseInt(page)) : (pageNum = 1);
         pageNum <= totalPages ? pageNum : (pageNum = totalPages);
+        pageNum <= 0 ? pageNum = 1 : pageNum;
 
         skip = limitNum * (pageNum - 1);
 
         const listResult = await this.employeeModel
-            .find({ name: new RegExp('.*' + search + '.*', 'i') })
+            .find({ name: new RegExp('.*' + search + '.*', 'i'), isDeleted: false})
             .sort({ [sortBy]: sortKind })
             .skip(skip)
             .limit(limitNum)
@@ -75,20 +76,20 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
 
     async getEmployeeByIdAsync(id: Types.ObjectId): Promise<EmployeeDocument> {
         return this.employeeModel
-            .findOne({ _id: id })
+            .findOne({ _id: id, isDeleted: false})
             .populate('technologies', 'name')
             .populate('projects', 'name');
     }
 
     async deleteEmployee(id: Types.ObjectId) {
-        return this.employeeModel.findOneAndDelete({ _id: id });
+        return this.employeeModel.findOneAndDelete({ _id: id, isDeleted: false});
     }
 
     async countEmployees(technology?: Types.ObjectId, project?: Types.ObjectId) {
         let count;
         let listEmployees;
 
-        let query = { technologies: technology, projects: project };
+        let query = { technologies: technology, projects: project, isDeleted: false };
 
         Object.keys(query).forEach(key => query[key] === undefined ? delete query[key] : {});
 
@@ -99,8 +100,7 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         count = listEmployees.length;
 
         return {
-            numEmployees: count,
-            listEmployees,
+            numEmployees: count
         };
     }
 }
