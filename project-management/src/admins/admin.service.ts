@@ -70,7 +70,7 @@ export class AdminService {
         const avatarCloud = await this.cloudinaryService.uploadCloudinary(
             avatar,
         );
-        createUserDto.avatar = avatarCloud.url;
+        createUserDto.avatarUrl = avatarCloud.url;
 
         await this.emailService.sendActiveMail(
             token,

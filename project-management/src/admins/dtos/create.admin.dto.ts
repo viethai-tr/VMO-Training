@@ -33,5 +33,5 @@ export class CreateUserDto {
     @ApiProperty({
         example: 'avatar_link',
     })
-    avatar: string;
+    avatarUrl: string;
 }

@@ -21,7 +21,7 @@ export class Admin {
     email: string;
 
     @Prop()
-    avatar: string;
+    avatarUrl: string;
 
     @Prop({ default: false })
     status: boolean;
