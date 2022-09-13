@@ -37,7 +37,7 @@ export class Employee {
     projects: Types.ObjectId[];
 
     @Prop([{type: mongoose.Schema.Types.ObjectId, ref: "Project"}])
-    deleteProjects: Types.ObjectId[];
+    deletedProjects: Types.ObjectId[];
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee).plugin(softDeletePlugin);

@@ -1,19 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import mongoose, { Model, Types } from 'mongoose';
-import { EmployeeService } from '../employees/employee.service';
 import { DepartmentDto } from '../core/dtos';
 import {
     Department,
     DepartmentDocument,
 } from '../core/schemas/department.schema';
-import {
-    RESPOND,
-    RESPOND_CREATED,
-    RESPOND_DELETED,
-    RESPOND_GOT,
-    RESPOND_UPDATED,
-} from '../shared/const/respond.const';
-import { checkValidDate } from '../shared/utils/checkValidDate';
 import { convertObjectId } from '../shared/utils/convertObjectId';
 import { DepartmentRepository } from './department.repository';
 import { InjectModel } from '@nestjs/mongoose';
@@ -56,11 +47,11 @@ export class DepartmentService {
             departmentDto;
         const idManager = new mongoose.Types.ObjectId(manager);
 
-        let checkManagerExists = this.employeeModel.find({
+        let checkManagerExists = await this.employeeModel.find({
             _id: idManager,
             isDeleted: false,
         });
-        if (!checkManagerExists)
+        if (!checkManagerExists || checkManagerExists.length === 0)
             throw new NotFoundException('Manager does not exist');
 
         employees = [...new Set(employees)];
@@ -69,8 +60,6 @@ export class DepartmentService {
         const idEmployees = convertObjectId(employees);
 
         const idProjects = convertObjectId(projects);
-
-        checkValidDate(founding_date);
 
         return this.departmentRepository.create(<DepartmentDocument>{
             name,
@@ -95,11 +84,11 @@ export class DepartmentService {
 
         if (manager) {
             idManager = new mongoose.Types.ObjectId(manager);
-            let checkManagerExists = this.employeeModel.find({
+            let checkManagerExists = await this.employeeModel.find({
                 _id: idManager,
                 isDeleted: false,
             });
-            if (!checkManagerExists)
+            if (!checkManagerExists || checkManagerExists.length === 0)
                 throw new NotFoundException('Manager does not exist');
         }
 
@@ -113,16 +102,20 @@ export class DepartmentService {
             idProjects = convertObjectId(projects);
         }
 
-        // if (founding_date) checkValidDate(founding_date);
-
-        return this.departmentRepository.update(id, {
+        let query = {
             name,
             description,
             founding_date,
             manager: idManager,
             employees: idEmployees,
             projects: idProjects,
-        });
+        };
+
+        Object.keys(query).forEach((key) =>
+            query[key] === undefined ? delete query[key] : {},
+        );
+
+        return this.departmentRepository.update(id, query);
     }
 
     async deleteDepartment(id: string) {
@@ -134,17 +127,11 @@ export class DepartmentService {
     }
 
     async getEmployeesDepartment(id: string) {
-        const listEmployees =
-            await this.departmentRepository.getEmployeesDepartment(id);
-
-        return RESPOND(RESPOND_GOT, listEmployees);
+        return this.departmentRepository.getEmployeesDepartment(id);
     }
 
     async getProjectsDepartment(id: string) {
-        const listProjects =
-            await this.departmentRepository.getProjectsDepartment(id);
-
-        return RESPOND(RESPOND_GOT, listProjects);
+        return this.departmentRepository.getProjectsDepartment(id);
     }
 
     async findByCondition(query) {

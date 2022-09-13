@@ -67,7 +67,8 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
             .populate('projects', 'name');
 
         return {
-            curPage: page,
+            totalDocs,
+            curPage: pageNum,
             totalPages,
             search,
             sortBy,
@@ -88,9 +89,8 @@ export class DepartmentRepository extends Repository<DepartmentDocument> {
         return this.departmentModel
             .findOne(
                 { _id: id, isDeleted: false},
-                { employees: 1, manager: 1, name: 1 },
+                { employees: 1 },
             )
-            .populate('manager', 'name')
             .populate('employees', 'name');
     }
 

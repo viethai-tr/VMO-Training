@@ -3,7 +3,7 @@ import { Types, Document } from "mongoose";
 export interface IRepository<T extends Document> {
     create(item: T): Promise<T>;
 
-    update(id: string, item: T): Promise<T>;
+    update(id: string, item: T);
 
     // delete(id: string): Promise<T>;
 

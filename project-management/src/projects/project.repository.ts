@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
 import { Project, ProjectDocument } from '../core/schemas/project.schema';
 import { Repository } from '../core/Repository';
-import { checkInteger } from 'src/shared/utils/checkInteger';
+import { checkInteger } from '../shared/utils/checkInteger';
 import { PROJECT_PROPERTIES } from './project.const';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 
@@ -111,9 +110,7 @@ export class ProjectRepository extends Repository<ProjectDocument> {
         const count = listProjects.length;
 
         return {
-            query,
             quantity: count,
-            listProjects,
         };
     }
 

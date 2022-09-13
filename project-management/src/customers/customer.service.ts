@@ -3,12 +3,12 @@ import {
     HttpException,
     HttpStatus,
     Injectable,
+    NotFoundException,
 } from '@nestjs/common';
 import { CustomerDto } from '../core/dtos';
 import { Customer, CustomerDocument } from '../core/schemas/customer.schema';
 import { CustomerRepository } from './customer.repository';
 import { ProjectService } from '../projects/project.service';
-import { Types } from 'mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdateCustomerDto } from './dtos/update.customer.dto';
@@ -53,12 +53,12 @@ export class CustomerService {
         // console.log(checkCustomer);
 
         if (!checkCustomer)
-            throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+            throw new NotFoundException('Not found');
 
         const projects = await this.projectService.findByCondition({
             customer: id, isDeleted: false
         });
-        if (projects.length > 0)
+        if (!projects || projects.length === 0)
             throw new BadRequestException('Cannot be deleted');
 
         return this.customerModel.softDelete({ _id: id});

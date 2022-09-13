@@ -1,1 +1,1 @@
-export const OBJECTID_PATTERN = /^[0-9a-fA-F]{24}$/;
+export const OBJECTID_PATTERN = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i;

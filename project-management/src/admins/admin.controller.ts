@@ -10,26 +10,24 @@ import {
     Post,
     Query,
     UseFilters,
-    UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { ChangePasswordDto } from '../core/dtos/change-password.dto';
+import { ChangePasswordDto } from './dtos/update.password.dto';
 import { GetCurrentAdmin } from '../shared/decorators/get-current-admin.decorator';
 import { AdminService } from './admin.service';
-import { AdminDto } from '../core/dtos/admin.dto';
+import { AdminDto } from './dtos/update.admin.dto';
 import { Roles } from '../shared/decorators/roles.decorator';
 import Role from '../core/enums/role.enum';
 import { PaginationDto } from '../core/dtos';
 import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
 import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 import { API_QUERY } from '../shared/const/variables.const';
-import { CreateUserDto } from 'src/core/dtos/create-user.dto';
-import { ParseObjectIdPipe } from 'src/shared/pipes/objectid.pipe';
-import { Types } from 'mongoose';
+import { CreateUserDto } from './dtos/create.admin.dto';
+import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
+import { Public } from '../shared/decorators/public.decorator';
 
 @ApiBearerAuth()
 @ApiTags('Admin')
-@Roles(Role.Admin)
 @UseFilters(MongoExceptionFilter)
 @UseFilters(HttpExceptionFilter)
 @Controller('admins')
@@ -79,6 +77,7 @@ export class AdminController {
     }
 
     @ApiBody({ type: CreateUserDto })
+    @Roles(Role.Admin)
     @Post('create')
     @HttpCode(201)
     async createUser(@Body() createUserDto: CreateUserDto) {
@@ -86,13 +85,36 @@ export class AdminController {
     }
 
     @Delete(':id')
+    @Roles(Role.Admin)
     @HttpCode(204)
     async deleteUser(@Param('id', ParseObjectIdPipe) id: string) {
         return this.adminService.deleteUser(id);
     }
 
     @Post('restore/:id')
+    @Roles(Role.Admin)
     async restoreUser(@Param('id', ParseObjectIdPipe) id: string) {
         return this.adminService.restoreUser(id);
+    }
+
+    @Public()
+    @Get('active')
+    async activeUser(@Query('token') token: string) {
+        return this.adminService.activeUser(token);
+    }
+
+    @Public()
+    @ApiBody({
+        schema: {
+            type: 'object',
+            required: ['email'],
+            properties: {
+                email: { type: 'string'}
+            }
+        }
+    })
+    @Post('resend')
+    async resendEmail(@Body('email') email: string) {
+        return this.adminService.resendEmail(email);
     }
 }

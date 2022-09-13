@@ -1,5 +1,4 @@
-import { Model, Types, Document } from 'mongoose';
-import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { Model, Document } from 'mongoose';
 import { checkInteger } from '../shared/utils/checkInteger';
 import { IRepository } from './database/IRepository';
 
@@ -10,17 +9,13 @@ export class Repository<T extends Document> implements IRepository<T> {
         return this._model.create(item);
     }
 
-    async update(id: string, item: any): Promise<T> {
-        await this._model.findOneAndUpdate(
+    async update(id: string, item: any) {
+        await this._model.updateOne(
             { _id: id, isDeleted: false },
             { $set: item },
         );
         return item;
     }
-
-    // async delete(id: string): Promise<T> {
-    //     return this._model.findOneAndUpdate({ _id: id, isDeleted: false }, {isDeleted: true});
-    // }
 
     async getAll(
         limit: string = '5',

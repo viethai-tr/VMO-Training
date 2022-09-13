@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CustomerService } from './customers.service';
+import { CustomerService } from './customer.service';
 import { CustomerController } from './customer.controller';
 import { CustomerRepository } from './customer.repository';
 import { MongooseModule } from '@nestjs/mongoose';

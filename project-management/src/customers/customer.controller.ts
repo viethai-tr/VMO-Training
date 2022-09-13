@@ -13,18 +13,18 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CustomerDto, PaginationDto } from '../core/dtos';
-import { CustomerService } from './customers.service';
+import { CustomerService } from './customer.service';
 import { Roles } from '../shared/decorators/roles.decorator';
 import Role from '../core/enums/role.enum';
 import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 import { API_QUERY } from '../shared/const/variables.const';
-import { ParseObjectIdPipe } from 'src/shared/pipes/objectid.pipe';
-import { ObjectId, Types } from 'mongoose';
+import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
 import { UpdateCustomerDto } from './dtos/update.customer.dto';
 
 @ApiBearerAuth()
 @ApiTags('Customer')
 @Roles(Role.Admin)
+
 @UseFilters(MongoExceptionFilter)
 @Controller('customers')
 export class CustomerController {

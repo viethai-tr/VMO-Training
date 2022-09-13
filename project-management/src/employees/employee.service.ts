@@ -1,7 +1,5 @@
 import {
     BadRequestException,
-    HttpException,
-    HttpStatus,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -9,16 +7,8 @@ import { EmployeeDto } from '../core/dtos';
 import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
 import { convertObjectId } from '../shared/utils/convertObjectId';
 import { EmployeeRepository } from './employee.repository';
-import {
-    RESPOND,
-    RESPOND_CREATED,
-    RESPOND_DELETED,
-    RESPOND_GOT,
-    RESPOND_UPDATED,
-} from '../shared/const/respond.const';
 import { ProjectService } from '../projects/project.service';
 import { DepartmentService } from '../departments/department.service';
-import { checkValidDate } from '../shared/utils/checkValidDate';
 import { Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';

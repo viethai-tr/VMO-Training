@@ -21,6 +21,7 @@ import { EMPLOYEE_QUERY } from './employee.const';
 import { Types } from 'mongoose';
 import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
 import { UpdateEmployeeDto } from './dtos/update.employee.dto';
+import { CountEmployeesDto } from './dtos/count.employee.dto';
 
 @ApiBearerAuth()
 @ApiTags('Employee')
@@ -66,8 +67,7 @@ export class EmployeeController {
         type: 'string',
     })
     async countEmployees(
-        @Query('technology', ParseObjectIdPipe) technology: string,
-        @Query('project', ParseObjectIdPipe) project: string,
+        @Query() {technology, project}: CountEmployeesDto,
     ) {
         return this.employeeService.countEmployees(technology, project);
     }

@@ -31,7 +31,8 @@ describe('EmployeeController', () => {
             experience: 3,
             languages: ['English', 'Japanese'],
             certs: ['Cert 1', 'Cert 2'],
-            projects: []
+            projects: [],
+            deletedProjects: []
         },
     ];
 
@@ -78,7 +79,8 @@ describe('EmployeeController', () => {
         experience: 3,
         languages: ['English', 'Japanese'],
         certs: ['Cert 1', 'Cert 2'],
-        projects: []
+        projects: [],
+        deletedProjects: []
     };
 
     let expectedValueCreated = dataMock.push(dataCreatedObjectId);

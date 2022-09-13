@@ -7,6 +7,6 @@ export * from '../../project-statuses/dtos/create.project-status.dto';
 export * from '../../projects/dtos/create.project.dto';
 export * from '../../technologies/dtos/create.technology.dto';
 export * from './pagination.dto';
-export * from './admin.dto'
-export * from './change-password.dto'
+export * from '../../admins/dtos/update.admin.dto'
+export * from '../../admins/dtos/update.password.dto'
 export * from './project-count.dto'

@@ -3,3 +3,8 @@ export type JwtPayload = {
     username: string;
     role: string;
 };
+
+export type EmailTokenPayload = {
+    email: string;
+    timestamp: number;
+}

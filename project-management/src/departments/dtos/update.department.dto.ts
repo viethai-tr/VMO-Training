@@ -24,7 +24,7 @@ export class UpdateDepartmentDto {
     @ApiProperty({
         example: '2022-08-24'
     })
-    founding_date: Date[];
+    founding_date: Date;
 
     @IsString()
     @IsOptional()

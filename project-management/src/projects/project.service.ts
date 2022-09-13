@@ -5,7 +5,7 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import mongoose, { Model, Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
 import { ProjectDto } from './dtos/create.project.dto';
 import { Project, ProjectDocument } from '../core/schemas/project.schema';
@@ -16,12 +16,7 @@ import {
     Department,
     DepartmentDocument,
 } from '../core/schemas/department.schema';
-import { checkValidDate } from '../shared/utils/checkValidDate';
-import {
-    RESPOND,
-    RESPOND_CREATED,
-    RESPOND_GOT,
-} from '../shared/const/respond.const';
+import { RESPOND, RESPOND_GOT } from '../shared/const/respond.const';
 import { Customer, CustomerDocument } from '../core/schemas/customer.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { UpdateProjectDto } from './dtos/update.project.dto';
@@ -75,17 +70,11 @@ export class ProjectService {
     }
 
     async getProjectById(id: string) {
-        const curProject = await this.projectRepository.getProjectById(id);
-
-        return RESPOND(RESPOND_GOT, curProject);
+        return this.projectRepository.getProjectById(id);
     }
 
     async getEmployeesProject(id: string) {
-        const listEmployees = await this.projectRepository.getEmployeesProject(
-            id,
-        );
-
-        return RESPOND(RESPOND_GOT, listEmployees);
+        return this.projectRepository.getEmployeesProject(id);
     }
 
     async countProjects(
@@ -125,8 +114,6 @@ export class ProjectService {
 
         technologies = [...new Set(technologies)];
         employees = [...new Set(employees)];
-
-        checkValidDate(starting_date);
 
         const idType = new mongoose.Types.ObjectId(type);
         const idStatus = new mongoose.Types.ObjectId(status);
@@ -186,17 +173,31 @@ export class ProjectService {
             idEmployees = convertObjectId(employees);
         }
 
-        if (type) idType = new mongoose.Types.ObjectId(type);
+        if (type) {
+            idType = new mongoose.Types.ObjectId(type);
+            let checkTypeExists = await this.projectTypeModel.find({
+                _id: idType,
+            });
+            if (!checkTypeExists || checkTypeExists.length <= 0)
+                throw new NotFoundException('Project type not exists');
+        }
 
-        if (status) idStatus = new mongoose.Types.ObjectId(status);
+        if (status) {
+            idStatus = new mongoose.Types.ObjectId(status);
+            let checkStatusExists = await this.projectStatusModel.find({
+                _id: idType,
+            });
+            if (!checkStatusExists || checkStatusExists.length <= 0)
+                throw new NotFoundException('Project status not exists');
+        }
 
         if (customer) {
             idCustomer = new mongoose.Types.ObjectId(customer);
-            let checkCustomerExists = this.customerModel.find({
+            let checkCustomerExists = await this.customerModel.find({
                 _id: idCustomer,
                 isDeleted: false,
             });
-            if (!checkCustomerExists)
+            if (!checkCustomerExists || checkCustomerExists.length <= 0)
                 throw new NotFoundException('Customer not exists');
         }
 
@@ -287,7 +288,7 @@ export class ProjectService {
 
         await this.employeeModel.updateMany(
             { _id: { $in: employees } },
-            { $pull: { deleteProjects: id }, $push: { projects: id } },
+            { $pull: { deletedProjects: id }, $push: { projects: id } },
         );
         return this.projectModel.restore({ _id: id });
     }

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
@@ -8,12 +8,12 @@ import {
     TechnologyDocument,
 } from '../core/schemas/technology.schema';
 import { Repository } from '../core/Repository';
-import { RESPOND, RESPOND_DELETED } from 'src/shared/const/respond.const';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 
 export class TechnologyRepository extends Repository<TechnologyDocument> {
     constructor(
         @InjectModel(Technology.name)
-        private technologyModel: Model<TechnologyDocument>,
+        private technologyModel: SoftDeleteModel<TechnologyDocument>,
         @InjectModel(Employee.name)
         private employeeModel: Model<EmployeeDocument>,
         @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
@@ -31,15 +31,16 @@ export class TechnologyRepository extends Repository<TechnologyDocument> {
                 (!projects || (await projects).length == 0) &&
                 (!employees || (await employees).length == 0);
             if (checkLinked) {
-                await this.technologyModel.findOneAndUpdate({ _id: id }, {deleted: true});
-                return RESPOND(RESPOND_DELETED, {
-                    id: id,
-                });
+                await this.technologyModel.softDelete({ _id: id });
             } else {
-                throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+                throw new BadRequestException('Cannot delete');
             }
         } else {
             throw new HttpException('Not found', HttpStatus.NOT_FOUND);
         }
+    }
+
+    async restoreTechnology(id: string) {
+        return this.technologyModel.restore({ _id: id });
     }
 }

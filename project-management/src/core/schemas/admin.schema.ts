@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from "mongoose";
+import { Document } from 'mongoose';
 import { Exclude } from 'class-transformer';
 import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
 
@@ -17,8 +17,14 @@ export class Admin {
     @Exclude()
     password: string;
 
+    @Prop({ required: true, unique: true })
+    email: string;
+
     @Prop({ default: false })
     status: boolean;
+
+    @Prop({ default: false })
+    active: boolean;
 
     @Prop({ required: true, default: 'User' })
     role: string;
@@ -27,4 +33,5 @@ export class Admin {
     rt: string;
 }
 
-export const AdminSchema = SchemaFactory.createForClass(Admin).plugin(softDeletePlugin);
+export const AdminSchema =
+    SchemaFactory.createForClass(Admin).plugin(softDeletePlugin);

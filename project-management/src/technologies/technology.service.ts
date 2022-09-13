@@ -1,8 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { TechnologyDto } from 'src/technologies/dtos/create.technology.dto';
-import { TechnologyDocument } from 'src/core/schemas/technology.schema';
-import { checkObjectId } from 'src/shared/utils/checkObjectId';
+import { TechnologyDto } from '../technologies/dtos/create.technology.dto';
+import { TechnologyDocument } from '../core/schemas/technology.schema';
 import { TechnologyRepository } from './technology.repository';
 import { UpdateTechnologyDto } from './dtos/update.technology.dto';
 
@@ -44,5 +43,9 @@ export class TechnologyService {
     async deleteTechnology(id: string) {
         
         return this.technologyRepository.deleteTechnology(id);
+    }
+
+    async restoreTechnology(id: string) {
+        return this.technologyRepository.restoreTechnology(id);
     }
 }

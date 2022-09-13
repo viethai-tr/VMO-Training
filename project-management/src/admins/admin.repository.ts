@@ -5,15 +5,13 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as argon from 'argon2';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { checkInteger } from '../shared/utils/checkInteger';
-import { AdminDto } from '../core/dtos/admin.dto';
-import { ChangePasswordDto } from '../core/dtos/change-password.dto';
+import { AdminDto } from './dtos/update.admin.dto';
+import { ChangePasswordDto } from './dtos/update.password.dto';
 import { Repository } from '../core/Repository';
 import { Admin, AdminDocument } from '../core/schemas/admin.schema';
 import {
-    RESPOND,
-    RESPOND_GOT,
     RESPOND_UPDATED,
 } from '../shared/const/respond.const';
 
@@ -97,9 +95,9 @@ export class AdminRepository extends Repository<AdminDocument> {
 
         if (oldPwMatch) {
             const newPasswordHashed = await argon.hash(passwordDto.newPassword);
-            await this.adminModel.findOneAndUpdate(
+            await this.adminModel.updateOne(
                 { _id: id },
-                { password: newPasswordHashed },
+                { $set: { password: newPasswordHashed } },
             );
             return RESPOND_UPDATED;
         } else {
@@ -110,14 +108,11 @@ export class AdminRepository extends Repository<AdminDocument> {
     }
 
     async updateAdmin(id: string, adminDto: AdminDto) {
-        return this.adminModel.findOneAndUpdate({ _id: id }, adminDto);
+        return this.adminModel.updateOne({ _id: id }, adminDto);
     }
 
     async getAdminInfo(id: string) {
-        return this.adminModel.findOne(
-            { _id: id },
-            { password: 0, rt: 0 },
-        );
+        return this.adminModel.findOne({ _id: id }, { password: 0, rt: 0 });
     }
 
     async findByCondition(query) {

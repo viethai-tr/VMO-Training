@@ -17,10 +17,9 @@ import { PaginationDto, ProjectDto } from '../core/dtos';
 import { ProjectService } from './project.service';
 import Role from '../core/enums/role.enum';
 import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
-import { API_QUERY } from 'src/shared/const/variables.const';
+import { API_QUERY } from '../shared/const/variables.const';
 import { PROJECT_COUNT, PROJECT_QUERY } from './project.const';
-import { ParseObjectIdPipe } from 'src/shared/pipes/objectid.pipe';
-import { Types } from 'mongoose';
+import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
 import { UpdateProjectDto } from './dtos/update.project.dto';
 
 @ApiBearerAuth()

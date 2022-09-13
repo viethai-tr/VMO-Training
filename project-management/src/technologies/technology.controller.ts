@@ -21,7 +21,7 @@ import { TechnologyDocument } from '../core/schemas/technology.schema';
 import { TechnologyService } from './technology.service';
 import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 import { API_QUERY } from '../shared/const/variables.const';
-import { ParseObjectIdPipe } from 'src/shared/pipes/objectid.pipe';
+import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
 import { Types } from 'mongoose';
 import { UpdateTechnologyDto } from './dtos/update.technology.dto';
 
@@ -81,5 +81,10 @@ export class TechnologyController {
     @HttpCode(204)
     async deleteTechnology(@Param('id', ParseObjectIdPipe) id: string) {
         return this.technologyService.deleteTechnology(id);
+    }
+
+    @Post('restore/:id')
+    async restoreTechnology(@Param('id', ParseObjectIdPipe) id: string) {
+        return this.technologyService.restoreTechnology(id);
     }
 }

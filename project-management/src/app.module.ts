@@ -18,6 +18,7 @@ import { AtGuard } from './shared/auth/guards/at.guard';
 import { RolesGuard } from './shared/auth/guards/roles.guard';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { MongoExceptionFilter } from './shared/filters/mongo-exception.filter';
+import { EmailModule } from './email/email.module';
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import { MongoExceptionFilter } from './shared/filters/mongo-exception.filter';
 
         ConfigModule.forRoot({
             load: [configuration],
+            envFilePath: 'src/config/env/.env',
             isGlobal: true,
         }),
 
@@ -51,6 +53,8 @@ import { MongoExceptionFilter } from './shared/filters/mongo-exception.filter';
         DepartmentModule,
 
         AdminModule,
+
+        EmailModule,
     ],
     controllers: [AppController],
     providers: [

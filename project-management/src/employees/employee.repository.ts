@@ -8,7 +8,7 @@ import {
 import { Employee, EmployeeDocument } from '../core/schemas/employee.schema';
 import { Project, ProjectDocument } from '../core/schemas/project.schema';
 import { Repository } from '../core/Repository';
-import { checkInteger } from 'src/shared/utils/checkInteger';
+import { checkInteger } from '../shared/utils/checkInteger';
 import { EMPLOYEE_PROPERTIES } from './employee.const';
 
 @Injectable()
@@ -97,7 +97,7 @@ export class EmployeeRepository extends Repository<EmployeeDocument> {
         count = listEmployees.length;
 
         return {
-            numEmployees: count
+            quantity: count
         };
     }
 }

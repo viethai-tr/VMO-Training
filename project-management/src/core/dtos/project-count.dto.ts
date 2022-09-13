@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsDateString, IsNotEmpty, IsOptional, IsString, Matches } from "class-validator";
+import { IsDate, IsDateString, IsNotEmpty, IsOptional, IsString, Matches } from "class-validator";
 import { OBJECTID_PATTERN } from "../../shared/const/regex.const";
 
 export class ProjectCountDto {
@@ -24,9 +24,9 @@ export class ProjectCountDto {
     @Matches(OBJECTID_PATTERN)
     customer: string;
 
-    @IsOptional()
-    @IsNotEmpty()
     @Type(() => Date)
+    @IsOptional()
+    @IsDate()
     @ApiProperty({
         example: '2022-08-24T00:00:00Z'
     })

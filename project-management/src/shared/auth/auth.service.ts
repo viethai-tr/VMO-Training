@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -29,6 +29,8 @@ export class AuthService {
                 'Password mismatch!',
                 HttpStatus.BAD_REQUEST,
             );
+
+        if (!admin.active) throw new BadRequestException('Account is not active. Please check your email');
 
         await this.adminModel.findOneAndUpdate(
             { username: authDto.username,isDeleted: false },

@@ -1,10 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
-import Status from "../enums/status.enum";
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class AdminDto {
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     @ApiProperty({
         example: 'Admin Name'
     })
@@ -13,5 +12,6 @@ export class AdminDto {
     @ApiProperty({
         example: false,
     })
+    @IsOptional()
     status: boolean;
 }
