@@ -19,13 +19,14 @@ import { RolesGuard } from './shared/auth/guards/roles.guard';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { MongoExceptionFilter } from './shared/filters/mongo-exception.filter';
 import { EmailModule } from './email/email.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { CloudinaryProvider } from './cloudinary/cloudinary.provider';
 
 @Module({
     imports: [
         AuthModule,
 
         ConfigModule.forRoot({
-            load: [configuration],
             envFilePath: 'src/config/env/.env',
             isGlobal: true,
         }),
@@ -34,7 +35,7 @@ import { EmailModule } from './email/email.module';
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: async (config: ConfigService) => ({
-                uri: config.get('database'),
+                uri: config.get<string>('DATABASE_URL'),
             }),
         }),
 
@@ -55,6 +56,8 @@ import { EmailModule } from './email/email.module';
         AdminModule,
 
         EmailModule,
+
+        CloudinaryModule,
     ],
     controllers: [AppController],
     providers: [

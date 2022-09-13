@@ -17,6 +17,7 @@ import { ConfigService } from '@nestjs/config';
 import { VerifyEmailToken } from '../shared/utils/verifyToken';
 import { EmailService } from '../email/email.service';
 import { ADMIN } from './admin.const';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class AdminService {
@@ -28,6 +29,7 @@ export class AdminService {
         private config: ConfigService,
         private verifyEmailToken: VerifyEmailToken,
         private emailService: EmailService,
+        private cloudinaryService: CloudinaryService,
     ) {}
 
     async getAllUser(
@@ -51,7 +53,10 @@ export class AdminService {
         return this.adminRepository.getAdminInfo(id);
     }
 
-    async createUser(createUserDto: CreateUserDto) {
+    async createUser(
+        createUserDto: CreateUserDto,
+        avatar: Express.Multer.File,
+    ) {
         const checkExistedEmail = await this.adminModel.find({
             email: createUserDto.email,
         });
@@ -61,6 +66,11 @@ export class AdminService {
         createUserDto.password = await argon.hash(createUserDto.password);
         const timestamp = Date.now();
         const token = await this.signToken(createUserDto.email, timestamp);
+
+        const avatarCloud = await this.cloudinaryService.uploadCloudinary(
+            avatar,
+        );
+        createUserDto.avatar = avatarCloud.url;
 
         await this.emailService.sendActiveMail(
             token,
@@ -106,7 +116,7 @@ export class AdminService {
         };
 
         const emailToken = await this.jwt.signAsync(payload, {
-            secret: this.config.get('emailSecretKey'),
+            secret: this.config.get<string>('EMAIL_SECRET_KEY'),
         });
 
         return emailToken;

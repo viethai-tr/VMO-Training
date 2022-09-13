@@ -15,7 +15,7 @@ export class EmailService {
         email: string,
         name: string,
     ) {
-        const port = this.config.get('port');
+        const port = this.config.get<number>('PORT');
         const url = `http://localhost:${port}/api/v1/admins/active?token=${token}`;
 
         await this.mailerService.sendMail({

@@ -27,8 +27,11 @@ npm install
 - [x] Checking Manager exists in Department documents and checking Customer exists in Project documents.
 - [x] Sending email to active users.
 - [ ] Login with Google.
-- [ ] Upload files.
+- [x] Upload files.
+    - [x] Upload files to Cloudinary (13/9).
+    - [ ] Remove, update files from Cloudinary.
+    - [ ] Handle errors with file field.
 
-## Testing:
-- [x] Customer + Department.
-### [Coverage](https://drive.google.com/file/d/1ZtZrSo6GNnh-b3cnDMdOew2hKVjZxwgn/view?usp=sharing).
+## Testing: [Coverage](https://drive.google.com/file/d/1ZtZrSo6GNnh-b3cnDMdOew2hKVjZxwgn/view?usp=sharing).
+- [x] Customer.
+- [x] Department.

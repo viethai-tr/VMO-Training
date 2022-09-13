@@ -12,7 +12,7 @@ export class VerifyEmailToken {
 
     async verifyJwt(token: string): Promise<EmailTokenPayload> {
         return this.jwtService.verifyAsync(token, {
-            secret: this.config.get('emailSecretKey'),
+            secret: this.config.get<string>('EMAIL_SECRET_KEY'),
         });
     }
 }

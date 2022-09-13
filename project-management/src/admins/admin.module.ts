@@ -7,6 +7,7 @@ import { AdminController } from './admin.controller';
 import { AdminRepository } from './admin.repository';
 import { AdminService } from './admin.service';
 import { EmailModule } from '../email/email.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
     controllers: [AdminController],
@@ -17,6 +18,8 @@ import { EmailModule } from '../email/email.module';
         JwtModule.register({}),
 
         EmailModule,
+
+        CloudinaryModule
     ],
     exports: [AdminService],
 })

@@ -20,6 +20,9 @@ export class Admin {
     @Prop({ required: true, unique: true })
     email: string;
 
+    @Prop()
+    avatar: string;
+
     @Prop({ default: false })
     status: boolean;
 

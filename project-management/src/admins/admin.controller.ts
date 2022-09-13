@@ -9,9 +9,11 @@ import {
     Patch,
     Post,
     Query,
+    UploadedFile,
     UseFilters,
+    UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ChangePasswordDto } from './dtos/update.password.dto';
 import { GetCurrentAdmin } from '../shared/decorators/get-current-admin.decorator';
 import { AdminService } from './admin.service';
@@ -25,6 +27,7 @@ import { API_QUERY } from '../shared/const/variables.const';
 import { CreateUserDto } from './dtos/create.admin.dto';
 import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
 import { Public } from '../shared/decorators/public.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiBearerAuth()
 @ApiTags('Admin')
@@ -76,12 +79,14 @@ export class AdminController {
         return this.adminService.getAdminInfo(id);
     }
 
+    @Post('create')
+    @ApiConsumes('multipart/form-data')
     @ApiBody({ type: CreateUserDto })
     @Roles(Role.Admin)
-    @Post('create')
+    @UseInterceptors(FileInterceptor('avatar'))
     @HttpCode(201)
-    async createUser(@Body() createUserDto: CreateUserDto) {
-        return this.adminService.createUser(createUserDto);
+    async createUser(@Body() createUserDto: CreateUserDto, @UploadedFile() avatar) {
+        return this.adminService.createUser(createUserDto, avatar);
     }
 
     @Delete(':id')
@@ -109,9 +114,9 @@ export class AdminController {
             type: 'object',
             required: ['email'],
             properties: {
-                email: { type: 'string'}
-            }
-        }
+                email: { type: 'string' },
+            },
+        },
     })
     @Post('resend')
     async resendEmail(@Body('email') email: string) {
