@@ -1,5 +1,6 @@
 import {
     Body,
+    ClassSerializerInterceptor,
     Controller,
     Delete,
     Get,
@@ -34,11 +35,12 @@ import { CreateUserDto } from './dtos/create.admin.dto';
 import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
 import { Public } from '../shared/decorators/public.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ResettingPasswordDto } from './dtos/reset.password.dto';
 
 @ApiBearerAuth()
 @ApiTags('Admin')
 @UseFilters(MongoExceptionFilter)
-@UseFilters(HttpExceptionFilter)
+// @UseFilters(HttpExceptionFilter)
 @Controller('admins')
 export class AdminController {
     constructor(private readonly adminService: AdminService) {}
@@ -117,6 +119,21 @@ export class AdminController {
         @UploadedFile() avatar,
     ) {
         return this.adminService.uploadAvatar(id, avatar);
+    }
+
+    @Public()
+    @Post('forgot')
+    async forgotPassword(@Body('search') search: string) {
+        return this.adminService.forgotPassword(search);
+    }
+
+    @Public()
+    @Post('reset')
+    @ApiBody({ type: ResettingPasswordDto })
+    async resetPassword(
+        @Body() resettingPassword: ResettingPasswordDto,
+    ) {
+        return this.adminService.resetPassword(resettingPassword);
     }
 
     @Delete(':id')

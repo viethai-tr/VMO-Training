@@ -31,6 +31,8 @@ npm install
 - [x] Upload files.
     - [x] Upload files to Cloudinary (13/9).
     - [x] Remove, update files from Cloudinary (14/9).
+- [x] Forget and reset password (send email with verify code based on timestamp).
+    - [ ] Transaction.
 
 ## Testing: [Coverage](https://drive.google.com/file/d/1ZtZrSo6GNnh-b3cnDMdOew2hKVjZxwgn/view?usp=sharing).
 - [x] Customer.

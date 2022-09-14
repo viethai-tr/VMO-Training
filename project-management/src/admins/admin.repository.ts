@@ -11,9 +11,7 @@ import { UpdateAdminDto } from './dtos/update.admin.dto';
 import { ChangePasswordDto } from './dtos/update.password.dto';
 import { Repository } from '../core/Repository';
 import { Admin, AdminDocument } from '../core/schemas/admin.schema';
-import {
-    RESPOND_UPDATED,
-} from '../shared/const/respond.const';
+import { RESPOND_UPDATED } from '../shared/const/respond.const';
 
 @Injectable()
 export class AdminRepository extends Repository<AdminDocument> {
@@ -113,5 +111,12 @@ export class AdminRepository extends Repository<AdminDocument> {
 
     async findByCondition(query) {
         return this.adminModel.find(query);
+    }
+
+    async updatePassword(username: string, password: string) {
+        return this.adminModel.updateOne(
+            { username: username },
+            { $set: { password: password, verifyCode: null } },
+        );
     }
 }

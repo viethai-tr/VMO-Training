@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards} from '@nestjs/common';
+import { Body, Controller, Post, UseGuards} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from '../../core/dtos/auth.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,9 +7,6 @@ import { Model } from 'mongoose';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Public } from '../decorators/public.decorator';
 import { GetCurrentAdmin } from '../decorators/get-current-admin.decorator';
-import { Request } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { AuthGuard } from '@nestjs/passport';
 import { RtGuard } from './guards/rt.guard';
 
 @ApiBearerAuth()

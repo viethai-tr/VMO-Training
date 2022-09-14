@@ -29,6 +29,9 @@ export class Admin {
     @Prop({ default: false })
     active: boolean;
 
+    @Prop()
+    verifyCode: string;
+
     @Prop({ required: true, default: 'User' })
     role: string;
 

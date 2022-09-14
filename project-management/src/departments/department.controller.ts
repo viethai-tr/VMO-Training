@@ -19,7 +19,6 @@ import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 import { API_QUERY } from '../shared/const/variables.const';
 import { DEPARTMENT_QUERY } from './department.const';
 import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
-import { Types } from 'mongoose';
 import { UpdateDepartmentDto } from './dtos/update.department.dto';
 
 @ApiBearerAuth()

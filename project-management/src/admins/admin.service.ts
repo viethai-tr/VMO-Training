@@ -17,6 +17,7 @@ import { VerifyEmailToken } from '../shared/utils/verifyToken';
 import { EmailService } from '../email/email.service';
 import { ADMIN } from './admin.const';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { ResettingPasswordDto } from './dtos/reset.password.dto';
 
 @Injectable()
 export class AdminService {
@@ -61,6 +62,56 @@ export class AdminService {
         }
 
         return this.adminRepository.update(id, updateAdminDto);
+    }
+
+    async forgotPassword(search: string) {
+        const user = await this.adminModel.findOne({
+            $or: [{ username: search }, { email: search }],
+        });
+
+        if (!user) throw new BadRequestException('This account does not exist');
+
+        const dateExpired = (Date.now() + ADMIN.ACTIVE_TIME).toString();
+        const code = dateExpired.slice(-6);
+        try {
+            await this.emailService.sendForgotPasswordMail(
+                user.name,
+                user.email,
+                code,
+            );
+        } catch (err) {
+            throw new BadRequestException(err.message);
+        }
+
+        await this.adminModel.updateOne(
+            { _id: user.id },
+            { $set: { verifyCode: dateExpired } },
+        );
+
+        return {
+            message: "Done!"
+        };
+    }
+
+    async resetPassword(resettingPassword: ResettingPasswordDto) {
+        const user = await this.adminModel.findOne({
+            username: resettingPassword.username,
+        });
+        const dbTimeCode = user.verifyCode;
+        const dateNow = Date.now();
+        if (resettingPassword.verifyCode !== dbTimeCode.slice(-6))
+            throw new BadRequestException('Incorrect code');
+        if (dateNow > parseInt(dbTimeCode))
+            throw new BadRequestException('This code is expired');
+        if (resettingPassword.newPassword != resettingPassword.confirmPassword)
+            throw new BadRequestException('Confirm password did not match');
+
+        const newDbPassword = await argon.hash(resettingPassword.newPassword);
+
+        return this.adminRepository.updatePassword(
+            resettingPassword.username,
+            newDbPassword,
+        );
     }
 
     async getAdminInfo(id: string) {
@@ -156,13 +207,19 @@ export class AdminService {
 
         const emailToken = await this.jwt.signAsync(payload, {
             secret: this.config.get<string>('EMAIL_SECRET_KEY'),
+            expiresIn: '15m',
         });
 
         return emailToken;
     }
 
     async activeUser(token: string) {
-        const payload = await this.verifyEmailToken.verifyJwt(token);
+        let payload;
+        try {
+            payload = await this.verifyEmailToken.verifyJwt(token);
+        } catch (err) {
+            throw new BadRequestException(err.message);
+        }
 
         const checkUser = await this.adminModel.find({
             email: payload.email,
@@ -175,10 +232,10 @@ export class AdminService {
             );
         }
 
-        const timestamp = payload.timestamp;
-        if (Date.now() - timestamp > ADMIN.ACTIVE_TIME) {
-            throw new BadRequestException('This active token is expired!');
-        }
+        // const timestamp = payload.timestamp;
+        // if (Date.now() - timestamp > ADMIN.ACTIVE_TIME) {
+        //     throw new BadRequestException('This active token is expired!');
+        // }
 
         await this.adminModel.updateOne(
             { email: payload.email },
