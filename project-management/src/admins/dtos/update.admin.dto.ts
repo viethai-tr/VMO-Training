@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
-export class AdminDto {
+export class UpdateAdminDto {
     @IsString()
     @IsOptional()
     @ApiProperty({
@@ -14,4 +14,12 @@ export class AdminDto {
     })
     @IsOptional()
     status: boolean;
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty({
+        type: 'string',
+        format: 'binary',
+    })
+    avatarUrl: string;
 }

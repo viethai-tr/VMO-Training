@@ -30,9 +30,15 @@ export class CloudinaryService {
     }
 
     async uploadCloudinary(file: Express.Multer.File) {
-        return this.uploadImage(file).catch(() => {
-            console.log(file.mimetype);
+        return this.uploadImage(file).catch((error) => {
+            if (error instanceof BadRequestException) throw error;
             throw new BadRequestException('Failed to upload image');
         });
+    }
+
+    async deleteCloudinary(url: string) {
+        v2.uploader.destroy(
+            `${this.config.get<string>('UPLOAD_FOLDER')}/${url}`,
+        );
     }
 }

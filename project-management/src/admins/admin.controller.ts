@@ -13,11 +13,17 @@ import {
     UseFilters,
     UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+    ApiBearerAuth,
+    ApiBody,
+    ApiConsumes,
+    ApiQuery,
+    ApiTags,
+} from '@nestjs/swagger';
 import { ChangePasswordDto } from './dtos/update.password.dto';
 import { GetCurrentAdmin } from '../shared/decorators/get-current-admin.decorator';
 import { AdminService } from './admin.service';
-import { AdminDto } from './dtos/update.admin.dto';
+import { UpdateAdminDto } from './dtos/update.admin.dto';
 import { Roles } from '../shared/decorators/roles.decorator';
 import Role from '../core/enums/role.enum';
 import { PaginationDto } from '../core/dtos';
@@ -49,14 +55,14 @@ export class AdminController {
         return this.adminService.getAllUser(limit, page, search, sort);
     }
 
-    @ApiBody({ type: AdminDto })
+    @ApiBody({ type: UpdateAdminDto })
     @Roles(Role.Admin, Role.User)
     @Patch('me')
     async updateAdmin(
         @GetCurrentAdmin('sub', ParseObjectIdPipe) id: string,
-        @Body() adminDto: AdminDto,
+        @Body() updateAdminDto: UpdateAdminDto,
     ) {
-        await this.adminService.updateAdmin(id, adminDto);
+        await this.adminService.updateAdmin(id, updateAdminDto);
         return {
             HttpStatus: HttpStatus.OK,
             message: 'Infomation updated successfully!',
@@ -83,10 +89,34 @@ export class AdminController {
     @ApiConsumes('multipart/form-data')
     @ApiBody({ type: CreateUserDto })
     @Roles(Role.Admin)
-    @UseInterceptors(FileInterceptor('avatar'))
+    @UseInterceptors(FileInterceptor('avatarUrl'))
     @HttpCode(201)
-    async createUser(@Body() createUserDto: CreateUserDto, @UploadedFile() avatar) {
+    async createUser(
+        @Body() createUserDto: CreateUserDto,
+        @UploadedFile() avatar,
+    ) {
         return this.adminService.createUser(createUserDto, avatar);
+    }
+
+    @Post('upload')
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                avatarUrl: {
+                    type: 'string',
+                    format: 'binary',
+                },
+            },
+        },
+    })
+    @UseInterceptors(FileInterceptor('avatarUrl'))
+    async uploadAvatar(
+        @GetCurrentAdmin('sub', ParseObjectIdPipe) id: string,
+        @UploadedFile() avatar,
+    ) {
+        return this.adminService.uploadAvatar(id, avatar);
     }
 
     @Delete(':id')

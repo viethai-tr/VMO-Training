@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
+import { USERNAME_PATTERN } from '../admin.const';
 
 export class CreateUserDto {
     @IsString()
@@ -10,6 +11,7 @@ export class CreateUserDto {
     name: string;
 
     @IsString()
+    @Matches(USERNAME_PATTERN)
     @ApiProperty({
         example: 'username',
     })
@@ -31,7 +33,8 @@ export class CreateUserDto {
     @IsString()
     @IsOptional()
     @ApiProperty({
-        example: 'avatar_link',
+        type: 'string',
+        format: 'binary',
     })
     avatarUrl: string;
 }

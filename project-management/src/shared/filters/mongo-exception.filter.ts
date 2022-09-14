@@ -18,8 +18,8 @@ export class MongoExceptionFilter implements ExceptionFilter {
                 key = key.charAt(0).toUpperCase() + key.slice(1);
                 key.replace('_', " ");
 
-                response.status(409).json({
-                    statusCode: 409,
+                response.status(400).json({
+                    statusCode: 400,
                     message: `${key} already exists!`
                 });
 

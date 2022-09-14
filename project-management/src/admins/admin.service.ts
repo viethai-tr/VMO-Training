@@ -4,12 +4,11 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create.admin.dto';
-import { AdminDto } from './dtos/update.admin.dto';
+import { UpdateAdminDto } from './dtos/update.admin.dto';
 import { ChangePasswordDto } from './dtos/update.password.dto';
 import { AdminRepository } from './admin.repository';
 import * as argon from 'argon2';
 import { Admin, AdminDocument } from '../core/schemas/admin.schema';
-import { Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { JwtService } from '@nestjs/jwt';
@@ -45,8 +44,23 @@ export class AdminService {
         return this.adminRepository.changePassword(id, passwordDto);
     }
 
-    async updateAdmin(id: string, adminDto: AdminDto) {
-        return this.adminRepository.updateAdmin(id, adminDto);
+    async updateAdmin(
+        id: string,
+        updateAdminDto: UpdateAdminDto,
+        avatar?: Express.Multer.File,
+    ) {
+        let avatarCloud;
+
+        if (avatar) {
+            const user = await this.adminModel.findOne({ _id: id });
+            if (user.avatarUrl)
+                await this.cloudinaryService.deleteCloudinary(user.avatarUrl);
+
+            avatarCloud = await this.cloudinaryService.uploadCloudinary(avatar);
+            updateAdminDto.avatarUrl = avatarCloud.url;
+        }
+
+        return this.adminRepository.update(id, updateAdminDto);
     }
 
     async getAdminInfo(id: string) {
@@ -55,8 +69,14 @@ export class AdminService {
 
     async createUser(
         createUserDto: CreateUserDto,
-        avatar: Express.Multer.File,
+        avatar?: Express.Multer.File,
     ) {
+        const checkExistedUsername = await this.adminModel.find({
+            username: createUserDto.username,
+        });
+        if (checkExistedUsername.length > 0)
+            throw new BadRequestException('Username already exists');
+
         const checkExistedEmail = await this.adminModel.find({
             email: createUserDto.email,
         });
@@ -67,10 +87,12 @@ export class AdminService {
         const timestamp = Date.now();
         const token = await this.signToken(createUserDto.email, timestamp);
 
-        const avatarCloud = await this.cloudinaryService.uploadCloudinary(
-            avatar,
-        );
-        createUserDto.avatarUrl = avatarCloud.url;
+        if (avatar) {
+            const avatarCloud = await this.cloudinaryService.uploadCloudinary(
+                avatar,
+            );
+            createUserDto.avatarUrl = avatarCloud.url;
+        }
 
         await this.emailService.sendActiveMail(
             token,
@@ -79,6 +101,23 @@ export class AdminService {
         );
 
         return this.adminRepository.create(<AdminDocument>createUserDto);
+    }
+
+    async uploadAvatar(id: string, avatar: Express.Multer.File) {
+        if (!avatar) return;
+        const user = await this.adminModel.findOne({ _id: id });
+
+        if (user.avatarUrl)
+            await this.cloudinaryService.deleteCloudinary(user.avatarUrl);
+
+        const avatarCloud = await this.cloudinaryService.uploadCloudinary(
+            avatar,
+        );
+
+        return this.adminModel.updateOne(
+            { _id: id },
+            { $set: { avatarUrl: avatarCloud.url } },
+        );
     }
 
     async resendEmail(email: string) {

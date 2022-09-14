@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as argon from 'argon2';
 import { Model } from 'mongoose';
 import { checkInteger } from '../shared/utils/checkInteger';
-import { AdminDto } from './dtos/update.admin.dto';
+import { UpdateAdminDto } from './dtos/update.admin.dto';
 import { ChangePasswordDto } from './dtos/update.password.dto';
 import { Repository } from '../core/Repository';
 import { Admin, AdminDocument } from '../core/schemas/admin.schema';
@@ -105,10 +105,6 @@ export class AdminRepository extends Repository<AdminDocument> {
                 'Password does not match old password!',
             );
         }
-    }
-
-    async updateAdmin(id: string, adminDto: AdminDto) {
-        return this.adminModel.updateOne({ _id: id }, adminDto);
     }
 
     async getAdminInfo(id: string) {

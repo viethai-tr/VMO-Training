@@ -29,8 +29,7 @@ npm install
 - [ ] Login with Google.
 - [x] Upload files.
     - [x] Upload files to Cloudinary (13/9).
-    - [ ] Remove, update files from Cloudinary.
-    - [ ] Handle errors with file field.
+    - [x] Remove, update files from Cloudinary (14/9).
 
 ## Testing: [Coverage](https://drive.google.com/file/d/1ZtZrSo6GNnh-b3cnDMdOew2hKVjZxwgn/view?usp=sharing).
 - [x] Customer.
