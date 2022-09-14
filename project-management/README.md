@@ -11,6 +11,7 @@
 ## Technologies:
 - NestJS.
 - MongoDB.
+- Cloudinary.
 
 ## Installation:
 Clone repo of the project to your device by 
