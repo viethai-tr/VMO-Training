@@ -1,4 +1,9 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+    BadRequestException,
+    HttpException,
+    HttpStatus,
+    Injectable,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,6 +12,7 @@ import { Admin, AdminDocument } from '../../core/schemas/admin.schema';
 import { AuthDto } from '../../core/dtos/auth.dto';
 import * as argon from 'argon2';
 import { Tokens } from './types/tokens.type';
+import { RedisCacheService } from 'src/caches/cache.service';
 
 @Injectable()
 export class AuthService {
@@ -14,11 +20,13 @@ export class AuthService {
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
         private jwt: JwtService,
         private config: ConfigService,
+        private cacheService: RedisCacheService,
     ) {}
 
-    async login(authDto: AuthDto) {
+    async login(authDto: AuthDto, session: any) {
         const admin = await this.adminModel.findOne({
-            username: authDto.username, isDeleted: false
+            username: authDto.username,
+            isDeleted: false,
         });
         if (!admin)
             throw new HttpException('Admin not found', HttpStatus.BAD_REQUEST);
@@ -30,10 +38,13 @@ export class AuthService {
                 HttpStatus.BAD_REQUEST,
             );
 
-        if (!admin.active) throw new BadRequestException('Account is not active. Please check your email');
+        if (!admin.active)
+            throw new BadRequestException(
+                'Account is not active. Please check your email',
+            );
 
         await this.adminModel.findOneAndUpdate(
-            { username: authDto.username,isDeleted: false },
+            { username: authDto.username, isDeleted: false },
             { status: true },
         );
 
@@ -41,12 +52,47 @@ export class AuthService {
         const tokens = await this.signToken(authDto.username, id, admin.role);
         await this.updateRtHash(id, tokens.refresh_token);
 
+        if (!session.sessionId) {
+            session.sessionId =
+                Math.floor(Math.random() * 1000) + '' + Number(new Date());
+        }
+
+        const accessCacheArray = tokens.access_token.split('.');
+        const accessCache = accessCacheArray[accessCacheArray.length - 1];
+
+        const accessTTL = this.config.get<number>('ACCESS_TTL');
+        const refreshTTL = this.config.get<number>('REFRESH_TTL');
+
+        await this.cacheService.set(
+            `user:${authDto.username}:access_token:${session.sessionId}`,
+            accessCache,
+            accessTTL,
+        );
+
+        const accessTokenCache = await this.cacheService.get(
+            `user:${authDto.username}:access_token:${session.sessionId}`,
+        );
+        const refreshKey = `user:${authDto.username}:refresh_token`;
+        let refreshTokenCache = await this.cacheService.get(refreshKey);
+        if (!refreshTokenCache) {
+            refreshTokenCache = tokens.refresh_token;
+            await this.cacheService.set(
+                refreshKey,
+                refreshTokenCache,
+                refreshTTL,
+            );
+        }
+
         return tokens;
     }
 
-    async logout(id: string): Promise<boolean> {
+    async logout(username: string, session: any): Promise<boolean> {
+        await this.cacheService.delete(
+            `user:${username}:access_token:${session.sessionId}`,
+        );
+
         await this.adminModel.findOneAndUpdate(
-            { _id: id },
+            { username: username },
             { rt: null, status: false },
         );
         return true;
@@ -55,12 +101,12 @@ export class AuthService {
     async signToken(
         username: string,
         id: string,
-        role: string
+        role: string,
     ): Promise<Tokens> {
         const payload = {
             sub: id,
             username,
-            role
+            role,
         };
 
         const [at, rt] = await Promise.all([

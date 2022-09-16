@@ -12,15 +12,15 @@ import { ProjectModule } from './projects/project.module';
 import { ProjectStatusModule } from './project-statuses/project-status.module';
 import { DepartmentModule } from './departments/department.module';
 import { AdminModule } from './admins/admin.module';
-import configuration from './config/configuration';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { AtGuard } from './shared/auth/guards/at.guard';
 import { RolesGuard } from './shared/auth/guards/roles.guard';
-import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { MongoExceptionFilter } from './shared/filters/mongo-exception.filter';
 import { EmailModule } from './email/email.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { CloudinaryProvider } from './cloudinary/cloudinary.provider';
+import { SessionModule } from 'nestjs-session';
+import { RedisCacheModule } from './caches/cache.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
     imports: [
@@ -58,6 +58,18 @@ import { CloudinaryProvider } from './cloudinary/cloudinary.provider';
         EmailModule,
 
         CloudinaryModule,
+
+        RedisCacheModule,
+
+        SessionModule.forRoot({
+            session: {
+                secret: new ConfigService().get<string>('SESSION_SECRET'),
+                resave: false,
+                saveUninitialized: false
+            }
+        }),
+
+        JwtModule
     ],
     controllers: [AppController],
     providers: [

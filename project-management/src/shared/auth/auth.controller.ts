@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards} from '@nestjs/common';
+import { Body, Controller, Post, Session, UseGuards} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from '../../core/dtos/auth.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -15,32 +15,24 @@ export class AuthController {
     constructor(
         private authService: AuthService,
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
-
-        // private config: ConfigService
     ) { }
 
     @Post('login')
     @Public()
-    async login(@Body() authDto: AuthDto) {
-        return await this.authService.login(authDto);
+    async login(@Body() authDto: AuthDto, @Session() session: any) {
+        return this.authService.login(authDto, session);
     }
 
-    // @Public()
-    // @Get('admin')
-    // async testAdmin(@GetCurrentAdmin() user) {
-    //     return user;
-    // }
-
     @Post('logout')
-    async logout(@GetCurrentAdmin('sub') id: string) {
-        return await this.authService.logout(id);
+    async logout(@GetCurrentAdmin('username') username: string, @Session() session: any) {
+        return this.authService.logout(username, session);
     }
 
     @Post('refresh')
     @Public()
     @UseGuards(RtGuard)
     async refreshToken(@GetCurrentAdmin('sub') id: string, @GetCurrentAdmin('refreshToken') rt: string) {
-        return await this.authService.refreshToken(id, rt);
+        return this.authService.refreshToken(id, rt);
     }
 
     // @UseGuards(AuthGuard('jwt'))

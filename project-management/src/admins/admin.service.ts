@@ -64,56 +64,6 @@ export class AdminService {
         return this.adminRepository.update(id, updateAdminDto);
     }
 
-    async forgotPassword(search: string) {
-        const user = await this.adminModel.findOne({
-            $or: [{ username: search }, { email: search }],
-        });
-
-        if (!user) throw new BadRequestException('This account does not exist');
-
-        const dateExpired = (Date.now() + ADMIN.ACTIVE_TIME).toString();
-        const code = dateExpired.slice(-6);
-        try {
-            await this.emailService.sendForgotPasswordMail(
-                user.name,
-                user.email,
-                code,
-            );
-        } catch (err) {
-            throw new BadRequestException(err.message);
-        }
-
-        await this.adminModel.updateOne(
-            { _id: user.id },
-            { $set: { verifyCode: dateExpired } },
-        );
-
-        return {
-            message: "Done!"
-        };
-    }
-
-    async resetPassword(resettingPassword: ResettingPasswordDto) {
-        const user = await this.adminModel.findOne({
-            username: resettingPassword.username,
-        });
-        const dbTimeCode = user.verifyCode;
-        const dateNow = Date.now();
-        if (resettingPassword.verifyCode !== dbTimeCode.slice(-6))
-            throw new BadRequestException('Incorrect code');
-        if (dateNow > parseInt(dbTimeCode))
-            throw new BadRequestException('This code is expired');
-        if (resettingPassword.newPassword != resettingPassword.confirmPassword)
-            throw new BadRequestException('Confirm password did not match');
-
-        const newDbPassword = await argon.hash(resettingPassword.newPassword);
-
-        return this.adminRepository.updatePassword(
-            resettingPassword.username,
-            newDbPassword,
-        );
-    }
-
     async getAdminInfo(id: string) {
         return this.adminRepository.getAdminInfo(id);
     }
@@ -152,6 +102,56 @@ export class AdminService {
         );
 
         return this.adminRepository.create(<AdminDocument>createUserDto);
+    }
+
+    async forgotPassword(search: string) {
+        const user = await this.adminModel.findOne({
+            $or: [{ username: search }, { email: search }],
+        });
+
+        if (!user) throw new BadRequestException('This account does not exist');
+
+        const dateExpired = (Date.now() + ADMIN.ACTIVE_TIME).toString();
+        const code = dateExpired.slice(-6);
+        try {
+            await this.emailService.sendForgotPasswordMail(
+                user.name,
+                user.email,
+                code,
+            );
+        } catch (err) {
+            throw new BadRequestException(err.message);
+        }
+
+        await this.adminModel.updateOne(
+            { _id: user.id },
+            { $set: { verifyCode: dateExpired } },
+        );
+
+        return {
+            message: 'Done!',
+        };
+    }
+
+    async resetPassword(resettingPassword: ResettingPasswordDto) {
+        const user = await this.adminModel.findOne({
+            username: resettingPassword.username,
+        });
+        const dbTimeCode = user.verifyCode;
+        const dateNow = Date.now();
+        if (resettingPassword.verifyCode !== dbTimeCode.slice(-6))
+            throw new BadRequestException('Incorrect code');
+        if (dateNow > parseInt(dbTimeCode))
+            throw new BadRequestException('This code is expired');
+        if (resettingPassword.newPassword != resettingPassword.confirmPassword)
+            throw new BadRequestException('Confirm password did not match');
+
+        const newDbPassword = await argon.hash(resettingPassword.newPassword);
+
+        return this.adminRepository.updatePassword(
+            resettingPassword.username,
+            newDbPassword,
+        );
     }
 
     async uploadAvatar(id: string, avatar: Express.Multer.File) {

@@ -5,21 +5,18 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Admin, AdminSchema } from '../../core/schemas/admin.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { Employee, EmployeeSchema } from '../../core/schemas/employee.schema';
-import { EmployeeModule } from '../../employees/employee.module';
-import { CustomerModule } from '../../customers/customer.module';
 import { RtStrategy } from './strategy/rt.strategy';
 import { AtStrategy } from './strategy/at.strategy';
 import { AdminModule } from '../../admins/admin.module';
-// import { RtStrategy } from './strategy/rt.strategy';
+import { RedisCacheModule } from 'src/caches/cache.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{name: Admin.name, schema: AdminSchema}]),
     MongooseModule.forFeature([{name: Employee.name, schema: EmployeeSchema}]),
     JwtModule.register({}),
-    EmployeeModule,
-    CustomerModule,
-    AdminModule
+    AdminModule,
+    RedisCacheModule
   ],
   providers: [AuthService, AtStrategy, RtStrategy],
   controllers: [AuthController],
