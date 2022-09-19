@@ -30,12 +30,14 @@ export class Admin {
     active: boolean;
 
     @Prop()
+    @Exclude()
     verifyCode: string;
 
     @Prop({ required: true, default: 'User' })
     role: string;
 
     @Prop({ default: null })
+    @Exclude()
     rt: string;
 }
 

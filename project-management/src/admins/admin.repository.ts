@@ -48,7 +48,6 @@ export class AdminRepository extends Repository<AdminDocument> {
                     name: new RegExp('.*' + search + '.*', 'i'),
                     isDeleted: false,
                 },
-                { password: 0, rt: 0 },
             )
             .sort({ [sortBy]: sortKind })
             .limit(limitNum);
@@ -60,7 +59,6 @@ export class AdminRepository extends Repository<AdminDocument> {
                     name: new RegExp('.*' + search + '.*', 'i'),
                     isDeleted: false,
                 },
-                { password: 0, rt: 0 },
             )
             .countDocuments();
 
@@ -106,7 +104,7 @@ export class AdminRepository extends Repository<AdminDocument> {
     }
 
     async getAdminInfo(id: string) {
-        return this.adminModel.findOne({ _id: id }, { password: 0, rt: 0 });
+        return this.adminModel.findOne({ _id: id });
     }
 
     async findByCondition(query) {

@@ -1,6 +1,5 @@
 import {
     Body,
-    ClassSerializerInterceptor,
     Controller,
     Delete,
     Get,
@@ -28,7 +27,6 @@ import { UpdateAdminDto } from './dtos/update.admin.dto';
 import { Roles } from '../shared/decorators/roles.decorator';
 import Role from '../core/enums/role.enum';
 import { PaginationDto } from '../core/dtos';
-import { HttpExceptionFilter } from '../shared/filters/http-exception.filter';
 import { MongoExceptionFilter } from '../shared/filters/mongo-exception.filter';
 import { API_QUERY } from '../shared/const/variables.const';
 import { CreateUserDto } from './dtos/create.admin.dto';
@@ -36,9 +34,13 @@ import { ParseObjectIdPipe } from '../shared/pipes/objectid.pipe';
 import { Public } from '../shared/decorators/public.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResettingPasswordDto } from './dtos/reset.password.dto';
+import { ResponseInterceptor } from '../shared/interceptors/response.interceptor';
+import { MongooseClassSerializerInterceptor } from '../shared/interceptors/mongoose.interceptor';
+import { Admin } from '../core/schemas/admin.schema';
 
 @ApiBearerAuth()
 @ApiTags('Admin')
+@UseInterceptors(MongooseClassSerializerInterceptor(Admin))
 @UseFilters(MongoExceptionFilter)
 // @UseFilters(HttpExceptionFilter)
 @Controller('admins')

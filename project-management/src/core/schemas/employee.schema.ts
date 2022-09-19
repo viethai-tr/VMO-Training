@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Exclude } from "class-transformer";
 import mongoose, { Types, Document } from "mongoose";
 import { softDeletePlugin } from "soft-delete-plugin-mongoose";
 
@@ -37,6 +38,7 @@ export class Employee {
     projects: Types.ObjectId[];
 
     @Prop([{type: mongoose.Schema.Types.ObjectId, ref: "Project"}])
+    @Exclude()
     deletedProjects: Types.ObjectId[];
 }
 
